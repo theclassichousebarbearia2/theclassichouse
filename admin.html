@@ -163,28 +163,32 @@
 // ============================================================
 // LIGAÇÃO AO SUPABASE — troca pelos valores do teu projeto
 // ============================================================
-const SUPABASE_URL = "https://kjhaphbaoxwxyankdkmk.supabase.co/rest/v1/";
-const SUPABASE_ANON_KEY = "sb_publishable_cWORdkD1hgnqw2fx7LciVQ_PomX771r";
-const supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+const SUPABASE_URL = https://kjhaphbaoxwxyankdkmk.supabase.co/rest/v1/;
+const SUPABASE_ANON_KEY = sb_publishable_cWORdkD1hgnqw2fx7LciVQ_PomX771r;
+const sb = window.supabase ? window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY) : null;
 
 let services = [], barbers = [];
 
 async function login(){
   const msgEl = document.getElementById('login-msg');
   msgEl.innerHTML = '';
-  if (SUPABASE_URL.includes('https://kjhaphbaoxwxyankdkmk.supabase.co/rest/v1/') || SUPABASE_ANON_KEY.includes('sb_publishable_cWORdkD1hgnqw2fx7LciVQ_PomX771r')) {
+  if (!sb) {
+    msgEl.innerHTML = `<div class="msg err">Não consegui carregar a biblioteca do Supabase (o ficheiro vindo da internet). Verifica a tua ligação à internet ou bloqueadores de anúncios/extensões.</div>`;
+    return;
+  }
+  if (SUPABASE_URL.includes(https://kjhaphbaoxwxyankdkmk.supabase.co/rest/v1/) || SUPABASE_ANON_KEY.includes(sb_publishable_cWORdkD1hgnqw2fx7LciVQ_PomX771r)) {
     msgEl.innerHTML = `<div class="msg err">Este painel ainda não está ligado ao Supabase. Troca o SUPABASE_URL e a SUPABASE_ANON_KEY no início do ficheiro admin.html.</div>`;
     return;
   }
   const email = document.getElementById('login-email').value.trim();
   const password = document.getElementById('login-password').value;
-  const { error } = await supabase.auth.signInWithPassword({ email, password });
+  const { error } = await sb.auth.signInWithPassword({ email, password });
   if (error) { msgEl.innerHTML = `<div class="msg err">Email ou palavra-passe incorretos.</div>`; return; }
   showDashboard();
 }
 
 async function logout(){
-  await supabase.auth.signOut();
+  await sb.auth.signOut();
   document.getElementById('login-view').classList.remove('hidden');
   document.getElementById('dashboard-view').classList.add('hidden');
   document.getElementById('logout-btn').classList.add('hidden');
@@ -197,8 +201,8 @@ async function showDashboard(){
 
   try {
     const [svcRes, barRes] = await Promise.all([
-      supabase.from('services').select('*').order('category').order('sort_order'),
-      supabase.from('barbers').select('*'),
+      sb.from('services').select('*').order('category').order('sort_order'),
+      sb.from('barbers').select('*'),
     ]);
     if (svcRes.error) throw svcRes.error;
     if (barRes.error) throw barRes.error;
@@ -242,7 +246,7 @@ async function loadAgenda(dateStr){
   const dayStart = new Date(dateStr+'T00:00:00');
   const dayEnd = new Date(dateStr+'T23:59:59');
 
-  const { data, error } = await supabase
+  const { data, error } = await sb
     .from('appointments')
     .select('*, clients(name,phone), barbers(name), services(name,price_eur), payments(id,amount_eur)')
     .gte('start_time', dayStart.toISOString())
@@ -296,7 +300,7 @@ async function loadAgenda(dateStr){
 }
 
 async function markPaid(appointmentId, price, dateStr){
-  const { error } = await supabase.from('payments').insert({
+  const { error } = await sb.from('payments').insert({
     appointment_id: appointmentId,
     amount_eur: price || 0,
     method: 'dinheiro',
@@ -306,14 +310,14 @@ async function markPaid(appointmentId, price, dateStr){
 }
 
 async function unmarkPaid(paymentId, dateStr){
-  const { error } = await supabase.from('payments').delete().eq('id', paymentId);
+  const { error } = await sb.from('payments').delete().eq('id', paymentId);
   if (error) { console.error(error); alert('Erro ao desfazer o pagamento.'); return; }
   loadAgenda(dateStr);
 }
 
 async function cancelAppointment(appointmentId, dateStr){
   if (!confirm('Cancelar esta marcação?')) return;
-  const { error } = await supabase.from('appointments').update({ status: 'cancelled' }).eq('id', appointmentId);
+  const { error } = await sb.from('appointments').update({ status: 'cancelled' }).eq('id', appointmentId);
   if (error) { console.error(error); alert('Erro ao cancelar.'); return; }
   loadAgenda(dateStr);
 }
@@ -335,7 +339,7 @@ async function submitManualAppointment(){
   const startTime = new Date(datetime);
   const endTime = new Date(startTime.getTime() + service.duration_minutes*60000);
 
-  const { data: conflicts } = await supabase
+  const { data: conflicts } = await sb
     .from('appointments')
     .select('id')
     .eq('barber_id', barberId)
@@ -348,14 +352,14 @@ async function submitManualAppointment(){
   }
 
   try {
-    const { data: existing } = await supabase.from('clients').select('id').eq('phone', phone).maybeSingle();
+    const { data: existing } = await sb.from('clients').select('id').eq('phone', phone).maybeSingle();
     let clientId = existing?.id;
     if (!clientId) {
-      const { data: created, error } = await supabase.from('clients').insert({ name, phone }).select('id').single();
+      const { data: created, error } = await sb.from('clients').insert({ name, phone }).select('id').single();
       if (error) throw error;
       clientId = created.id;
     }
-    const { error: apptErr } = await supabase.from('appointments').insert({
+    const { error: apptErr } = await sb.from('appointments').insert({
       client_id: clientId, barber_id: barberId, service_id: serviceId,
       start_time: startTime.toISOString(), end_time: endTime.toISOString(), status: 'confirmed',
     });
@@ -396,7 +400,7 @@ async function loadReport(kind){
   const areaEl = document.getElementById('report-area');
   areaEl.innerHTML = 'A calcular…';
 
-  const { data, error } = await supabase
+  const { data, error } = await sb
     .from('payments')
     .select('amount_eur, paid_at, appointments(barber_id, barbers(name))')
     .gte('paid_at', start.toISOString())
@@ -430,10 +434,10 @@ async function loadReport(kind){
 async function loadClients(){
   const listEl = document.getElementById('clients-list');
   listEl.innerHTML = 'A carregar…';
-  const { data: clients, error } = await supabase.from('clients').select('*').order('name');
+  const { data: clients, error } = await sb.from('clients').select('*').order('name');
   if (error) { listEl.innerHTML = `<div class="msg err">Erro a carregar clientes.</div>`; console.error(error); return; }
 
-  const { data: appts } = await supabase.from('appointments').select('client_id').neq('status','cancelled');
+  const { data: appts } = await sb.from('appointments').select('client_id').neq('status','cancelled');
   const visitCounts = {};
   (appts||[]).forEach(a => { visitCounts[a.client_id] = (visitCounts[a.client_id]||0) + 1; });
 
@@ -451,9 +455,11 @@ async function loadClients(){
 }
 
 // mantém a sessão se já estiver autenticado
-supabase.auth.getSession().then(({ data }) => {
-  if (data.session) showDashboard();
-});
+if (sb) {
+  sb.auth.getSession().then(({ data }) => {
+    if (data.session) showDashboard();
+  });
+}
 </script>
 </body>
 </html>

@@ -166,7 +166,7 @@
 // ============================================================
 const SUPABASE_URL = "https://kjhaphbaoxwxyankdkmk.supabase.co/rest/v1/";
 const SUPABASE_ANON_KEY = "sb_publishable_cWORdkD1hgnqw2fx7LciVQ_PomX771r";
-const supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+const sb = window.supabase ? window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY) : null;
 
 const WHATSAPP_NUMBER = "351926323222";
 
@@ -182,6 +182,11 @@ function euro(v){ return v === null || v === undefined ? 'a confirmar' : `€ ${
 function fmtDuration(mins){ return mins >= 60 ? `${(mins/60).toFixed(mins%60===0?0:1)} h` : `${mins} min`; }
 
 async function init(){
+  if (!sb) {
+    document.getElementById('services-list').innerHTML =
+      `<div class="msg err">Não consegui carregar a biblioteca do Supabase (o ficheiro vindo da internet). Verifica a tua ligação à internet, desativa temporariamente bloqueadores de anúncios/extensões, e volta a abrir a página.</div>`;
+    return;
+  }
   if (SUPABASE_URL.includes('https://kjhaphbaoxwxyankdkmk.supabase.co/rest/v1/') || SUPABASE_ANON_KEY.includes('sb_publishable_cWORdkD1hgnqw2fx7LciVQ_PomX771r')) {
     document.getElementById('services-list').innerHTML =
       `<div class="msg err">Este site ainda não está ligado à base de dados. No ficheiro booking.html, troca o SUPABASE_URL e a SUPABASE_ANON_KEY (no topo do &lt;script&gt;) pelos valores do teu projeto Supabase.</div>`;
@@ -190,9 +195,9 @@ async function init(){
 
   try {
     const [svcRes, barRes, hrsRes] = await Promise.all([
-      supabase.from('services').select('*').eq('active', true).order('category').order('sort_order'),
-      supabase.from('barbers').select('*').eq('active', true),
-      supabase.from('business_hours').select('*'),
+      sb.from('services').select('*').eq('active', true).order('category').order('sort_order'),
+      sb.from('barbers').select('*').eq('active', true),
+      sb.from('business_hours').select('*'),
     ]);
     if (svcRes.error) throw svcRes.error;
     if (barRes.error) throw barRes.error;
@@ -299,7 +304,7 @@ async function renderSlots(){
   const dayStart = new Date(state.selectedDate + 'T00:00:00');
   const dayEnd = new Date(state.selectedDate + 'T23:59:59');
 
-  const { data: busy, error } = await supabase
+  const { data: busy, error } = await sb
     .from('public_busy_slots')
     .select('barber_id, start_time, end_time')
     .in('barber_id', barberIds)
@@ -376,9 +381,9 @@ function renderSummary(){
 }
 
 async function findOrCreateClient(name, phone, email){
-  const { data: existing } = await supabase.from('clients').select('id').eq('phone', phone).maybeSingle();
+  const { data: existing } = await sb.from('clients').select('id').eq('phone', phone).maybeSingle();
   if (existing) return existing.id;
-  const { data: created, error } = await supabase.from('clients').insert({ name, phone, email: email || null }).select('id').single();
+  const { data: created, error } = await sb.from('clients').insert({ name, phone, email: email || null }).select('id').single();
   if (error) throw error;
   return created.id;
 }
@@ -403,7 +408,7 @@ async function submitBooking(){
     const slot = state.selectedSlot;
     const barberId = slot.barberId;
 
-    const { error: apptErr } = await supabase.from('appointments').insert({
+    const { error: apptErr } = await sb.from('appointments').insert({
       client_id: clientId,
       barber_id: barberId,
       service_id: state.selectedService.id,
