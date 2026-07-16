@@ -164,8 +164,8 @@
 // LIGAÇÃO AO SUPABASE — troca pelos valores do teu projeto
 // (Project Settings -> API, no dashboard do Supabase)
 // ============================================================
-const SUPABASE_URL = "https://kjhaphbaoxwxyankdkmk.supabase.co/rest/v1/";
-const SUPABASE_ANON_KEY = "sb_publishable_cWORdkD1hgnqw2fx7LciVQ_PomX771r";
+const SUPABASE_URL = https://kjhaphbaoxwxyankdkmk.supabase.co/rest/v1/;
+const SUPABASE_ANON_KEY = sb_publishable_cWORdkD1hgnqw2fx7LciVQ_PomX771r;
 const sb = window.supabase ? window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY) : null;
 
 const WHATSAPP_NUMBER = "351926323222";
@@ -187,7 +187,7 @@ async function init(){
       `<div class="msg err">Não consegui carregar a biblioteca do Supabase (o ficheiro vindo da internet). Verifica a tua ligação à internet, desativa temporariamente bloqueadores de anúncios/extensões, e volta a abrir a página.</div>`;
     return;
   }
-  if (SUPABASE_URL.includes('https://kjhaphbaoxwxyankdkmk.supabase.co/rest/v1/') || SUPABASE_ANON_KEY.includes('sb_publishable_cWORdkD1hgnqw2fx7LciVQ_PomX771r')) {
+  if (SUPABASE_URL.includes('COLOCA_AQUI') || SUPABASE_ANON_KEY.includes('COLOCA_AQUI')) {
     document.getElementById('services-list').innerHTML =
       `<div class="msg err">Este site ainda não está ligado à base de dados. No ficheiro booking.html, troca o SUPABASE_URL e a SUPABASE_ANON_KEY (no topo do &lt;script&gt;) pelos valores do teu projeto Supabase.</div>`;
     return;
