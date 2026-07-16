@@ -182,7 +182,7 @@ function euro(v){ return v === null || v === undefined ? 'a confirmar' : `€ ${
 function fmtDuration(mins){ return mins >= 60 ? `${(mins/60).toFixed(mins%60===0?0:1)} h` : `${mins} min`; }
 
 async function init(){
-  if (SUPABASE_URL.includes('COLOCA_AQUI') || SUPABASE_ANON_KEY.includes('COLOCA_AQUI')) {
+  if (SUPABASE_URL.includes('https://kjhaphbaoxwxyankdkmk.supabase.co/rest/v1/') || SUPABASE_ANON_KEY.includes('sb_publishable_cWORdkD1hgnqw2fx7LciVQ_PomX771r')) {
     document.getElementById('services-list').innerHTML =
       `<div class="msg err">Este site ainda não está ligado à base de dados. No ficheiro booking.html, troca o SUPABASE_URL e a SUPABASE_ANON_KEY (no topo do &lt;script&gt;) pelos valores do teu projeto Supabase.</div>`;
     return;

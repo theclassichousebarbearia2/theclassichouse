@@ -172,7 +172,7 @@ let services = [], barbers = [];
 async function login(){
   const msgEl = document.getElementById('login-msg');
   msgEl.innerHTML = '';
-  if (SUPABASE_URL.includes('COLOCA_AQUI') || SUPABASE_ANON_KEY.includes('COLOCA_AQUI')) {
+  if (SUPABASE_URL.includes('https://kjhaphbaoxwxyankdkmk.supabase.co/rest/v1/') || SUPABASE_ANON_KEY.includes('sb_publishable_cWORdkD1hgnqw2fx7LciVQ_PomX771r')) {
     msgEl.innerHTML = `<div class="msg err">Este painel ainda não está ligado ao Supabase. Troca o SUPABASE_URL e a SUPABASE_ANON_KEY no início do ficheiro admin.html.</div>`;
     return;
   }
