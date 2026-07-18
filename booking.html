@@ -41,6 +41,17 @@
   .card-meta{ font-family:'IBM Plex Mono',monospace; color:var(--ink-muted); font-size:0.78rem; margin-top:4px; }
   .card-price{ font-family:'IBM Plex Mono',monospace; white-space:nowrap; }
 
+  /* Cartões de barbeiro — bloco inteiro colorido para identificação rápida */
+  .card.barber-bruno{ background:#cfe8fb; border-color:#8fc4ec; color:#0f2d43; }
+  .card.barber-bruno:hover{ border-color:#5da8dd; }
+  .card.barber-bruno.selected{ background:#a9d6f5; border-color:#3d8fce; }
+  .card.barber-bruno .card-meta{ color:#245275; }
+
+  .card.barber-joao{ background:#d3f0d8; border-color:#9bd9a8; color:#0f3a1c; }
+  .card.barber-joao:hover{ border-color:#69c17e; }
+  .card.barber-joao.selected{ background:#b3e6bd; border-color:#3fa958; }
+  .card.barber-joao .card-meta{ color:#256235; }
+
   .category-label{ font-family:'IBM Plex Mono',monospace; color:var(--brass); font-size:0.78rem; text-transform:uppercase; letter-spacing:0.1em; margin:22px 0 10px; }
   .category-label:first-child{ margin-top:0; }
 
@@ -366,7 +377,11 @@ function renderBarbers(){
 
   state.barbers.forEach(b => {
     const card = document.createElement('div');
-    card.className = 'card';
+    const nameLower = (b.name || '').trim().toLowerCase();
+    let colorClass = '';
+    if (nameLower === 'bruno') colorClass = ' barber-bruno';
+    else if (nameLower === 'joão' || nameLower === 'joao') colorClass = ' barber-joao';
+    card.className = 'card' + colorClass;
     card.innerHTML = `<div class="card-row"><div class="card-name">${b.name}</div></div>`;
     card.addEventListener('click', () => selectBarber(b.id, card));
     el.appendChild(card);
