@@ -501,7 +501,6 @@ async function submitBooking(){
       p_client_name: name,
       p_client_phone: phone,
       p_client_email: email || null,
-      p_barber_preference: state.selectedBarber ? 'specific' : 'any',
     });
     if (error) throw error;
     showSuccess(name);
