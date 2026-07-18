@@ -104,6 +104,7 @@
   }
   .cal-appt.barber-bruno{ background:var(--bruno-fill); color:var(--bruno-ink); border-color:var(--bruno-border); }
   .cal-appt.barber-joao{ background:var(--joao-fill); color:var(--joao-ink); border-color:var(--joao-border); }
+  .cal-appt.neutral{ background:#C9BFA8; color:#2A1F15; border-color:#B7AB8C; }
   .cal-appt.is-paid{ border-left-color:#2E5B3B; border-left-width:5px; }
   .cal-appt strong{ display:block; font-size:0.76rem; }
   .cal-appt .tag{ opacity:0.9; font-size:0.66rem; }
@@ -513,8 +514,9 @@ function toggleManualForm(){ document.getElementById('manual-form').classList.to
 function renderLegend(){
   const legendEl = document.getElementById('legend');
   legendEl.innerHTML = `
-    <span><span class="legend-swatch" style="background:var(--bruno-fill);"></span>Bruno</span>
-    <span><span class="legend-swatch" style="background:var(--joao-fill);"></span>João</span>
+    <span><span class="legend-swatch" style="background:var(--bruno-fill);"></span>Bruno (pedido)</span>
+    <span><span class="legend-swatch" style="background:var(--joao-fill);"></span>João (pedido)</span>
+    <span><span class="legend-swatch" style="background:#C9BFA8;"></span>Sem preferência</span>
     <span>▍ verde à esquerda = pago</span>
   `;
 }
@@ -524,6 +526,11 @@ function barberColorClass(name){
   if (n === 'bruno') return 'barber-bruno';
   if (n === 'joão' || n === 'joao') return 'barber-joao';
   return '';
+}
+
+function blockColorClass(appt){
+  if (appt.barber_preference !== 'specific') return 'neutral';
+  return barberColorClass(appt.barbers?.name);
 }
 
 function changeZoom(delta){
@@ -592,7 +599,7 @@ async function loadAgenda(dateStr){
     const isPaid = appt.payments && appt.payments.length > 0;
 
     const block = document.createElement('div');
-    block.className = `cal-appt ${barberColorClass(appt.barbers?.name)} ${isPaid ? 'is-paid' : ''}`;
+    block.className = `cal-appt ${blockColorClass(appt)} ${isPaid ? 'is-paid' : ''}`;
     block.style.top = (startMin * pxPerMin) + 'px';
     block.style.height = Math.max(durMin * pxPerMin - 2, 16) + 'px';
     const timeLabel = start.toLocaleTimeString('pt-PT', { hour:'2-digit', minute:'2-digit' });
