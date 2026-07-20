@@ -132,6 +132,14 @@
   .msg.ok{ background:rgba(63,122,82,0.12); color:var(--ok); border:1px solid var(--ok); }
   .hidden{ display:none !important; }
   .manual-form{ border:1px solid var(--brass-dim); background:var(--bg-alt); padding:18px; margin-bottom:20px; }
+  .manual-slots{ display:grid; grid-template-columns:repeat(auto-fill, minmax(84px,1fr)); gap:8px; margin-top:14px; }
+  .manual-slot-btn{
+    padding:10px 6px; text-align:center; font-family:'IBM Plex Mono',monospace;
+    background:var(--bg); border:1px solid var(--brass-dim); color:var(--ink);
+    border-radius:2px; cursor:pointer; font-size:0.9rem;
+  }
+  .manual-slot-btn:hover{ border-color:var(--brass); }
+  .manual-slot-btn.selected{ background:var(--primary); border-color:var(--primary); color:var(--bg); }
   .form-grid{ display:grid; gap:12px; grid-template-columns:1fr 1fr; }
   @media (max-width:600px){ .form-grid{ grid-template-columns:1fr; } }
 </style>
@@ -227,9 +235,6 @@
           <label>Barbeiro
             <select id="manual-barber"></select>
           </label>
-          <label>Data e hora
-            <input type="datetime-local" id="manual-datetime">
-          </label>
           <label>Nome do cliente
             <input type="text" id="manual-name">
           </label>
@@ -242,9 +247,13 @@
               <option value="any">Sem preferência (qualquer barbeiro)</option>
             </select>
           </label>
+          <label>Dia
+            <input type="date" id="manual-date">
+          </label>
         </div>
+        <div id="manual-slots-area"></div>
         <div id="manual-msg"></div>
-        <button class="btn btn-primary" onclick="submitManualAppointment()">Adicionar</button>
+        <button class="btn btn-primary" onclick="submitManualAppointment()" style="margin-top:14px;">Adicionar</button>
       </div>
 
       <div class="legend" id="legend"></div>
@@ -379,7 +388,8 @@ const CAL_START_HOUR = 8;
 const CAL_END_HOUR = 20;
 let calZoom = 1;
 
-let services = [], barbers = [], currentAppointments = [];
+let services = [], barbers = [], currentAppointments = [], businessHours = [];
+let manualSelectedSlot = null; // { start: Date, end: Date }
 
 function openSidebar(){
   document.getElementById('mobile-sidebar').classList.add('open');
@@ -456,14 +466,16 @@ async function showDashboard(){
   document.getElementById('logout-btn').classList.remove('hidden');
 
   try {
-    const [svcRes, barRes] = await Promise.all([
+    const [svcRes, barRes, hrsRes] = await Promise.all([
       sb.from('services').select('*').order('category').order('sort_order'),
       sb.from('barbers').select('*'),
+      sb.from('business_hours').select('*'),
     ]);
     if (svcRes.error) throw svcRes.error;
     if (barRes.error) throw barRes.error;
     services = svcRes.data || [];
     barbers = barRes.data || [];
+    businessHours = hrsRes.data || [];
   } catch (err) {
     console.error(err);
     document.getElementById('calendar-area').innerHTML =
@@ -483,6 +495,14 @@ async function showDashboard(){
   svcSelect.innerHTML = services.map(s => `<option value="${s.id}">${s.name.split('|')[0].trim()} (${euro(s.price_eur)})</option>`).join('');
   const barberSelect = document.getElementById('manual-barber');
   barberSelect.innerHTML = barbers.map(b => `<option value="${b.id}">${b.name}</option>`).join('');
+
+  const manualDateInput = document.getElementById('manual-date');
+  const todayStr = new Date().toISOString().slice(0,10);
+  manualDateInput.min = todayStr;
+  manualDateInput.value = todayStr;
+  svcSelect.addEventListener('change', renderManualSlots);
+  barberSelect.addEventListener('change', renderManualSlots);
+  manualDateInput.addEventListener('change', renderManualSlots);
 
   const subServiceSelect = document.getElementById('sub-service');
   subServiceSelect.innerHTML = services.map(s => `<option value="${s.id}">${s.name.split('|')[0].trim()}</option>`).join('');
@@ -512,7 +532,84 @@ function switchTab(tab){
   closeSidebar();
 }
 
-function toggleManualForm(){ document.getElementById('manual-form').classList.toggle('hidden'); }
+function toggleManualForm(){
+  const formEl = document.getElementById('manual-form');
+  formEl.classList.toggle('hidden');
+  if (!formEl.classList.contains('hidden')) {
+    document.getElementById('manual-msg').innerHTML = '';
+    manualSelectedSlot = null;
+    renderManualSlots();
+  }
+}
+
+function timeStrToMinutes(t){ const [h,m] = t.split(':').map(Number); return h*60+m; }
+function minutesToTimeStr(mins){ const h=Math.floor(mins/60).toString().padStart(2,'0'); const m=(mins%60).toString().padStart(2,'0'); return `${h}:${m}`; }
+
+async function renderManualSlots(){
+  const areaEl = document.getElementById('manual-slots-area');
+  manualSelectedSlot = null;
+  const serviceId = document.getElementById('manual-service').value;
+  const barberId = document.getElementById('manual-barber').value;
+  const dateStr = document.getElementById('manual-date').value;
+  if (!serviceId || !barberId || !dateStr) { areaEl.innerHTML = ''; return; }
+
+  const service = services.find(s => s.id === serviceId);
+  areaEl.innerHTML = '<p style="color:var(--ink-muted); font-size:0.85rem; margin-top:12px;">A verificar disponibilidade…</p>';
+
+  const dow = new Date(dateStr + 'T00:00:00').getDay();
+  const hoursRow = businessHours.find(h => h.day_of_week === dow);
+  if (!hoursRow || hoursRow.is_closed) {
+    areaEl.innerHTML = '<div class="msg err">A barbearia está fechada neste dia.</div>';
+    return;
+  }
+
+  const dayStart = new Date(dateStr + 'T00:00:00');
+  const dayEnd = new Date(dateStr + 'T23:59:59');
+  const { data: busy, error } = await sb
+    .from('appointments')
+    .select('start_time, end_time')
+    .eq('barber_id', barberId)
+    .neq('status', 'cancelled')
+    .gte('start_time', dayStart.toISOString())
+    .lte('start_time', dayEnd.toISOString());
+
+  if (error) { areaEl.innerHTML = '<div class="msg err">Erro a verificar disponibilidade.</div>'; console.error(error); return; }
+
+  const openMin = timeStrToMinutes(hoursRow.open_time);
+  const closeMin = timeStrToMinutes(hoursRow.close_time);
+  const duration = service.duration_minutes;
+  const isToday = dateStr === new Date().toISOString().slice(0,10);
+  const now = new Date();
+  const slots = [];
+
+  for (let start = openMin; start + duration <= closeMin; start += 15) {
+    const slotStart = new Date(dateStr + 'T' + minutesToTimeStr(start) + ':00');
+    const slotEnd = new Date(slotStart.getTime() + duration*60000);
+    if (isToday && slotStart < now) continue;
+
+    const conflict = (busy||[]).some(b => new Date(b.start_time) < slotEnd && new Date(b.end_time) > slotStart);
+    if (!conflict) slots.push({ time: minutesToTimeStr(start), start: slotStart, end: slotEnd });
+  }
+
+  if (slots.length === 0) {
+    areaEl.innerHTML = '<div class="msg err">Sem horários livres para este barbeiro neste dia.</div>';
+    return;
+  }
+
+  areaEl.innerHTML = '<div class="manual-slots" id="manual-slots-grid"></div>';
+  const grid = document.getElementById('manual-slots-grid');
+  slots.forEach(slot => {
+    const btn = document.createElement('div');
+    btn.className = 'manual-slot-btn';
+    btn.textContent = slot.time;
+    btn.addEventListener('click', () => {
+      manualSelectedSlot = slot;
+      document.querySelectorAll('.manual-slot-btn').forEach(b => b.classList.remove('selected'));
+      btn.classList.add('selected');
+    });
+    grid.appendChild(btn);
+  });
+}
 
 function renderLegend(){
   const legendEl = document.getElementById('legend');
@@ -667,27 +764,27 @@ async function cancelAppointment(appointmentId, dateStr){
 async function submitManualAppointment(){
   const serviceId = document.getElementById('manual-service').value;
   const barberId = document.getElementById('manual-barber').value;
-  const datetime = document.getElementById('manual-datetime').value;
   const name = document.getElementById('manual-name').value.trim();
   const phone = document.getElementById('manual-phone').value.trim();
   const preference = document.getElementById('manual-preference').value;
   const msgEl = document.getElementById('manual-msg');
   msgEl.innerHTML = '';
 
-  if (!datetime || !name || !phone) {
-    msgEl.innerHTML = '<div class="msg err">Preenche data/hora, nome e telemóvel.</div>';
+  if (!manualSelectedSlot) {
+    msgEl.innerHTML = '<div class="msg err">Escolhe um horário na grelha acima.</div>';
     return;
   }
-  const service = services.find(s => s.id === serviceId);
-  const startTime = new Date(datetime);
-  const endTime = new Date(startTime.getTime() + service.duration_minutes*60000);
+  if (!name || !phone) {
+    msgEl.innerHTML = '<div class="msg err">Preenche o nome e o telemóvel.</div>';
+    return;
+  }
 
   try {
     const { error } = await sb.rpc('book_appointment', {
       p_service_id: serviceId,
       p_barber_id: barberId,
-      p_start_time: startTime.toISOString(),
-      p_end_time: endTime.toISOString(),
+      p_start_time: manualSelectedSlot.start.toISOString(),
+      p_end_time: manualSelectedSlot.end.toISOString(),
       p_client_name: name,
       p_client_phone: phone,
       p_client_email: null,
@@ -697,7 +794,8 @@ async function submitManualAppointment(){
 
     document.getElementById('manual-name').value = '';
     document.getElementById('manual-phone').value = '';
-    document.getElementById('manual-datetime').value = '';
+    document.getElementById('manual-slots-area').innerHTML = '';
+    manualSelectedSlot = null;
     toggleManualForm();
     loadAgenda(document.getElementById('agenda-date').value);
   } catch (err) {
