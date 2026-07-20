@@ -719,6 +719,7 @@ async function saveBarberShift(barberId, dow, newStart, newEnd, newIsOff){
 }
 
 
+function renderLegend(){
   const legendEl = document.getElementById('legend');
   legendEl.innerHTML = `
     <span><span class="legend-swatch" style="background:var(--bruno-fill);"></span>Bruno (pedido)</span>
@@ -726,6 +727,7 @@ async function saveBarberShift(barberId, dow, newStart, newEnd, newIsOff){
     <span><span class="legend-swatch" style="background:#C9BFA8;"></span>Sem preferência</span>
     <span>▍ verde à esquerda = pago</span>
   `;
+}
 
 function barberColorClass(name){
   const n = (name || '').trim().toLowerCase();
