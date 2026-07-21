@@ -334,10 +334,13 @@
           <label>Telemóvel
             <input type="tel" id="sub-client-phone">
           </label>
-          <label>Serviço incluído na assinatura
+          <label>Nome do plano (o que aparece na lista de assinantes)
+            <input type="text" id="sub-plan-name" placeholder='ex: "Cabelo e Barba 2x ao mês"'>
+          </label>
+          <label>Serviço avulso que desconta desta assinatura
             <select id="sub-service"></select>
           </label>
-          <div class="client-meta" style="margin:-8px 0 10px;">Escolhe o serviço real que o cliente vai marcar (ex: "Corte de Cabelo"). Não cries um serviço novo no Catálogo tipo "2x ao mês" — a periodicidade define-se abaixo, com a quantidade e as datas.</div>
+          <div class="client-meta" style="margin:-8px 0 10px;">Escolhe o serviço avulso real que o cliente tem de marcar (ex: "Cabelo e Barba Clássica"). O desconto só acontece se ele marcar esta opção avulsa no catálogo — não crie um serviço novo tipo "2x ao mês", isso é só o nome do plano acima.</div>
           <label>Serviços incluídos
             <input type="number" id="sub-total-services" value="4" min="1">
           </label>
@@ -1269,6 +1272,7 @@ function toggleSubForm(){ document.getElementById('sub-form').classList.toggle('
 async function submitSubscription(){
   const name = document.getElementById('sub-client-name').value.trim();
   const phone = normalizePhone(document.getElementById('sub-client-phone').value.trim());
+  const planName = document.getElementById('sub-plan-name').value.trim();
   const serviceId = document.getElementById('sub-service').value;
   const totalServices = parseInt(document.getElementById('sub-total-services').value, 10) || 1;
   const startDate = document.getElementById('sub-start-date').value;
@@ -1290,11 +1294,12 @@ async function submitSubscription(){
       clientId = created.id;
     }
     const { error: subErr } = await sb.from('subscriptions').insert({
-      client_id: clientId, service_id: serviceId, start_date: startDate, end_date: endDate, total_services: totalServices,
+      client_id: clientId, service_id: serviceId, plan_name: planName || null, start_date: startDate, end_date: endDate, total_services: totalServices,
     });
     if (subErr) throw subErr;
 
     document.getElementById('sub-client-name').value = '';
+    document.getElementById('sub-plan-name').value = '';
     document.getElementById('sub-client-phone').value = '';
     toggleSubForm();
     loadSubscriptions();
@@ -1337,6 +1342,7 @@ async function loadSubscriptions(){
           <div class="client-name">${s.clients?.name || ''}</div>
           ${isEditing ? `
             <div style="margin:6px 0;">
+              <input type="text" id="edit-sub-planname-${s.id}" value="${(s.plan_name||'').replace(/"/g,'&quot;')}" placeholder="Nome do plano" style="margin-bottom:6px;">
               <select id="edit-sub-service-${s.id}">
                 ${services.map(sv => `<option value="${sv.id}" ${sv.id===s.service_id?'selected':''}>${sv.name.split('|')[0].trim()}</option>`).join('')}
               </select>
@@ -1344,7 +1350,7 @@ async function loadSubscriptions(){
               <button class="btn btn-ghost btn-sm" onclick="cancelEditSubscriptionService()">Cancelar</button>
             </div>
           ` : `
-            <div class="client-meta">${s.services?.name?.split('|')[0].trim() || ''} · ${s.clients?.phone || ''}</div>
+            <div class="client-meta">${s.plan_name || s.services?.name?.split('|')[0].trim() || ''} · ${s.clients?.phone || ''}</div>
           `}
           <div class="client-meta">Usados: ${used} de ${s.total_services} · Validade: ${new Date(s.end_date+'T00:00:00').toLocaleDateString('pt-PT')}</div>
           <div class="client-meta">Código de acesso: <strong>${s.access_code}</strong></div>
@@ -1369,9 +1375,11 @@ function cancelEditSubscriptionService(){
 
 async function saveSubscriptionService(subscriptionId){
   const select = document.getElementById(`edit-sub-service-${subscriptionId}`);
+  const planNameInput = document.getElementById(`edit-sub-planname-${subscriptionId}`);
   const newServiceId = select.value;
-  const { error } = await sb.from('subscriptions').update({ service_id: newServiceId }).eq('id', subscriptionId);
-  if (error) { alert('Erro ao atualizar o serviço da assinatura.'); console.error(error); return; }
+  const newPlanName = planNameInput.value.trim();
+  const { error } = await sb.from('subscriptions').update({ service_id: newServiceId, plan_name: newPlanName || null }).eq('id', subscriptionId);
+  if (error) { alert('Erro ao atualizar a assinatura.'); console.error(error); return; }
   editingSubscriptionId = null;
   loadSubscriptions();
 }
