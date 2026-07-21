@@ -415,8 +415,6 @@ let calZoom = 1;
 let services = [], barbers = [], currentAppointments = [], businessHours = [], barberShifts = [];
 let manualSelectedSlot = null; // { start: Date, end: Date }
 let editSelectedSlot = null;   // { start: Date, end: Date } — usado ao editar uma marcação existente
-let editingAppointment = null; // marcação atualmente aberta no painel de detalhe/edição
-let lastSubscriptions = [];    // última lista de assinaturas carregada (para o botão "Renovar")
 let currentAgendaDateStr = null;
 let touchStartX = null;
 
@@ -519,8 +517,11 @@ async function showDashboard(){
   setupCalendarSwipe();
 
   const dateInput = document.getElementById('agenda-date');
-  dateInput.value = new Date().toISOString().slice(0,10);
-  dateInput.addEventListener('change', () => loadAgenda(dateInput.value));
+  dateInput.value = toLocalDateStr(new Date());
+  if (!dateInput.dataset.listenerAttached) {
+    dateInput.dataset.listenerAttached = '1';
+    dateInput.addEventListener('change', () => loadAgenda(dateInput.value));
+  }
   loadAgenda(dateInput.value);
 
   const svcSelect = document.getElementById('manual-service');
@@ -529,7 +530,7 @@ async function showDashboard(){
   barberSelect.innerHTML = barbers.map(b => `<option value="${b.id}">${b.name}</option>`).join('');
 
   const manualDateInput = document.getElementById('manual-date');
-  const todayStr = new Date().toISOString().slice(0,10);
+  const todayStr = toLocalDateStr(new Date());
   manualDateInput.min = todayStr;
   manualDateInput.value = todayStr;
   svcSelect.addEventListener('change', renderManualSlots);
@@ -538,16 +539,23 @@ async function showDashboard(){
 
   const subServiceSelect = document.getElementById('sub-service');
   subServiceSelect.innerHTML = services.map(s => `<option value="${s.id}">${s.name.split('|')[0].trim()}</option>`).join('');
-  document.getElementById('sub-start-date').value = new Date().toISOString().slice(0,10);
+  document.getElementById('sub-start-date').value = toLocalDateStr(new Date());
   const in30 = new Date(); in30.setDate(in30.getDate()+30);
-  document.getElementById('sub-end-date').value = in30.toISOString().slice(0,10);
+  document.getElementById('sub-end-date').value = toLocalDateStr(in30);
 
-  const today = new Date().toISOString().slice(0,10);
+  const today = toLocalDateStr(new Date());
   document.getElementById('report-start-date').value = today;
   document.getElementById('report-end-date').value = today;
 }
 
 function euro(v){ return v === null || v === undefined ? 'a confirmar' : `€ ${Number(v).toFixed(0)}`; }
+function normalizePhone(p){ return String(p||'').replace(/\D/g,'').slice(-9); }
+function toLocalDateStr(d){
+  const y = d.getFullYear();
+  const m = String(d.getMonth()+1).padStart(2,'0');
+  const day = String(d.getDate()).padStart(2,'0');
+  return `${y}-${m}-${day}`;
+}
 
 function switchTab(tab){
   ['agenda','relatorios','clientes','assinantes','catalogo','marketing'].forEach(t => {
@@ -610,7 +618,7 @@ async function renderManualSlots(preferredMinutes){
   const openMin = timeStrToMinutes(hoursRow.open_time);
   const closeMin = timeStrToMinutes(hoursRow.close_time);
   const duration = service.duration_minutes;
-  const isToday = dateStr === new Date().toISOString().slice(0,10);
+  const isToday = dateStr === toLocalDateStr(new Date());
   const now = new Date();
   const slots = [];
 
@@ -719,6 +727,7 @@ async function saveBarberShift(barberId, dow, newStart, newEnd, newIsOff){
   renderShiftsPanel();
   loadAgenda(document.getElementById('agenda-date').value);
 }
+
 
 function renderLegend(){
   const legendEl = document.getElementById('legend');
@@ -862,7 +871,10 @@ async function loadAgenda(dateStr){
 
 function setupCalendarSwipe(){
   const areaEl = document.getElementById('calendar-area');
+  if (areaEl.dataset.swipeAttached) return;
+  areaEl.dataset.swipeAttached = '1';
   areaEl.addEventListener('touchstart', (e) => { touchStartX = e.touches[0].clientX; }, { passive: true });
+  areaEl.addEventListener('touchcancel', () => { touchStartX = null; }, { passive: true });
   areaEl.addEventListener('touchend', (e) => {
     if (touchStartX === null) return;
     const dx = e.changedTouches[0].clientX - touchStartX;
@@ -876,7 +888,7 @@ function changeAgendaDay(deltaDays){
   const dateInput = document.getElementById('agenda-date');
   const current = new Date(dateInput.value + 'T00:00:00');
   current.setDate(current.getDate() + deltaDays);
-  dateInput.value = current.toISOString().slice(0,10);
+  dateInput.value = toLocalDateStr(current);
   loadAgenda(dateInput.value);
 }
 
@@ -927,7 +939,7 @@ function showApptDetail(appt, dateStr){
   barberSelect.innerHTML = barbers.map(b => `<option value="${b.id}">${b.name}</option>`).join('');
   barberSelect.value = appt.barber_id;
   document.getElementById('edit-preference').value = appt.barber_preference || 'any';
-  document.getElementById('edit-date').value = new Date(appt.start_time).toISOString().slice(0,10);
+  document.getElementById('edit-date').value = toLocalDateStr(new Date(appt.start_time));
   barberSelect.addEventListener('change', () => renderEditSlots());
   document.getElementById('edit-date').addEventListener('change', () => renderEditSlots());
 }
@@ -976,7 +988,7 @@ async function renderEditSlots(preferredMinutes){
 
   const openMin = timeStrToMinutes(hoursRow.open_time);
   const closeMin = timeStrToMinutes(hoursRow.close_time);
-  const isToday = dateStr === new Date().toISOString().slice(0,10);
+  const isToday = dateStr === toLocalDateStr(new Date());
   const now = new Date();
   const slots = [];
 
@@ -1063,7 +1075,7 @@ async function submitManualAppointment(){
   const serviceId = document.getElementById('manual-service').value;
   const barberId = document.getElementById('manual-barber').value;
   const name = document.getElementById('manual-name').value.trim();
-  const phone = document.getElementById('manual-phone').value.trim();
+  const phone = normalizePhone(document.getElementById('manual-phone').value.trim());
   const preference = document.getElementById('manual-preference').value;
   const msgEl = document.getElementById('manual-msg');
   msgEl.innerHTML = '';
@@ -1150,20 +1162,18 @@ async function runReport(start, end, label){
   const areaEl = document.getElementById('report-area');
   areaEl.innerHTML = 'A calcular…';
 
-  const { data, error } = await sb
-    .from('payments')
-    .select('id, amount_eur, paid_at, appointments(start_time, barber_id, barbers(name), services(name), clients(name))')
-    .gte('paid_at', start.toISOString())
-    .lt('paid_at', end.toISOString())
-    .order('paid_at', { ascending: false });
+  const { data, error } = await sb.rpc('get_revenue_report', {
+    p_start: start.toISOString(),
+    p_end: end.toISOString(),
+  });
 
-  if (error) { areaEl.innerHTML = `<div class="msg err">Erro a calcular o relatório.</div>`; console.error(error); return; }
+  if (error) { areaEl.innerHTML = `<div class="msg err">Não tens permissão para ver relatórios financeiros, ou a tua conta ainda não está associada a um barbeiro.</div>`; console.error(error); return; }
 
   const total = (data||[]).reduce((sum, p) => sum + Number(p.amount_eur), 0);
   const count = (data||[]).length;
   const byBarber = {};
   (data||[]).forEach(p => {
-    const name = p.appointments?.barbers?.name || 'Sem barbeiro';
+    const name = p.barber_name || 'Sem barbeiro';
     byBarber[name] = (byBarber[name] || 0) + Number(p.amount_eur);
   });
 
@@ -1184,8 +1194,8 @@ async function runReport(start, end, label){
     ${(data||[]).map(p => `
       <div class="client-row">
         <div style="flex:1;">
-          <div class="client-name">${p.appointments?.clients?.name || 'Cliente'} · ${p.appointments?.services?.name?.split('|')[0].trim() || ''}</div>
-          <div class="client-meta">${p.appointments?.barbers?.name || ''} · ${new Date(p.paid_at).toLocaleDateString('pt-PT')} · <span class="mono">€ ${Number(p.amount_eur).toFixed(0)}</span></div>
+          <div class="client-name">${p.client_name || 'Cliente'} · ${p.service_name?.split('|')[0].trim() || ''}</div>
+          <div class="client-meta">${p.barber_name || ''} · ${new Date(p.paid_at).toLocaleDateString('pt-PT')} · <span class="mono">€ ${Number(p.amount_eur).toFixed(0)}</span></div>
         </div>
         <button class="btn btn-ghost btn-sm" onclick="cancelPayment('${p.id}')">Cancelar pagamento</button>
       </div>
@@ -1204,7 +1214,7 @@ function toggleClientForm(){ document.getElementById('client-form').classList.to
 
 async function submitNewClient(){
   const name = document.getElementById('new-client-name').value.trim();
-  const phone = document.getElementById('new-client-phone').value.trim();
+  const phone = normalizePhone(document.getElementById('new-client-phone').value.trim());
   const email = document.getElementById('new-client-email').value.trim();
   const msgEl = document.getElementById('new-client-msg');
   msgEl.innerHTML = '';
@@ -1255,30 +1265,9 @@ async function loadClients(){
 
 function toggleSubForm(){ document.getElementById('sub-form').classList.toggle('hidden'); }
 
-function renewSubscription(subId){
-  const sub = lastSubscriptions.find(s => s.id === subId);
-  if (!sub) return;
-
-  document.getElementById('sub-client-name').value = sub.clients?.name || '';
-  document.getElementById('sub-client-phone').value = sub.clients?.phone || '';
-  document.getElementById('sub-service').value = sub.service_id;
-  document.getElementById('sub-total-services').value = sub.total_services;
-
-  const today = new Date();
-  document.getElementById('sub-start-date').value = today.toISOString().slice(0,10);
-  const renewalEnd = new Date();
-  renewalEnd.setDate(renewalEnd.getDate() + 30);
-  document.getElementById('sub-end-date').value = renewalEnd.toISOString().slice(0,10);
-
-  document.getElementById('sub-msg').innerHTML = '<div class="msg ok">Dados do cliente já preenchidos — confirma as datas e clica em "Adicionar assinatura" para renovar.</div>';
-  const formEl = document.getElementById('sub-form');
-  formEl.classList.remove('hidden');
-  formEl.scrollIntoView({ behavior: 'smooth', block: 'center' });
-}
-
 async function submitSubscription(){
   const name = document.getElementById('sub-client-name').value.trim();
-  const phone = document.getElementById('sub-client-phone').value.trim();
+  const phone = normalizePhone(document.getElementById('sub-client-phone').value.trim());
   const serviceId = document.getElementById('sub-service').value;
   const totalServices = parseInt(document.getElementById('sub-total-services').value, 10) || 1;
   const startDate = document.getElementById('sub-start-date').value;
@@ -1328,13 +1317,12 @@ async function loadSubscriptions(){
     return;
   }
   if (!data || data.length === 0) { listEl.innerHTML = '<p style="color:var(--ink-muted);">Ainda não há assinantes registados.</p>'; return; }
-  lastSubscriptions = data;
 
   const { data: usageRows } = await sb.from('appointments').select('subscription_id').neq('status','cancelled').not('subscription_id','is',null);
   const usageCounts = {};
   (usageRows||[]).forEach(r => { usageCounts[r.subscription_id] = (usageCounts[r.subscription_id]||0) + 1; });
 
-  const today = new Date().toISOString().slice(0,10);
+  const today = toLocalDateStr(new Date());
   listEl.innerHTML = data.map(s => {
     const isActive = s.end_date >= today;
     const used = usageCounts[s.id] || 0;
@@ -1348,7 +1336,6 @@ async function loadSubscriptions(){
           <div class="client-meta">Código de acesso: <strong>${s.access_code}</strong></div>
         </div>
         <div class="client-visits" style="color:${isActive ? 'var(--ok)' : 'var(--err)'};">${isActive ? 'Ativo' : 'Expirado'}</div>
-        <button class="btn btn-ghost btn-sm" onclick="renewSubscription('${s.id}')">Renovar</button>
         <button class="btn btn-ghost btn-sm" onclick="deleteSubscription('${s.id}')">Apagar</button>
       </div>
     `;
