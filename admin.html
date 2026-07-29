@@ -144,6 +144,29 @@
   .msg.ok{ background:rgba(63,122,82,0.12); color:var(--ok); border:1px solid var(--ok); }
   .hidden{ display:none !important; }
   .manual-form{ border:1px solid var(--brass-dim); background:var(--bg-alt); padding:18px; margin-bottom:20px; }
+  .hidden-select{ display:none !important; }
+  .service-picker-btn{
+    width:100%; text-align:left; margin-top:5px; padding:11px 13px;
+    background:var(--bg-alt); border:1px solid var(--brass-dim); color:var(--ink);
+    font-family:'IBM Plex Sans',sans-serif; font-size:0.95rem; border-radius:2px; cursor:pointer;
+  }
+  .service-picker-btn:after{ content:'▾'; float:right; color:var(--brass); }
+  .service-picker-panel{
+    margin-top:8px; border:1px solid var(--brass-dim); background:var(--bg);
+    max-height:340px; overflow-y:auto; padding:12px;
+  }
+  .service-picker-panel input{ width:100%; margin-bottom:12px; }
+  .service-picker-category{ font-family:'IBM Plex Mono',monospace; font-size:0.72rem; text-transform:uppercase; letter-spacing:0.08em; color:var(--ink-muted); margin:14px 0 6px; }
+  .service-picker-category:first-child{ margin-top:0; }
+  .service-picker-item{
+    display:flex; justify-content:space-between; align-items:center; gap:10px;
+    padding:10px 10px 10px 12px; margin-bottom:2px; cursor:pointer;
+    border-left:4px solid var(--brass); background:var(--bg-alt);
+  }
+  .service-picker-item:hover{ background:var(--bg-card); }
+  .service-picker-item .name{ font-size:0.92rem; }
+  .service-picker-item .meta{ color:var(--ink-muted); font-size:0.76rem; margin-top:2px; }
+  .service-picker-item .price{ font-family:'IBM Plex Mono',monospace; white-space:nowrap; }
   .shift-row{ display:grid; grid-template-columns:90px 1fr 1fr auto; gap:8px; align-items:center; padding:8px 0; border-bottom:1px dashed var(--brass-dim); }
   .shift-row:last-child{ border-bottom:none; }
   .shift-row input[type=time]{ width:100%; }
@@ -253,8 +276,13 @@
 
       <div class="manual-form hidden" id="manual-form">
         <div class="form-grid">
-          <label>Serviço
-            <select id="manual-service"></select>
+          <label style="grid-column:1 / -1;">Serviço
+            <button type="button" class="service-picker-btn" id="manual-service-btn" onclick="toggleServicePicker()">Escolhe um serviço</button>
+            <select id="manual-service" class="hidden-select"></select>
+            <div class="service-picker-panel hidden" id="manual-service-picker">
+              <input type="text" id="service-picker-search" placeholder="Pesquisar por nome de serviço" oninput="renderServicePicker(this.value)">
+              <div id="service-picker-list"></div>
+            </div>
           </label>
           <label>Barbeiro
             <select id="manual-barber"></select>
@@ -262,8 +290,8 @@
           <label>Nome do cliente
             <input type="text" id="manual-name">
           </label>
-          <label>Telemóvel
-            <input type="tel" id="manual-phone">
+          <label>Telemóvel (opcional)
+            <input type="tel" id="manual-phone" placeholder="deixa em branco se não tiveres">
           </label>
           <label>Preferência
             <select id="manual-preference">
@@ -334,13 +362,9 @@
           <label>Telemóvel
             <input type="tel" id="sub-client-phone">
           </label>
-          <label>Nome do plano (o que aparece na lista de assinantes)
-            <input type="text" id="sub-plan-name" placeholder='ex: "Cabelo e Barba 2x ao mês"'>
-          </label>
-          <label>Serviço avulso que desconta desta assinatura
+          <label>Plano / Serviço
             <select id="sub-service"></select>
           </label>
-          <div class="client-meta" style="margin:-8px 0 10px;">Escolhe o serviço avulso real que o cliente tem de marcar (ex: "Cabelo e Barba Clássica"). O desconto só acontece se ele marcar esta opção avulsa no catálogo — não crie um serviço novo tipo "2x ao mês", isso é só o nome do plano acima.</div>
           <label>Serviços incluídos
             <input type="number" id="sub-total-services" value="4" min="1">
           </label>
@@ -419,6 +443,8 @@ let calZoom = 1;
 let services = [], barbers = [], currentAppointments = [], businessHours = [], barberShifts = [];
 let manualSelectedSlot = null; // { start: Date, end: Date }
 let editSelectedSlot = null;   // { start: Date, end: Date } — usado ao editar uma marcação existente
+let editingAppointment = null; // marcação atualmente aberta no painel de detalhe/edição
+let lastSubscriptions = [];    // última lista de assinaturas carregada (para o botão "Renovar")
 let currentAgendaDateStr = null;
 let touchStartX = null;
 
@@ -519,22 +545,21 @@ async function showDashboard(){
   document.documentElement.style.setProperty('--n-barbers', barbers.length);
   renderLegend();
   setupCalendarSwipe();
+  await loadCategories();
 
   const dateInput = document.getElementById('agenda-date');
-  dateInput.value = toLocalDateStr(new Date());
-  if (!dateInput.dataset.listenerAttached) {
-    dateInput.dataset.listenerAttached = '1';
-    dateInput.addEventListener('change', () => loadAgenda(dateInput.value));
-  }
+  dateInput.value = new Date().toISOString().slice(0,10);
+  dateInput.addEventListener('change', () => loadAgenda(dateInput.value));
   loadAgenda(dateInput.value);
 
   const svcSelect = document.getElementById('manual-service');
   svcSelect.innerHTML = services.map(s => `<option value="${s.id}">${s.name.split('|')[0].trim()} (${euro(s.price_eur)})</option>`).join('');
+  updateServicePickerButtonLabel();
   const barberSelect = document.getElementById('manual-barber');
   barberSelect.innerHTML = barbers.map(b => `<option value="${b.id}">${b.name}</option>`).join('');
 
   const manualDateInput = document.getElementById('manual-date');
-  const todayStr = toLocalDateStr(new Date());
+  const todayStr = new Date().toISOString().slice(0,10);
   manualDateInput.min = todayStr;
   manualDateInput.value = todayStr;
   svcSelect.addEventListener('change', renderManualSlots);
@@ -543,23 +568,16 @@ async function showDashboard(){
 
   const subServiceSelect = document.getElementById('sub-service');
   subServiceSelect.innerHTML = services.map(s => `<option value="${s.id}">${s.name.split('|')[0].trim()}</option>`).join('');
-  document.getElementById('sub-start-date').value = toLocalDateStr(new Date());
+  document.getElementById('sub-start-date').value = new Date().toISOString().slice(0,10);
   const in30 = new Date(); in30.setDate(in30.getDate()+30);
-  document.getElementById('sub-end-date').value = toLocalDateStr(in30);
+  document.getElementById('sub-end-date').value = in30.toISOString().slice(0,10);
 
-  const today = toLocalDateStr(new Date());
+  const today = new Date().toISOString().slice(0,10);
   document.getElementById('report-start-date').value = today;
   document.getElementById('report-end-date').value = today;
 }
 
 function euro(v){ return v === null || v === undefined ? 'a confirmar' : `€ ${Number(v).toFixed(0)}`; }
-function normalizePhone(p){ return String(p||'').replace(/\D/g,'').slice(-9); }
-function toLocalDateStr(d){
-  const y = d.getFullYear();
-  const m = String(d.getMonth()+1).padStart(2,'0');
-  const day = String(d.getDate()).padStart(2,'0');
-  return `${y}-${m}-${day}`;
-}
 
 function switchTab(tab){
   ['agenda','relatorios','clientes','assinantes','catalogo','marketing'].forEach(t => {
@@ -584,6 +602,67 @@ function toggleManualForm(){
     manualSelectedSlot = null;
     renderManualSlots();
   }
+}
+
+const SERVICE_PICKER_COLORS = ['#7A8C6E', '#A9782E', '#8E6B8F', '#3F7A52', '#A8402F', '#5B7C99'];
+
+function categoryColor(categoryName){
+  const idx = categories.findIndex(c => c.name === categoryName);
+  const pos = idx >= 0 ? idx : 0;
+  return SERVICE_PICKER_COLORS[pos % SERVICE_PICKER_COLORS.length];
+}
+
+function updateServicePickerButtonLabel(){
+  const svcSelect = document.getElementById('manual-service');
+  const selected = services.find(s => s.id === svcSelect.value);
+  const btn = document.getElementById('manual-service-btn');
+  btn.textContent = selected ? `${selected.name.split('|')[0].trim()} — ${euro(selected.price_eur)}` : 'Escolhe um serviço';
+}
+
+function toggleServicePicker(){
+  const panel = document.getElementById('manual-service-picker');
+  panel.classList.toggle('hidden');
+  if (!panel.classList.contains('hidden')) {
+    document.getElementById('service-picker-search').value = '';
+    renderServicePicker('');
+    document.getElementById('service-picker-search').focus();
+  }
+}
+
+function renderServicePicker(query){
+  const listEl = document.getElementById('service-picker-list');
+  const q = (query || '').trim().toLowerCase();
+  const filtered = services.filter(s => !q || s.name.toLowerCase().includes(q));
+
+  const byCategory = {};
+  filtered.forEach(s => { (byCategory[s.category] ||= []).push(s); });
+
+  const orderedCatNames = categories.length
+    ? [...categories.map(c => c.name), ...Object.keys(byCategory).filter(c => !categories.some(cat => cat.name === c))]
+    : Object.keys(byCategory);
+
+  const html = orderedCatNames.filter(cat => byCategory[cat] && byCategory[cat].length).map(cat => `
+    <div class="service-picker-category">${cat} <span style="color:var(--ink-muted);">(${byCategory[cat].length})</span></div>
+    ${byCategory[cat].map(s => `
+      <div class="service-picker-item" style="border-left-color:${categoryColor(cat)};" onclick="selectManualService('${s.id}')">
+        <div>
+          <div class="name">${s.name.split('|')[0].trim()}</div>
+          <div class="meta">${s.duration_minutes}min</div>
+        </div>
+        <div class="price">${euro(s.price_eur)}</div>
+      </div>
+    `).join('')}
+  `).join('');
+
+  listEl.innerHTML = html || '<p style="color:var(--ink-muted); font-size:0.85rem;">Nenhum serviço encontrado.</p>';
+}
+
+function selectManualService(serviceId){
+  const svcSelect = document.getElementById('manual-service');
+  svcSelect.value = serviceId;
+  svcSelect.dispatchEvent(new Event('change'));
+  updateServicePickerButtonLabel();
+  document.getElementById('manual-service-picker').classList.add('hidden');
 }
 
 function timeStrToMinutes(t){ const [h,m] = t.split(':').map(Number); return h*60+m; }
@@ -622,7 +701,7 @@ async function renderManualSlots(preferredMinutes){
   const openMin = timeStrToMinutes(hoursRow.open_time);
   const closeMin = timeStrToMinutes(hoursRow.close_time);
   const duration = service.duration_minutes;
-  const isToday = dateStr === toLocalDateStr(new Date());
+  const isToday = dateStr === new Date().toISOString().slice(0,10);
   const now = new Date();
   const slots = [];
 
@@ -731,7 +810,6 @@ async function saveBarberShift(barberId, dow, newStart, newEnd, newIsOff){
   renderShiftsPanel();
   loadAgenda(document.getElementById('agenda-date').value);
 }
-
 
 function renderLegend(){
   const legendEl = document.getElementById('legend');
@@ -875,10 +953,7 @@ async function loadAgenda(dateStr){
 
 function setupCalendarSwipe(){
   const areaEl = document.getElementById('calendar-area');
-  if (areaEl.dataset.swipeAttached) return;
-  areaEl.dataset.swipeAttached = '1';
   areaEl.addEventListener('touchstart', (e) => { touchStartX = e.touches[0].clientX; }, { passive: true });
-  areaEl.addEventListener('touchcancel', () => { touchStartX = null; }, { passive: true });
   areaEl.addEventListener('touchend', (e) => {
     if (touchStartX === null) return;
     const dx = e.changedTouches[0].clientX - touchStartX;
@@ -892,7 +967,7 @@ function changeAgendaDay(deltaDays){
   const dateInput = document.getElementById('agenda-date');
   const current = new Date(dateInput.value + 'T00:00:00');
   current.setDate(current.getDate() + deltaDays);
-  dateInput.value = toLocalDateStr(current);
+  dateInput.value = current.toISOString().slice(0,10);
   loadAgenda(dateInput.value);
 }
 
@@ -943,7 +1018,7 @@ function showApptDetail(appt, dateStr){
   barberSelect.innerHTML = barbers.map(b => `<option value="${b.id}">${b.name}</option>`).join('');
   barberSelect.value = appt.barber_id;
   document.getElementById('edit-preference').value = appt.barber_preference || 'any';
-  document.getElementById('edit-date').value = toLocalDateStr(new Date(appt.start_time));
+  document.getElementById('edit-date').value = new Date(appt.start_time).toISOString().slice(0,10);
   barberSelect.addEventListener('change', () => renderEditSlots());
   document.getElementById('edit-date').addEventListener('change', () => renderEditSlots());
 }
@@ -992,7 +1067,7 @@ async function renderEditSlots(preferredMinutes){
 
   const openMin = timeStrToMinutes(hoursRow.open_time);
   const closeMin = timeStrToMinutes(hoursRow.close_time);
-  const isToday = dateStr === toLocalDateStr(new Date());
+  const isToday = dateStr === new Date().toISOString().slice(0,10);
   const now = new Date();
   const slots = [];
 
@@ -1079,7 +1154,7 @@ async function submitManualAppointment(){
   const serviceId = document.getElementById('manual-service').value;
   const barberId = document.getElementById('manual-barber').value;
   const name = document.getElementById('manual-name').value.trim();
-  const phone = normalizePhone(document.getElementById('manual-phone').value.trim());
+  const phone = document.getElementById('manual-phone').value.trim();
   const preference = document.getElementById('manual-preference').value;
   const msgEl = document.getElementById('manual-msg');
   msgEl.innerHTML = '';
@@ -1088,8 +1163,8 @@ async function submitManualAppointment(){
     msgEl.innerHTML = '<div class="msg err">Escolhe um horário na grelha acima.</div>';
     return;
   }
-  if (!name || !phone) {
-    msgEl.innerHTML = '<div class="msg err">Preenche o nome e o telemóvel.</div>';
+  if (!name) {
+    msgEl.innerHTML = '<div class="msg err">Preenche o nome do cliente.</div>';
     return;
   }
 
@@ -1100,7 +1175,7 @@ async function submitManualAppointment(){
       p_start_time: manualSelectedSlot.start.toISOString(),
       p_end_time: manualSelectedSlot.end.toISOString(),
       p_client_name: name,
-      p_client_phone: phone,
+      p_client_phone: phone || null,
       p_client_email: null,
       p_barber_preference: preference,
     });
@@ -1166,18 +1241,20 @@ async function runReport(start, end, label){
   const areaEl = document.getElementById('report-area');
   areaEl.innerHTML = 'A calcular…';
 
-  const { data, error } = await sb.rpc('get_revenue_report', {
-    p_start: start.toISOString(),
-    p_end: end.toISOString(),
-  });
+  const { data, error } = await sb
+    .from('payments')
+    .select('id, amount_eur, paid_at, appointments(start_time, barber_id, barbers(name), services(name), clients(name))')
+    .gte('paid_at', start.toISOString())
+    .lt('paid_at', end.toISOString())
+    .order('paid_at', { ascending: false });
 
-  if (error) { areaEl.innerHTML = `<div class="msg err">Não tens permissão para ver relatórios financeiros, ou a tua conta ainda não está associada a um barbeiro.</div>`; console.error(error); return; }
+  if (error) { areaEl.innerHTML = `<div class="msg err">Erro a calcular o relatório.</div>`; console.error(error); return; }
 
   const total = (data||[]).reduce((sum, p) => sum + Number(p.amount_eur), 0);
   const count = (data||[]).length;
   const byBarber = {};
   (data||[]).forEach(p => {
-    const name = p.barber_name || 'Sem barbeiro';
+    const name = p.appointments?.barbers?.name || 'Sem barbeiro';
     byBarber[name] = (byBarber[name] || 0) + Number(p.amount_eur);
   });
 
@@ -1198,8 +1275,8 @@ async function runReport(start, end, label){
     ${(data||[]).map(p => `
       <div class="client-row">
         <div style="flex:1;">
-          <div class="client-name">${p.client_name || 'Cliente'} · ${p.service_name?.split('|')[0].trim() || ''}</div>
-          <div class="client-meta">${p.barber_name || ''} · ${new Date(p.paid_at).toLocaleDateString('pt-PT')} · <span class="mono">€ ${Number(p.amount_eur).toFixed(0)}</span></div>
+          <div class="client-name">${p.appointments?.clients?.name || 'Cliente'} · ${p.appointments?.services?.name?.split('|')[0].trim() || ''}</div>
+          <div class="client-meta">${p.appointments?.barbers?.name || ''} · ${new Date(p.paid_at).toLocaleDateString('pt-PT')} · <span class="mono">€ ${Number(p.amount_eur).toFixed(0)}</span></div>
         </div>
         <button class="btn btn-ghost btn-sm" onclick="cancelPayment('${p.id}')">Cancelar pagamento</button>
       </div>
@@ -1218,7 +1295,7 @@ function toggleClientForm(){ document.getElementById('client-form').classList.to
 
 async function submitNewClient(){
   const name = document.getElementById('new-client-name').value.trim();
-  const phone = normalizePhone(document.getElementById('new-client-phone').value.trim());
+  const phone = document.getElementById('new-client-phone').value.trim();
   const email = document.getElementById('new-client-email').value.trim();
   const msgEl = document.getElementById('new-client-msg');
   msgEl.innerHTML = '';
@@ -1269,10 +1346,30 @@ async function loadClients(){
 
 function toggleSubForm(){ document.getElementById('sub-form').classList.toggle('hidden'); }
 
+function renewSubscription(subId){
+  const sub = lastSubscriptions.find(s => s.id === subId);
+  if (!sub) return;
+
+  document.getElementById('sub-client-name').value = sub.clients?.name || '';
+  document.getElementById('sub-client-phone').value = sub.clients?.phone || '';
+  document.getElementById('sub-service').value = sub.service_id;
+  document.getElementById('sub-total-services').value = sub.total_services;
+
+  const today = new Date();
+  document.getElementById('sub-start-date').value = today.toISOString().slice(0,10);
+  const renewalEnd = new Date();
+  renewalEnd.setDate(renewalEnd.getDate() + 30);
+  document.getElementById('sub-end-date').value = renewalEnd.toISOString().slice(0,10);
+
+  document.getElementById('sub-msg').innerHTML = '<div class="msg ok">Dados do cliente já preenchidos — confirma as datas e clica em "Adicionar assinatura" para renovar.</div>';
+  const formEl = document.getElementById('sub-form');
+  formEl.classList.remove('hidden');
+  formEl.scrollIntoView({ behavior: 'smooth', block: 'center' });
+}
+
 async function submitSubscription(){
   const name = document.getElementById('sub-client-name').value.trim();
-  const phone = normalizePhone(document.getElementById('sub-client-phone').value.trim());
-  const planName = document.getElementById('sub-plan-name').value.trim();
+  const phone = document.getElementById('sub-client-phone').value.trim();
   const serviceId = document.getElementById('sub-service').value;
   const totalServices = parseInt(document.getElementById('sub-total-services').value, 10) || 1;
   const startDate = document.getElementById('sub-start-date').value;
@@ -1294,12 +1391,11 @@ async function submitSubscription(){
       clientId = created.id;
     }
     const { error: subErr } = await sb.from('subscriptions').insert({
-      client_id: clientId, service_id: serviceId, plan_name: planName || null, start_date: startDate, end_date: endDate, total_services: totalServices,
+      client_id: clientId, service_id: serviceId, start_date: startDate, end_date: endDate, total_services: totalServices,
     });
     if (subErr) throw subErr;
 
     document.getElementById('sub-client-name').value = '';
-    document.getElementById('sub-plan-name').value = '';
     document.getElementById('sub-client-phone').value = '';
     toggleSubForm();
     loadSubscriptions();
@@ -1308,8 +1404,6 @@ async function submitSubscription(){
     msgEl.innerHTML = '<div class="msg err">Erro ao adicionar a assinatura. Confirma se já correste a migration_03_advanced.sql no Supabase.</div>';
   }
 }
-
-let editingSubscriptionId = null;
 
 async function loadSubscriptions(){
   const listEl = document.getElementById('subscriptions-list');
@@ -1325,63 +1419,31 @@ async function loadSubscriptions(){
     return;
   }
   if (!data || data.length === 0) { listEl.innerHTML = '<p style="color:var(--ink-muted);">Ainda não há assinantes registados.</p>'; return; }
+  lastSubscriptions = data;
 
   const { data: usageRows } = await sb.from('appointments').select('subscription_id').neq('status','cancelled').not('subscription_id','is',null);
   const usageCounts = {};
   (usageRows||[]).forEach(r => { usageCounts[r.subscription_id] = (usageCounts[r.subscription_id]||0) + 1; });
 
-  const today = toLocalDateStr(new Date());
+  const today = new Date().toISOString().slice(0,10);
   listEl.innerHTML = data.map(s => {
     const isActive = s.end_date >= today;
     const used = usageCounts[s.id] || 0;
-    const isEditing = editingSubscriptionId === s.id;
     return `
       <div class="client-row">
         <div class="client-avatar">${(s.clients?.name||'?').charAt(0).toUpperCase()}</div>
         <div style="flex:1;">
           <div class="client-name">${s.clients?.name || ''}</div>
-          ${isEditing ? `
-            <div style="margin:6px 0;">
-              <input type="text" id="edit-sub-planname-${s.id}" value="${(s.plan_name||'').replace(/"/g,'&quot;')}" placeholder="Nome do plano" style="margin-bottom:6px;">
-              <select id="edit-sub-service-${s.id}">
-                ${services.map(sv => `<option value="${sv.id}" ${sv.id===s.service_id?'selected':''}>${sv.name.split('|')[0].trim()}</option>`).join('')}
-              </select>
-              <button class="btn btn-primary btn-sm" onclick="saveSubscriptionService('${s.id}')">Guardar</button>
-              <button class="btn btn-ghost btn-sm" onclick="cancelEditSubscriptionService()">Cancelar</button>
-            </div>
-          ` : `
-            <div class="client-meta">${s.plan_name || s.services?.name?.split('|')[0].trim() || ''} · ${s.clients?.phone || ''}</div>
-          `}
+          <div class="client-meta">${s.services?.name?.split('|')[0].trim() || ''} · ${s.clients?.phone || ''}</div>
           <div class="client-meta">Usados: ${used} de ${s.total_services} · Validade: ${new Date(s.end_date+'T00:00:00').toLocaleDateString('pt-PT')}</div>
           <div class="client-meta">Código de acesso: <strong>${s.access_code}</strong></div>
         </div>
         <div class="client-visits" style="color:${isActive ? 'var(--ok)' : 'var(--err)'};">${isActive ? 'Ativo' : 'Expirado'}</div>
-        ${!isEditing ? `<button class="btn btn-ghost btn-sm" onclick="startEditSubscriptionService('${s.id}')">Editar serviço</button>` : ''}
+        <button class="btn btn-ghost btn-sm" onclick="renewSubscription('${s.id}')">Renovar</button>
         <button class="btn btn-ghost btn-sm" onclick="deleteSubscription('${s.id}')">Apagar</button>
       </div>
     `;
   }).join('');
-}
-
-function startEditSubscriptionService(subscriptionId){
-  editingSubscriptionId = subscriptionId;
-  loadSubscriptions();
-}
-
-function cancelEditSubscriptionService(){
-  editingSubscriptionId = null;
-  loadSubscriptions();
-}
-
-async function saveSubscriptionService(subscriptionId){
-  const select = document.getElementById(`edit-sub-service-${subscriptionId}`);
-  const planNameInput = document.getElementById(`edit-sub-planname-${subscriptionId}`);
-  const newServiceId = select.value;
-  const newPlanName = planNameInput.value.trim();
-  const { error } = await sb.from('subscriptions').update({ service_id: newServiceId, plan_name: newPlanName || null }).eq('id', subscriptionId);
-  if (error) { alert('Erro ao atualizar a assinatura.'); console.error(error); return; }
-  editingSubscriptionId = null;
-  loadSubscriptions();
 }
 
 async function deleteSubscription(subscriptionId){
