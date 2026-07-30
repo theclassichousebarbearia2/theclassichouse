@@ -365,6 +365,9 @@
           <label>Plano / Serviço
             <select id="sub-service"></select>
           </label>
+          <label>Serviço a descontar
+            <select id="sub-debit-service"></select>
+          </label>
           <label>Serviços incluídos
             <input type="number" id="sub-total-services" value="4" min="1">
           </label>
@@ -568,6 +571,8 @@ async function showDashboard(){
 
   const subServiceSelect = document.getElementById('sub-service');
   subServiceSelect.innerHTML = services.map(s => `<option value="${s.id}">${s.name.split('|')[0].trim()}</option>`).join('');
+  const subDebitServiceSelect = document.getElementById('sub-debit-service');
+  subDebitServiceSelect.innerHTML = services.map(s => `<option value="${s.id}">${s.name.split('|')[0].trim()}</option>`).join('');
   document.getElementById('sub-start-date').value = new Date().toISOString().slice(0,10);
   const in30 = new Date(); in30.setDate(in30.getDate()+30);
   document.getElementById('sub-end-date').value = in30.toISOString().slice(0,10);
@@ -949,6 +954,8 @@ async function loadAgenda(dateStr){
     note.textContent = 'Sem marcações neste dia.';
     areaEl.appendChild(note);
   }
+
+  setupCalendarSwipe();
 }
 
 function setupCalendarSwipe(){
@@ -1353,6 +1360,7 @@ function renewSubscription(subId){
   document.getElementById('sub-client-name').value = sub.clients?.name || '';
   document.getElementById('sub-client-phone').value = sub.clients?.phone || '';
   document.getElementById('sub-service').value = sub.service_id;
+  document.getElementById('sub-debit-service').value = sub.debit_service_id || sub.service_id;
   document.getElementById('sub-total-services').value = sub.total_services;
 
   const today = new Date();
@@ -1371,6 +1379,7 @@ async function submitSubscription(){
   const name = document.getElementById('sub-client-name').value.trim();
   const phone = document.getElementById('sub-client-phone').value.trim();
   const serviceId = document.getElementById('sub-service').value;
+  const debitServiceId = document.getElementById('sub-debit-service').value;
   const totalServices = parseInt(document.getElementById('sub-total-services').value, 10) || 1;
   const startDate = document.getElementById('sub-start-date').value;
   const endDate = document.getElementById('sub-end-date').value;
@@ -1391,7 +1400,7 @@ async function submitSubscription(){
       clientId = created.id;
     }
     const { error: subErr } = await sb.from('subscriptions').insert({
-      client_id: clientId, service_id: serviceId, start_date: startDate, end_date: endDate, total_services: totalServices,
+      client_id: clientId, service_id: serviceId, debit_service_id: debitServiceId, start_date: startDate, end_date: endDate, total_services: totalServices,
     });
     if (subErr) throw subErr;
 
