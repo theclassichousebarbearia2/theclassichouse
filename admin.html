@@ -960,14 +960,22 @@ async function loadAgenda(dateStr){
 
 function setupCalendarSwipe(){
   const areaEl = document.getElementById('calendar-area');
-  areaEl.addEventListener('touchstart', (e) => { touchStartX = e.touches[0].clientX; }, { passive: true });
-  areaEl.addEventListener('touchend', (e) => {
-    if (touchStartX === null) return;
-    const dx = e.changedTouches[0].clientX - touchStartX;
-    touchStartX = null;
-    if (Math.abs(dx) < 60) return;
-    changeAgendaDay(dx < 0 ? 1 : -1);
-  }, { passive: true });
+  areaEl.removeEventListener('touchstart', calendarTouchStart);
+  areaEl.removeEventListener('touchend', calendarTouchEnd);
+  areaEl.addEventListener('touchstart', calendarTouchStart, { passive: true });
+  areaEl.addEventListener('touchend', calendarTouchEnd, { passive: true });
+}
+
+function calendarTouchStart(e){
+  touchStartX = e.touches[0].clientX;
+}
+
+function calendarTouchEnd(e){
+  if (touchStartX === null) return;
+  const dx = e.changedTouches[0].clientX - touchStartX;
+  touchStartX = null;
+  if (Math.abs(dx) < 60) return;
+  changeAgendaDay(dx > 0 ? -1 : 1);
 }
 
 function changeAgendaDay(deltaDays){
