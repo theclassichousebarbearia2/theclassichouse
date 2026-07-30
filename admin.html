@@ -86,7 +86,7 @@
   .legend{ display:flex; gap:16px; flex-wrap:wrap; margin-bottom:14px; font-size:0.78rem; color:var(--ink-muted); align-items:center; }
   .legend-swatch{ display:inline-block; width:12px; height:12px; border-radius:2px; margin-right:5px; vertical-align:middle; }
 
-  .cal-scroll{ overflow-x:hidden; overflow-y:auto; max-height:70vh; border:1px solid var(--brass-dim); background:var(--bg-alt); touch-action:pan-y; }
+  .cal-scroll{ overflow-x:hidden; overflow-y:auto; max-height:70vh; border:1px solid var(--brass-dim); background:var(--bg-alt); touch-action:pan-y pinch-zoom; }
   .cal-grid{ display:grid; width:100%; }
   .cal-header-row{ display:grid; grid-template-columns:44px repeat(var(--n-barbers,2), 1fr); border-bottom:1px solid var(--brass-dim); position:sticky; top:0; background:var(--bg-alt); z-index:2; }
   .cal-corner{ border-right:1px solid var(--brass-dim); }
@@ -959,11 +959,12 @@ async function loadAgenda(dateStr){
 }
 
 function setupCalendarSwipe(){
-  const areaEl = document.getElementById('calendar-area');
-  areaEl.removeEventListener('touchstart', calendarTouchStart);
-  areaEl.removeEventListener('touchend', calendarTouchEnd);
-  areaEl.addEventListener('touchstart', calendarTouchStart, { passive: true });
-  areaEl.addEventListener('touchend', calendarTouchEnd, { passive: true });
+  const scrollEl = document.querySelector('.cal-scroll');
+  if (!scrollEl) return;
+  scrollEl.removeEventListener('touchstart', calendarTouchStart);
+  scrollEl.removeEventListener('touchend', calendarTouchEnd);
+  scrollEl.addEventListener('touchstart', calendarTouchStart, { passive: true });
+  scrollEl.addEventListener('touchend', calendarTouchEnd, { passive: true });
 }
 
 function calendarTouchStart(e){
@@ -972,7 +973,8 @@ function calendarTouchStart(e){
 
 function calendarTouchEnd(e){
   if (touchStartX === null) return;
-  const dx = e.changedTouches[0].clientX - touchStartX;
+  const touchEndX = e.changedTouches[0].clientX;
+  const dx = touchEndX - touchStartX;
   touchStartX = null;
   if (Math.abs(dx) < 60) return;
   changeAgendaDay(dx > 0 ? -1 : 1);
