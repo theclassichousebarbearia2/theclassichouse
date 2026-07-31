@@ -193,6 +193,41 @@
 
   .form-grid{ display:grid; gap:12px; grid-template-columns:1fr 1fr; }
   @media (max-width:600px){ .form-grid{ grid-template-columns:1fr; } }
+
+  .floating-action-menu{ position:fixed; bottom:30px; right:30px; z-index:100; }
+  .fab-main{
+    width:60px; height:60px; border-radius:50%; background:var(--brass); color:white;
+    border:none; cursor:pointer; font-size:2rem; display:flex; align-items:center; justify-content:center;
+    box-shadow:0 4px 12px rgba(0,0,0,0.2); transition:all 0.3s; font-weight:700;
+  }
+  .fab-main:hover{ transform:scale(1.1); box-shadow:0 6px 16px rgba(0,0,0,0.3); }
+  .fab-menu{
+    position:absolute; bottom:80px; right:0; background:white; border-radius:12px;
+    box-shadow:0 4px 16px rgba(0,0,0,0.15); overflow:hidden; min-width:200px;
+  }
+  .fab-menu.hidden{ display:none; }
+  .fab-item{
+    width:100%; padding:16px 14px; border:none; background:none; cursor:pointer;
+    display:flex; align-items:center; gap:12px; text-align:left; transition:all 0.2s;
+    border-bottom:1px solid var(--brass-dim);
+  }
+  .fab-item:last-child{ border-bottom:none; }
+  .fab-item:hover{ background:rgba(184,134,11,0.08); }
+  .fab-icon{ font-size:1.3rem; }
+  .fab-label{ font-size:0.95rem; color:var(--ink); font-weight:500; }
+
+  .keypad-grid{
+    display:grid; grid-template-columns:repeat(3, 1fr); gap:12px;
+    max-width:300px; margin:0 auto;
+  }
+  .keypad-btn{
+    padding:18px; background:white; border:2px solid var(--brass-dim);
+    border-radius:8px; font-size:1.4rem; font-weight:600; color:var(--ink);
+    cursor:pointer; transition:all 0.2s;
+  }
+  .keypad-btn:hover{ border-color:var(--brass); background:rgba(184,134,11,0.05); transform:scale(1.05); }
+  .keypad-btn:active{ transform:scale(0.95); }
+  .keypad-delete{ color:var(--err); border-color:var(--err); }
 </style>
 </head>
 <body>
@@ -255,6 +290,19 @@
   </div>
 
   <div id="dashboard-view" class="hidden">
+    <div class="floating-action-menu" id="floating-action-menu">
+      <button class="fab-main" onclick="toggleActionMenu()" title="Adicionar">+</button>
+      <div class="fab-menu hidden" id="fab-menu">
+        <button class="fab-item" onclick="openQuickPayment()" title="Pagamento rápido">
+          <span class="fab-icon">💳</span>
+          <span class="fab-label">Pagamento rápido</span>
+        </button>
+        <button class="fab-item" onclick="openQuickSale()" title="Venda">
+          <span class="fab-icon">🛍️</span>
+          <span class="fab-label">Venda</span>
+        </button>
+      </div>
+    </div>
     <div class="tabs">
       <button class="tab-btn active" data-tab="agenda" onclick="switchTab('agenda')">Agenda</button>
       <button class="tab-btn" data-tab="relatorios" onclick="switchTab('relatorios')">Relatórios</button>
@@ -453,6 +501,34 @@
         <button class="btn btn-primary" onclick="sendMarketingCampaign()">Enviar campanha</button>
       </div>
     </section>
+
+    <div class="modal-overlay hidden" id="quick-payment-modal">
+      <div class="modal-sheet">
+        <div class="modal-header">
+          <h3>Inserir montante</h3>
+          <button class="modal-close" onclick="closeQuickPayment()">×</button>
+        </div>
+        <div style="text-align:center; margin:30px 0;">
+          <div id="quick-payment-amount" style="font-size:3rem; font-family:'Fraunces',serif; color:var(--brass); font-weight:700; margin-bottom:20px;">0 €</div>
+          <div id="quick-payment-keypad" class="keypad-grid">
+            <button class="keypad-btn" onclick="appendToQuickPayment('1')">1</button>
+            <button class="keypad-btn" onclick="appendToQuickPayment('2')">2</button>
+            <button class="keypad-btn" onclick="appendToQuickPayment('3')">3</button>
+            <button class="keypad-btn" onclick="appendToQuickPayment('4')">4</button>
+            <button class="keypad-btn" onclick="appendToQuickPayment('5')">5</button>
+            <button class="keypad-btn" onclick="appendToQuickPayment('6')">6</button>
+            <button class="keypad-btn" onclick="appendToQuickPayment('7')">7</button>
+            <button class="keypad-btn" onclick="appendToQuickPayment('8')">8</button>
+            <button class="keypad-btn" onclick="appendToQuickPayment('9')">9</button>
+            <button class="keypad-btn" onclick="appendToQuickPayment('.')">.</button>
+            <button class="keypad-btn" onclick="appendToQuickPayment('0')">0</button>
+            <button class="keypad-btn keypad-delete" onclick="deleteQuickPayment()">⌫</button>
+          </div>
+        </div>
+        <div id="quick-payment-msg"></div>
+        <button class="btn btn-primary" style="width:100%; margin-top:20px;" onclick="submitQuickPayment()">Registar pagamento</button>
+      </div>
+    </div>
   </div>
 </div>
 
@@ -1724,10 +1800,76 @@ async function sendMarketingCampaign(){
   }
 }
 
-if (sb) {
-  sb.auth.getSession().then(({ data }) => {
-    if (data.session) showDashboard();
-  });
+let currentQuickPaymentValue = '';
+
+function toggleActionMenu(){
+  const menu = document.getElementById('fab-menu');
+  menu.classList.toggle('hidden');
+}
+
+function openQuickPayment(){
+  currentQuickPaymentValue = '';
+  document.getElementById('quick-payment-modal').classList.remove('hidden');
+  document.getElementById('quick-payment-amount').textContent = '0 €';
+  document.getElementById('quick-payment-msg').innerHTML = '';
+  toggleActionMenu();
+}
+
+function closeQuickPayment(){
+  document.getElementById('quick-payment-modal').classList.add('hidden');
+  currentQuickPaymentValue = '';
+}
+
+function appendToQuickPayment(char){
+  if(char === '.' && currentQuickPaymentValue.includes('.')) return;
+  currentQuickPaymentValue += char;
+  updateQuickPaymentDisplay();
+}
+
+function deleteQuickPayment(){
+  currentQuickPaymentValue = currentQuickPaymentValue.slice(0, -1);
+  updateQuickPaymentDisplay();
+}
+
+function updateQuickPaymentDisplay(){
+  const value = currentQuickPaymentValue === '' ? '0' : parseFloat(currentQuickPaymentValue).toFixed(2);
+  document.getElementById('quick-payment-amount').textContent = `${value} €`;
+}
+
+async function submitQuickPayment(){
+  if(!currentQuickPaymentValue || parseFloat(currentQuickPaymentValue) <= 0){
+    document.getElementById('quick-payment-msg').innerHTML = '<div class="msg err">Escreve um valor válido.</div>';
+    return;
+  }
+
+  const amount = parseFloat(currentQuickPaymentValue);
+  const msgEl = document.getElementById('quick-payment-msg');
+  msgEl.innerHTML = '';
+
+  try {
+    const { error } = await sb.from('payments').insert({
+      appointment_id: null,
+      amount_eur: amount,
+      method: 'dinheiro',
+      paid_at: new Date().toISOString(),
+    });
+    if(error) throw error;
+
+    msgEl.innerHTML = '<div class="msg ok">Pagamento registado!</div>';
+    setTimeout(() => {
+      closeQuickPayment();
+      if(currentAgendaDateStr) loadAgenda(currentAgendaDateStr);
+    }, 1500);
+  } catch(err) {
+    console.error(err);
+    msgEl.innerHTML = '<div class="msg err">Erro ao registar o pagamento.</div>';
+  }
+}
+
+function openQuickSale(){
+  // Implementação similar para Venda rápida
+  console.log('Venda rápida - em desenvolvimento');
+  toggleActionMenu();
 }
 </script>
 </body>
