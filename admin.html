@@ -1093,6 +1093,7 @@ function showApptDetail(appt, dateStr){
         }
         <button class="btn btn-ghost btn-sm" onclick="toggleEditAppt()">Alterar marcação</button>
         <button class="btn btn-ghost btn-sm" onclick="cancelAppointment('${appt.id}','${dateStr}')">Cancelar marcação</button>
+        <button class="btn btn-ghost btn-sm" onclick="sendReviewLink('${appt.clients?.phone}')">Enviar avaliação por WhatsApp</button>
       </div>
       <div class="hidden" id="edit-appt-panel" style="margin-top:16px; border-top:1px solid var(--brass-dim); padding-top:14px;">
         <div class="form-grid">
@@ -1243,6 +1244,22 @@ async function unmarkPaid(paymentId, dateStr){
   const { error } = await sb.from('payments').delete().eq('id', paymentId);
   if (error) { console.error(error); alert('Erro ao desfazer o pagamento.'); return; }
   loadAgenda(dateStr);
+}
+
+function sendReviewLink(phone){
+  if(!phone){
+    alert('Este cliente não tem telemóvel registado.');
+    return;
+  }
+  const normalized = normalizePhone(phone);
+  if(!normalized || normalized.length < 9){
+    alert('Telemóvel inválido.');
+    return;
+  }
+  const message = "Agradecemos a sua visita. Se gostou do nosso serviço, deixa-nos uma avaliação no google. Até a próxima.\n\nhttps://maps.app.goo.gl/KxLcf4DXhtGBoP8Z6?g_st=ic";
+  const encoded = encodeURIComponent(message);
+  const whatsappUrl = `https://wa.me/351${normalized}?text=${encoded}`;
+  window.open(whatsappUrl, '_blank');
 }
 
 async function cancelAppointment(appointmentId, dateStr){
