@@ -228,6 +228,17 @@
   .keypad-btn:hover{ border-color:var(--brass); background:rgba(184,134,11,0.05); transform:scale(1.05); }
   .keypad-btn:active{ transform:scale(0.95); }
   .keypad-delete{ color:var(--err); border-color:var(--err); }
+
+  .client-pick-item{
+    display:flex; gap:12px; padding:14px 12px; border-bottom:1px solid var(--brass-dim);
+    cursor:pointer; align-items:center; transition:all 0.2s;
+  }
+  .client-pick-item:hover{ background:rgba(184,134,11,0.05); }
+  .client-pick-avatar{ width:40px; height:40px; border-radius:50%; background:rgba(184,134,11,0.15);
+    display:flex; align-items:center; justify-content:center; color:var(--brass); font-weight:600; flex-shrink:0; }
+  .client-pick-info{ flex:1; }
+  .client-pick-name{ font-weight:500; color:var(--ink); }
+  .client-pick-phone{ font-size:0.8rem; color:var(--ink-muted); margin-top:2px; }
 </style>
 </head>
 <body>
@@ -345,11 +356,12 @@
           <label>Barbeiro
             <select id="manual-barber"></select>
           </label>
-          <label>Nome do cliente
-            <input type="text" id="manual-name">
-          </label>
-          <label>Telemóvel <span style="color:var(--ink-muted); font-weight:400;">(opcional)</span>
-            <input type="tel" id="manual-phone" placeholder="Deixa em branco se não tiver">
+          <label>Cliente
+            <button type="button" class="service-picker-btn" id="manual-client-btn" onclick="openClientPicker()">
+              <span id="manual-client-btn-label">Escolher cliente</span><span class="chev">›</span>
+            </button>
+            <input type="hidden" id="manual-name">
+            <input type="hidden" id="manual-phone">
           </label>
           <label>Preferência
             <select id="manual-preference">
@@ -501,6 +513,17 @@
         <button class="btn btn-primary" onclick="sendMarketingCampaign()">Enviar campanha</button>
       </div>
     </section>
+
+    <div class="modal-overlay hidden" id="client-picker-modal">
+      <div class="modal-sheet">
+        <div class="modal-header">
+          <h3>Selecionar cliente</h3>
+          <button class="modal-close" onclick="closeClientPicker()">×</button>
+        </div>
+        <input type="text" id="client-picker-search" class="service-search-input" placeholder="Pesquisar por nome ou telemóvel">
+        <div id="client-picker-list"></div>
+      </div>
+    </div>
 
     <div class="modal-overlay hidden" id="quick-payment-modal">
       <div class="modal-sheet">
@@ -1818,6 +1841,78 @@ async function sendMarketingCampaign(){
 }
 
 let currentQuickPaymentValue = '';
+
+async function openClientPicker(){
+  document.getElementById('client-picker-modal').classList.remove('hidden');
+  const searchEl = document.getElementById('client-picker-search');
+  searchEl.value = '';
+  searchEl.oninput = (e) => renderClientPickerList(e.target.value);
+  renderClientPickerList('');
+}
+
+function closeClientPicker(){
+  document.getElementById('client-picker-modal').classList.add('hidden');
+}
+
+async function renderClientPickerList(query){
+  const listEl = document.getElementById('client-picker-list');
+  const q = query.trim().toLowerCase();
+  
+  let clients = [];
+  if(q.length > 0){
+    const { data } = await sb.from('clients').select('id, name, phone').ilike('name', `%${q}%`).limit(20);
+    clients = data || [];
+    if(clients.length === 0){
+      const { data: byPhone } = await sb.from('clients').select('id, name, phone').ilike('phone', `%${q}%`).limit(20);
+      clients = byPhone || [];
+    }
+  }
+
+  if(clients.length === 0){
+    listEl.innerHTML = `
+      <button type="button" class="client-pick-item" onclick="addNewClientFromPicker()" style="justify-content:center; color:var(--brass); font-weight:600;">
+        + Adicionar novo cliente
+      </button>
+      <button type="button" class="client-pick-item" onclick="selectClientFromPicker(null, 'Sem marcação')" style="justify-content:center; color:var(--ink-muted);">
+        👤 Sem marcação
+      </button>
+    `;
+  } else {
+    listEl.innerHTML = `
+      <button type="button" class="client-pick-item" onclick="addNewClientFromPicker()" style="justify-content:center; color:var(--brass); font-weight:600;">
+        + Adicionar novo cliente
+      </button>
+      <button type="button" class="client-pick-item" onclick="selectClientFromPicker(null, 'Sem marcação')" style="justify-content:center; color:var(--ink-muted);">
+        👤 Sem marcação
+      </button>
+      ${clients.map(c => `
+        <button type="button" class="client-pick-item" onclick="selectClientFromPicker('${c.id}', '${(c.name || '').replace(/'/g, "\\'")}', '${(c.phone || '').replace(/'/g, "\\'")}')" style="border:none; background:none; padding:14px 12px;">
+          <div class="client-pick-avatar">${(c.name || '?').charAt(0).toUpperCase()}</div>
+          <div class="client-pick-info">
+            <div class="client-pick-name">${c.name || 'Cliente'}</div>
+            <div class="client-pick-phone">${c.phone || '—'}</div>
+          </div>
+        </button>
+      `).join('')}
+    `;
+  }
+}
+
+function selectClientFromPicker(clientId, name, phone){
+  document.getElementById('manual-name').value = name;
+  document.getElementById('manual-phone').value = phone || '';
+  const btnLabel = phone ? `${name} (${phone})` : name;
+  document.getElementById('manual-client-btn-label').textContent = btnLabel;
+  closeClientPicker();
+}
+
+function addNewClientFromPicker(){
+  // Modal para criar novo cliente rápido
+  const name = prompt('Nome do cliente:');
+  if(!name) return;
+  const phone = prompt('Telemóvel (opcional):');
+  selectClientFromPicker(null, name, phone || '');
+}
 
 function toggleActionMenu(){
   const menu = document.getElementById('fab-menu');
