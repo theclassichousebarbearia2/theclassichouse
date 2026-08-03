@@ -239,6 +239,15 @@
   .client-pick-info{ flex:1; }
   .client-pick-name{ font-weight:500; color:var(--ink); }
   .client-pick-phone{ font-size:0.8rem; color:var(--ink-muted); margin-top:2px; }
+
+  .subscription-row{
+    display:flex; align-items:center; justify-content:space-between; padding:12px 0;
+    border-bottom:1px dashed var(--brass-dim); cursor:pointer; transition:all 0.2s;
+  }
+  .subscription-row:hover{ background:rgba(184,134,11,0.05); padding:12px 8px; margin:0 -8px; border-radius:2px; }
+  .subscription-name{ font-weight:500; font-family:'Fraunces',serif; color:var(--primary); }
+  .subscription-status{ font-size:0.75rem; font-weight:600; margin-top:2px; }
+  .subscription-usage{ font-weight:600; color:var(--brass); font-family:'Fraunces',serif; white-space:nowrap; }
 </style>
 </head>
 <body>
@@ -1534,6 +1543,8 @@ async function submitSubscription(){
 
 let editingSubscriptionId = null;
 
+let selectedSubscriptionForDetail = null;
+
 async function loadSubscriptions(){
   const listEl = document.getElementById('subscriptions-list');
   listEl.innerHTML = 'A carregar…';
@@ -1557,33 +1568,48 @@ async function loadSubscriptions(){
   listEl.innerHTML = data.map(s => {
     const isActive = s.end_date >= today;
     const used = usageCounts[s.id] || 0;
-    const isEditing = editingSubscriptionId === s.id;
     return `
-      <div class="client-row">
-        <div class="client-avatar">${(s.clients?.name||'?').charAt(0).toUpperCase()}</div>
+      <div class="subscription-row" onclick="showSubscriptionDetail('${s.id}')">
         <div style="flex:1;">
-          <div class="client-name">${s.clients?.name || ''}</div>
-          ${isEditing ? `
-            <div style="margin:6px 0;">
-              <input type="text" id="edit-sub-planname-${s.id}" value="${(s.plan_name||'').replace(/"/g,'&quot;')}" placeholder="Nome do plano" style="margin-bottom:6px;">
-              <select id="edit-sub-service-${s.id}">
-                ${services.map(sv => `<option value="${sv.id}" ${sv.id===s.service_id?'selected':''}>${sv.name.split('|')[0].trim()}</option>`).join('')}
-              </select>
-              <button class="btn btn-primary btn-sm" onclick="saveSubscriptionService('${s.id}')">Guardar</button>
-              <button class="btn btn-ghost btn-sm" onclick="cancelEditSubscriptionService()">Cancelar</button>
-            </div>
-          ` : `
-            <div class="client-meta">${s.plan_name || s.services?.name?.split('|')[0].trim() || ''} · ${s.clients?.phone || ''}</div>
-          `}
-          <div class="client-meta">Usados: ${used} de ${s.total_services} · Validade: ${new Date(s.end_date+'T00:00:00').toLocaleDateString('pt-PT')}</div>
-          <div class="client-meta">Código de acesso: <strong>${s.access_code}</strong></div>
+          <div class="subscription-name">${s.clients?.name || ''}</div>
+          <div class="subscription-status" style="color:${isActive ? 'var(--ok)' : 'var(--err)'};">${isActive ? '✓ Ativo' : '✗ Expirado'}</div>
         </div>
-        <div class="client-visits" style="color:${isActive ? 'var(--ok)' : 'var(--err)'};">${isActive ? 'Ativo' : 'Expirado'}</div>
-        ${!isEditing ? `<button class="btn btn-ghost btn-sm" onclick="startEditSubscriptionService('${s.id}')">Editar serviço</button>` : ''}
-        <button class="btn btn-ghost btn-sm" onclick="deleteSubscription('${s.id}')">Apagar</button>
+        <div class="subscription-usage">${used}/${s.total_services}</div>
       </div>
     `;
   }).join('');
+}
+
+function showSubscriptionDetail(subscriptionId){
+  const listEl = document.getElementById('subscriptions-list');
+  const { data } = sb.from('subscriptions').select('*, clients(name,phone), services(name)').eq('id', subscriptionId).maybeSingle();
+  
+  // Buscar direto da lista que já temos carregada
+  const allSubs = document.querySelectorAll('[data-sub-id]');
+  let sub = null;
+  allSubs.forEach(el => {
+    if(el.dataset.subId === subscriptionId) sub = JSON.parse(el.dataset.subData);
+  });
+  
+  if(!sub) return;
+  
+  const used = parseInt(listEl.textContent.match(/(\d+)\/\d+/) || [0,0])[1];
+  const today = toLocalDateStr(new Date());
+  const isActive = sub.end_date >= today;
+  
+  alert(`
+📋 ASSINATURA
+
+Cliente: ${sub.clients?.name || ''}
+Telefone: ${sub.clients?.phone || '—'}
+
+Serviço: ${sub.plan_name || sub.services?.name || ''}
+Usados: ${used} de ${sub.total_services}
+Validade: ${new Date(sub.end_date+'T00:00:00').toLocaleDateString('pt-PT')}
+Código: ${sub.access_code}
+
+Status: ${isActive ? '✓ Ativo' : '✗ Expirado'}
+  `.trim());
 }
 
 function startEditSubscriptionService(subscriptionId){
