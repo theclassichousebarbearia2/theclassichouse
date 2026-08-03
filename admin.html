@@ -534,6 +534,16 @@
       </div>
     </div>
 
+    <div class="modal-overlay hidden" id="subscription-detail-modal">
+      <div class="modal-sheet">
+        <div class="modal-header">
+          <h3>Detalhes da Assinatura</h3>
+          <button class="modal-close" onclick="closeSubscriptionDetail()">×</button>
+        </div>
+        <div id="subscription-detail-content"></div>
+      </div>
+    </div>
+
     <div class="modal-overlay hidden" id="quick-payment-modal">
       <div class="modal-sheet">
         <div class="modal-header">
@@ -1543,7 +1553,7 @@ async function submitSubscription(){
 
 let editingSubscriptionId = null;
 
-let selectedSubscriptionForDetail = null;
+let subscriptionsData = [];
 
 async function loadSubscriptions(){
   const listEl = document.getElementById('subscriptions-list');
@@ -1559,6 +1569,8 @@ async function loadSubscriptions(){
     return;
   }
   if (!data || data.length === 0) { listEl.innerHTML = '<p style="color:var(--ink-muted);">Ainda não há assinantes registados.</p>'; return; }
+
+  subscriptionsData = data;
 
   const { data: usageRows } = await sb.from('appointments').select('subscription_id').neq('status','cancelled').not('subscription_id','is',null);
   const usageCounts = {};
@@ -1581,35 +1593,40 @@ async function loadSubscriptions(){
 }
 
 function showSubscriptionDetail(subscriptionId){
-  const listEl = document.getElementById('subscriptions-list');
-  const { data } = sb.from('subscriptions').select('*, clients(name,phone), services(name)').eq('id', subscriptionId).maybeSingle();
-  
-  // Buscar direto da lista que já temos carregada
-  const allSubs = document.querySelectorAll('[data-sub-id]');
-  let sub = null;
-  allSubs.forEach(el => {
-    if(el.dataset.subId === subscriptionId) sub = JSON.parse(el.dataset.subData);
-  });
-  
+  const sub = subscriptionsData.find(s => s.id === subscriptionId);
   if(!sub) return;
   
-  const used = parseInt(listEl.textContent.match(/(\d+)\/\d+/) || [0,0])[1];
-  const today = toLocalDateStr(new Date());
-  const isActive = sub.end_date >= today;
-  
-  alert(`
-📋 ASSINATURA
+  const usageRows = sb.from('appointments').select('subscription_id').eq('subscription_id', subscriptionId).neq('status','cancelled');
+  usageRows.then(({ data }) => {
+    const used = (data || []).length;
+    const today = toLocalDateStr(new Date());
+    const isActive = sub.end_date >= today;
+    
+    document.getElementById('subscription-detail-content').innerHTML = `
+      <div style="padding:20px; line-height:1.8;">
+        <div style="margin-bottom:20px;">
+          <div class="eyebrow">Cliente</div>
+          <div style="font-size:1.1rem; font-family:'Fraunces',serif; color:var(--primary); font-weight:600;">${sub.clients?.name || '—'}</div>
+        </div>
+        
+        <div class="appt-detail">
+          <div class="row"><span>Telemóvel:</span><span>${sub.clients?.phone || '—'}</span></div>
+          <div class="row"><span>Plano:</span><span>${sub.plan_name || sub.services?.name || '—'}</span></div>
+          <div class="row"><span>Serviço:</span><span>${sub.services?.name?.split('|')[0].trim() || '—'}</span></div>
+          <div class="row"><span>Usados:</span><span>${used} de ${sub.total_services}</span></div>
+          <div class="row"><span>Validade:</span><span>${new Date(sub.end_date+'T00:00:00').toLocaleDateString('pt-PT')}</span></div>
+          <div class="row"><span>Código:</span><span style="font-weight:600; font-family:'IBM Plex Mono',monospace;">${sub.access_code}</span></div>
+          <div class="row"><span>Status:</span><span style="color:${isActive ? 'var(--ok)' : 'var(--err)'}; font-weight:600;">${isActive ? '✓ Ativo' : '✗ Expirado'}</span></div>
+        </div>
+      </div>
+    `;
+    
+    document.getElementById('subscription-detail-modal').classList.remove('hidden');
+  });
+}
 
-Cliente: ${sub.clients?.name || ''}
-Telefone: ${sub.clients?.phone || '—'}
-
-Serviço: ${sub.plan_name || sub.services?.name || ''}
-Usados: ${used} de ${sub.total_services}
-Validade: ${new Date(sub.end_date+'T00:00:00').toLocaleDateString('pt-PT')}
-Código: ${sub.access_code}
-
-Status: ${isActive ? '✓ Ativo' : '✗ Expirado'}
-  `.trim());
+function closeSubscriptionDetail(){
+  document.getElementById('subscription-detail-modal').classList.add('hidden');
 }
 
 function startEditSubscriptionService(subscriptionId){
