@@ -1441,7 +1441,7 @@ async function runReport(start, end, label){
       <div class="client-row">
         <div style="flex:1;">
           <div class="client-name">${p.client_name || 'Cliente'} · ${p.service_name?.split('|')[0].trim() || ''}</div>
-          <div class="client-meta">${p.barber_name || ''} · ${new Date(p.paid_at).toLocaleDateString('pt-PT')} · <span class="mono">€ ${Number(p.amount_eur).toFixed(0)}</span></div>
+          <div class="client-meta">${p.barber_name || ''} · ${new Date(p.paid_at).toLocaleDateString('pt-PT')} às ${new Date(p.paid_at).toLocaleTimeString('pt-PT', {hour:'2-digit', minute:'2-digit'})} · <span class="mono">€ ${Number(p.amount_eur).toFixed(0)}</span></div>
         </div>
         <button class="btn btn-ghost btn-sm" onclick="cancelPayment('${p.id}')">Cancelar pagamento</button>
       </div>
