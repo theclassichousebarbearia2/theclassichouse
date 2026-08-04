@@ -14,6 +14,43 @@
 <link rel="icon" href="images/icon-192.png">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Fraunces:wght@600;700&family=IBM+Plex+Mono:wght@400;500&family=IBM+Plex+Sans:wght@400;500&display=swap" rel="stylesheet">
+async function editClientData(subscriptionId){
+  const sub = subscriptionsData.find(s => s.id === subscriptionId);
+  if(!sub) return;
+  
+  const newName = prompt("Nome do cliente:", sub.clients?.name || "");
+  if(!newName) return;
+  
+  const newPhone = prompt("Telemóvel:", sub.clients?.phone || "");
+  
+  const { error } = await sb.from("clients").update({ name: newName, phone: newPhone || null }).eq("id", sub.client_id);
+  if(error) { alert("Erro ao atualizar cliente."); console.error(error); return; }
+  
+  alert("Dados do cliente atualizados!");
+  loadSubscriptions();
+}
+
+async function renewSubscription(subscriptionId){
+  const sub = subscriptionsData.find(s => s.id === subscriptionId);
+  if(!sub) return;
+  
+  const days = prompt("Quantos dias deseja renovar?", "30");
+  if(!days) return;
+  
+  const currentEnd = new Date(sub.end_date);
+  const newEnd = new Date(currentEnd.getTime() + parseInt(days) * 24 * 60 * 60 * 1000);
+  const newServices = prompt("Quantos serviços incluir?", sub.total_services.toString());
+  if(!newServices) return;
+  
+  const { error } = await sb.from("subscriptions").update({ 
+    end_date: newEnd.toISOString().split("T")[0],
+    total_services: parseInt(newServices)
+  }).eq("id", subscriptionId);
+  
+  if(error) { alert("Erro ao renovar."); console.error(error); return; }
+  alert(`Renovada até ${newEnd.toLocaleDateString("pt-PT")}!`);
+  loadSubscriptions();
+}
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <style>
   :root{
@@ -2025,6 +2062,43 @@ function openQuickSale(){
   // Implementação similar para Venda rápida
   console.log('Venda rápida - em desenvolvimento');
   toggleActionMenu();
+}
+async function editClientData(subscriptionId){
+  const sub = subscriptionsData.find(s => s.id === subscriptionId);
+  if(!sub) return;
+  
+  const newName = prompt("Nome do cliente:", sub.clients?.name || "");
+  if(!newName) return;
+  
+  const newPhone = prompt("Telemóvel:", sub.clients?.phone || "");
+  
+  const { error } = await sb.from("clients").update({ name: newName, phone: newPhone || null }).eq("id", sub.client_id);
+  if(error) { alert("Erro ao atualizar cliente."); console.error(error); return; }
+  
+  alert("Dados do cliente atualizados!");
+  loadSubscriptions();
+}
+
+async function renewSubscription(subscriptionId){
+  const sub = subscriptionsData.find(s => s.id === subscriptionId);
+  if(!sub) return;
+  
+  const days = prompt("Quantos dias deseja renovar?", "30");
+  if(!days) return;
+  
+  const currentEnd = new Date(sub.end_date);
+  const newEnd = new Date(currentEnd.getTime() + parseInt(days) * 24 * 60 * 60 * 1000);
+  const newServices = prompt("Quantos serviços incluir?", sub.total_services.toString());
+  if(!newServices) return;
+  
+  const { error } = await sb.from("subscriptions").update({ 
+    end_date: newEnd.toISOString().split("T")[0],
+    total_services: parseInt(newServices)
+  }).eq("id", subscriptionId);
+  
+  if(error) { alert("Erro ao renovar."); console.error(error); return; }
+  alert(`Renovada até ${newEnd.toLocaleDateString("pt-PT")}!`);
+  loadSubscriptions();
 }
 </script>
 </body>
