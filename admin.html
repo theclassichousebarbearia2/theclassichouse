@@ -1581,18 +1581,12 @@ async function loadSubscriptions(){
     const isActive = s.end_date >= today;
     const used = usageCounts[s.id] || 0;
     return `
-      <div class="client-row">
-        <div class="client-avatar">${(s.clients?.name||'?').charAt(0).toUpperCase()}</div>
+      <div class="subscription-row" onclick="showSubscriptionDetail('${s.id}')">
         <div style="flex:1;">
-          <div class="client-name">${s.clients?.name || ''}</div>
-          <div class="client-meta">${s.services?.name?.split('|')[0].trim() || ''} · ${s.clients?.phone || ''}</div>
-          <div class="client-meta">Usados: ${used} de ${s.total_services} · Validade: ${new Date(s.end_date+'T00:00:00').toLocaleDateString('pt-PT')}</div>
-          <div class="client-meta">Código de acesso: <strong>${s.access_code}</strong></div>
+          <div class="subscription-name">${s.clients?.name || ''}</div>
+          <div class="subscription-status" style="color:${isActive ? 'var(--ok)' : 'var(--err)'};">${isActive ? '✓ Ativo' : '✗ Expirado'}</div>
         </div>
-        <div class="client-visits" style="color:${isActive ? 'var(--ok)' : 'var(--err)'};">${isActive ? 'Ativo' : 'Expirado'}</div>
-        <button class="btn btn-ghost btn-sm" onclick="editClientData('${s.id}')">Editar cliente</button>
-        <button class="btn btn-ghost btn-sm" onclick="renewSubscription('${s.id}')">Renovar</button>
-        <button class="btn btn-ghost btn-sm" onclick="deleteSubscription('${s.id}')">Apagar</button>
+        <div class="subscription-usage">${used}/${s.total_services}</div>
       </div>
     `;
   }).join('');
@@ -1623,6 +1617,12 @@ function showSubscriptionDetail(subscriptionId){
           <div class="row"><span>Validade:</span><span>${new Date(sub.end_date+'T00:00:00').toLocaleDateString('pt-PT')}</span></div>
           <div class="row"><span>Código:</span><span style="font-weight:600; font-family:'IBM Plex Mono',monospace;">${sub.access_code}</span></div>
           <div class="row"><span>Status:</span><span style="color:${isActive ? 'var(--ok)' : 'var(--err)'}; font-weight:600;">${isActive ? '✓ Ativo' : '✗ Expirado'}</span></div>
+        </div>
+        
+        <div style="display:flex; gap:8px; margin-top:20px; flex-wrap:wrap;">
+          <button class="btn btn-primary btn-sm" onclick="editClientData('${sub.id}')">Editar cliente</button>
+          <button class="btn btn-ghost btn-sm" onclick="renewSubscription('${sub.id}')">Renovar</button>
+          <button class="btn btn-ghost btn-sm" onclick="deleteSubscription('${sub.id}')">Apagar</button>
         </div>
       </div>
     `;
@@ -1663,6 +1663,7 @@ async function deleteSubscription(subscriptionId){
   loadSubscriptions();
 }
 
+
 async function editClientData(subscriptionId){
   const sub = subscriptionsData.find(s => s.id === subscriptionId);
   if(!sub) return;
@@ -1700,7 +1701,6 @@ async function renewSubscription(subscriptionId){
   alert(`Renovada até ${newEnd.toLocaleDateString('pt-PT')}!`);
   loadSubscriptions();
 }
-
 let categories = [];
 
 async function loadCategories(){
