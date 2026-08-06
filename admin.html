@@ -1408,53 +1408,31 @@ async function runReport(start, end, label){
   const areaEl = document.getElementById('report-area');
   areaEl.innerHTML = 'A calcular…';
 
-  // Buscar os dados direto da BD, filtrados por barbeiro do utilizador logado
-  const user = await sb.auth.getUser();
-  const { data: userRole } = await sb.from('staff_roles').select('barber_id').eq('user_id', user.data.user.id).single();
-  
-  if(!userRole?.barber_id) {
-    areaEl.innerHTML = `<div class="msg err">A tua conta ainda não está associada a um barbeiro. Contacta o admin.</div>`;
-    return;
-  }
-
-  const { data, error } = await sb
-    .from('payments')
-    .select('*, appointments(barber_id, clients(name), services(name))')
-    .gte('paid_at', start.toISOString())
-    .lte('paid_at', end.toISOString())
-    .or(`appointments.barber_id.eq.${userRole.barber_id},barber_id.eq.${userRole.barber_id}`);
+  const { data, error } = await sb.rpc('get_my_payments', {
+    p_start: start.toISOString(),
+    p_end: end.toISOString(),
+  });
 
   if (error) { areaEl.innerHTML = `<div class="msg err">Erro ao carregar relatório. ${error.message}</div>`; console.error(error); return; }
 
   const total = (data||[]).reduce((sum, p) => sum + Number(p.amount_eur), 0);
   const count = (data||[]).length;
-  const byBarber = {};
-  (data||[]).forEach(p => {
-    const name = p.barber_name || 'Sem barbeiro';
-    byBarber[name] = (byBarber[name] || 0) + Number(p.amount_eur);
-  });
 
   areaEl.innerHTML = `
     <div class="eyebrow" style="margin-bottom:14px; display:block;">${label}</div>
     <div class="stat-grid">
-      <div class="stat-card"><span class="eyebrow">Faturação</span><div class="value">€ ${total.toFixed(0)}</div></div>
-      <div class="stat-card"><span class="eyebrow">Marcações pagas</span><div class="value">${count}</div></div>
+      <div class="stat-card"><span class="eyebrow">Faturação Total</span><div class="value">€ ${total.toFixed(0)}</div></div>
+      <div class="stat-card"><span class="eyebrow">Total de Pagamentos</span><div class="value">${count}</div></div>
     </div>
-    <div class="eyebrow" style="margin-bottom:10px; display:block;">Por barbeiro</div>
-    ${Object.entries(byBarber).map(([name, val]) => `
-      <div style="display:flex; justify-content:space-between; padding:8px 0; border-bottom:1px dashed var(--brass-dim);">
-        <span>${name}</span><span class="mono">€ ${val.toFixed(0)}</span>
-      </div>
-    `).join('') || '<p style="color:var(--ink-muted);">Sem pagamentos neste período.</p>'}
 
     <div class="eyebrow" style="margin:22px 0 10px; display:block;">Pagamentos</div>
     ${(data||[]).map(p => `
       <div class="client-row">
         <div style="flex:1;">
-          <div class="client-name">${p.client_name || 'Cliente'} · ${p.service_name?.split('|')[0].trim() || ''}</div>
-          <div class="client-meta">${p.barber_name || ''} · ${new Date(p.paid_at).toLocaleDateString('pt-PT')} às ${new Date(p.paid_at).toLocaleTimeString('pt-PT', {hour:'2-digit', minute:'2-digit'})} · <span class="mono">€ ${Number(p.amount_eur).toFixed(0)}</span></div>
+          <div class="client-name">${p.client_name || 'Cliente'} · ${p.service_name || 'Venda rápida'}</div>
+          <div class="client-meta">${new Date(p.paid_at).toLocaleDateString('pt-PT')} às ${new Date(p.paid_at).toLocaleTimeString('pt-PT', {hour:'2-digit', minute:'2-digit'})} · <span class="mono">€ ${Number(p.amount_eur).toFixed(0)}</span></div>
         </div>
-        <button class="btn btn-ghost btn-sm" onclick="cancelPayment('${p.id}')">Cancelar pagamento</button>
+        <button class="btn btn-ghost btn-sm" onclick="cancelPayment('${p.id}')">Cancelar</button>
       </div>
     `).join('') || '<p style="color:var(--ink-muted);">Sem pagamentos neste período.</p>'}
   `;
@@ -2056,9 +2034,12 @@ async function submitQuickPayment(){
   const msgEl = document.getElementById('quick-payment-msg');
   msgEl.innerHTML = '';
 
+  const user = await sb.auth.getUser();
+
   try {
     const { error } = await sb.from('payments').insert({
       appointment_id: null,
+      user_id: user.data.user.id,
       amount_eur: amount,
       method: 'dinheiro',
       paid_at: new Date().toISOString(),
