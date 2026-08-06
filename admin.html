@@ -627,10 +627,15 @@ const sb = window.supabase ? window.supabase.createClient(SUPABASE_URL, SUPABASE
 // Verificar sessão ao carregar
 if (sb) {
   sb.auth.getSession().then(({ data: { session } }) => {
+    console.log('Session check on load:', session ? 'Active' : 'No session');
     if (session) {
       showDashboard();
     }
+  }).catch(err => {
+    console.error('Error checking session:', err);
   });
+} else {
+  console.warn('Supabase client not initialized');
 }
 
 const CAL_START_HOUR = 8;
@@ -668,8 +673,16 @@ async function login(){
     return;
   }
   
-  const { error } = await sb.auth.signInWithPassword({ email, password });
-  if (error) { msgEl.innerHTML = `<div class="msg err">Email ou palavra-passe incorretos.</div>`; return; }
+  msgEl.innerHTML = '<div class="msg ok">A entrar...</div>';
+  
+  const { data, error } = await sb.auth.signInWithPassword({ email, password });
+  if (error) { 
+    console.error('Login error:', error);
+    msgEl.innerHTML = `<div class="msg err">Email ou palavra-passe incorretos.</div>`; 
+    return; 
+  }
+  
+  console.log('Login successful:', data);
   
   if (rememberMe) {
     localStorage.setItem('tch-remember-login', 'true');
@@ -677,7 +690,12 @@ async function login(){
     localStorage.removeItem('tch-remember-login');
   }
   
-  showDashboard();
+  try {
+    await showDashboard();
+  } catch (err) {
+    console.error('Error loading dashboard:', err);
+    msgEl.innerHTML = `<div class="msg err">Erro ao carregar dashboard: ${err.message}</div>`;
+  }
 }
 
 async function logout(){
