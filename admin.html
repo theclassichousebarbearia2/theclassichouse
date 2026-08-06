@@ -321,6 +321,10 @@
     <label>Palavra-passe
       <input type="password" id="login-password">
     </label>
+    <label style="display:flex; align-items:center; margin-bottom:14px;">
+      <input type="checkbox" id="login-remember" style="width:auto; margin:0 8px 0 0;">
+      <span style="font-size:0.85rem;">Manter sessão iniciada</span>
+    </label>
     <div id="login-msg"></div>
     <button class="btn btn-primary" style="width:100%;" onclick="login()">Entrar</button>
     <p style="margin-top:14px;">
@@ -620,6 +624,15 @@ const SUPABASE_URL = "https://kjhaphbaoxwxyankdkmk.supabase.co";
 const SUPABASE_ANON_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImtqaGFwaGJhb3h3eHlhbmtka21rIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODQxOTI2ODIsImV4cCI6MjA5OTc2ODY4Mn0.IIHToQLp68HRHf7uOUblWd0YtiLRnLmsE35RVU-Cq14";
 const sb = window.supabase ? window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY) : null;
 
+// Verificar sessão ao carregar
+if (sb) {
+  sb.auth.getSession().then(({ data: { session } }) => {
+    if (session) {
+      showDashboard();
+    }
+  });
+}
+
 const CAL_START_HOUR = 8;
 const CAL_END_HOUR = 20;
 let calZoom = 1;
@@ -648,8 +661,22 @@ async function login(){
   }
   const email = document.getElementById('login-email').value.trim();
   const password = document.getElementById('login-password').value;
+  const rememberMe = document.getElementById('login-remember').checked;
+  
+  if (!email || !password) {
+    msgEl.innerHTML = `<div class="msg err">Preenche o email e a palavra-passe.</div>`;
+    return;
+  }
+  
   const { error } = await sb.auth.signInWithPassword({ email, password });
   if (error) { msgEl.innerHTML = `<div class="msg err">Email ou palavra-passe incorretos.</div>`; return; }
+  
+  if (rememberMe) {
+    localStorage.setItem('tch-remember-login', 'true');
+  } else {
+    localStorage.removeItem('tch-remember-login');
+  }
+  
   showDashboard();
 }
 
