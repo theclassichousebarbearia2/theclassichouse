@@ -127,7 +127,8 @@
 
   .cal-column{
     position:relative; border-right:2px solid var(--brass-dim); cursor:pointer;
-    background-image:repeating-linear-gradient(to bottom, transparent 0, transparent 29px, rgba(184,134,11,0.15) 29px, rgba(184,134,11,0.15) 30px, transparent 30px, transparent 59px, rgba(184,134,11,0.1) 59px, rgba(184,134,11,0.1) 60px);
+    background-size: 100% 60px;
+    background-image:repeating-linear-gradient(to bottom, transparent 0, transparent calc(50% - 1px), rgba(184,134,11,0.15) calc(50% - 1px), rgba(184,134,11,0.15) 50%, transparent 50%, transparent 100%);
   }
   .cal-column:last-child{ border-right:none; }
   .cal-column.barber-bruno{ background-color:#eaf5fd; }
@@ -248,6 +249,43 @@
   .subscription-name{ font-weight:500; font-family:'Fraunces',serif; color:var(--primary); }
   .subscription-status{ font-size:0.75rem; font-weight:600; margin-top:2px; }
   .subscription-usage{ font-weight:600; color:var(--brass); font-family:'Fraunces',serif; white-space:nowrap; }
+
+.service-picker-btn {
+  background: var(--bg);
+  border: 2px solid var(--brass-dim);
+  border-radius: 3px;
+  padding: 8px 12px;
+  font-size: 0.9rem;
+  cursor: pointer;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  width: 100%;
+  transition: all 0.2s ease;
+}
+.service-picker-btn:hover { border-color: var(--primary); background: var(--bg-hover); }
+.service-picker-btn .chev { margin-left: 8px; font-size: 1.2rem; }
+
+#sub-service-picker-modal { display: none; position: fixed; top: 0; left: 0; right: 0; bottom: 0; background: rgba(0,0,0,0.5); z-index: 9999; }
+#sub-service-picker-modal.hidden { display: none; }
+#sub-service-picker-modal:not(.hidden) { display: flex; align-items: flex-end; }
+
+.service-search-input { padding: 10px 14px; border: none; border-bottom: 2px solid var(--brass-dim); font-size: 0.95rem; }
+.service-search-input:focus { outline: none; border-color: var(--primary); }
+
+.service-cat-title { padding: 12px 14px; font-weight: 600; color: var(--primary); font-family: 'Fraunces', serif; border-top: 1px dashed var(--brass-dim); }
+.service-cat-title .count { font-size: 0.8rem; color: var(--ink-muted); font-weight: normal; }
+
+.service-pick-card {
+  display: flex; justify-content: space-between; align-items: center; width: 100%; padding: 10px 14px;
+  border: none; background: transparent; cursor: pointer; text-align: left; transition: all 0.2s ease;
+}
+.service-pick-card:hover { background: var(--bg-hover); }
+.service-pick-info { flex: 1; }
+.service-pick-name { font-size: 0.95rem; font-weight: 500; color: var(--ink); }
+.service-pick-duration { font-size: 0.8rem; color: var(--ink-muted); }
+.service-pick-price { font-weight: 600; color: var(--primary); font-family: 'IBM Plex Mono', monospace; }
+
 </style>
 </head>
 <body>
@@ -455,11 +493,11 @@
           <label>Nome do plano (o que aparece na lista de assinantes)
             <input type="text" id="sub-plan-name" placeholder='ex: "Cabelo e Barba 2x ao mês"'>
           </label>
-          <label>Categoria
-            <select id="sub-category" onchange="filterSubServicesByCategory()"></select>
-          </label>
-          <label>Serviço avulso que desconta desta assinatura
-            <select id="sub-service"></select>
+          <label>Serviço avulso que desconta
+            <button type="button" class="service-picker-btn" id="sub-service-btn" onclick="openSubServicePicker()">
+              <span id="sub-service-btn-label">Escolher serviço</span><span class="chev">›</span>
+            </button>
+            <input type="hidden" id="sub-service">
           </label>
           <div class="client-meta" style="margin:-8px 0 10px;">Escolhe o serviço avulso real que o cliente tem de marcar (ex: "Cabelo e Barba Clássica"). O desconto só acontece se ele marcar esta opção avulsa no catálogo — não crie um serviço novo tipo "2x ao mês", isso é só o nome do plano acima.</div>
           <label>Serviços incluídos
@@ -735,6 +773,54 @@ function filterSubServicesByCategory(){
   const category = document.getElementById('sub-category').value;
   const subServiceSelect = document.getElementById('sub-service');
   subServiceSelect.innerHTML = services.filter(s => s.category === category).map(s => `<option value="${s.id}">${s.name.split('|')[0].trim()}</option>`).join('');
+}
+
+function openSubServicePicker(){
+  document.getElementById('sub-service-picker-modal').classList.remove('hidden');
+  const searchEl = document.getElementById('sub-service-picker-search');
+  searchEl.value = '';
+  searchEl.oninput = (e) => renderSubServicePickerList(e.target.value);
+  renderSubServicePickerList('');
+}
+
+function closeSubServicePicker(){
+  document.getElementById('sub-service-picker-modal').classList.add('hidden');
+}
+
+function renderSubServicePickerList(query){
+  const listEl = document.getElementById('sub-service-picker-list');
+  const q = query.trim().toLowerCase();
+  
+  let filtered = services;
+  if(q.length > 0){
+    filtered = services.filter(s => s.name.toLowerCase().includes(q) || (s.category && s.category.toLowerCase().includes(q)));
+  }
+
+  const byCat = {};
+  filtered.forEach(s => {
+    if(!byCat[s.category]) byCat[s.category] = [];
+    byCat[s.category].push(s);
+  });
+
+  listEl.innerHTML = Object.entries(byCat).map(([cat, items]) => `
+    <div class="service-cat-title">${cat} <span class="count">${items.length}</span></div>
+    ${items.map(s => `
+      <button type="button" class="service-pick-card" onclick="selectSubServiceFromPicker('${s.id}', '${(s.name || '').replace(/'/g, "\\'")}', ${s.price_eur || 0})">
+        <div class="service-pick-info">
+          <div class="service-pick-name">${s.name?.split('|')[0].trim() || ''}</div>
+          <div class="service-pick-duration">${s.duration_minutes} min</div>
+        </div>
+        <div class="service-pick-price">€ ${Number(s.price_eur || 0).toFixed(0)}</div>
+      </button>
+    `).join('')}
+  `).join('');
+}
+
+function selectSubServiceFromPicker(serviceId, serviceName, price){
+  document.getElementById('sub-service').value = serviceId;
+  const btnLabel = `${serviceName} (€${Number(price).toFixed(0)})`;
+  document.getElementById('sub-service-btn-label').textContent = btnLabel;
+  closeSubServicePicker();
 }
 
 const SERVICE_PICKER_COLORS = ['#5da8dd','#e0964a','#69c17e','#b26b8c','#8a6bb2','#c9a227','#4a9b8e'];
@@ -1421,20 +1507,19 @@ async function runReport(start, end, label){
   const areaEl = document.getElementById('report-area');
   areaEl.innerHTML = 'A calcular…';
 
-  const { data, error } = await sb.rpc('get_revenue_report', {
-    p_start: start.toISOString(),
-    p_end: end.toISOString(),
-  });
+  const user = await sb.auth.getUser();
+  const { data, error } = await sb
+    .from('payments')
+    .select('*, appointments(clients(name), services(name))')
+    .eq('user_id', user.data.user.id)
+    .gte('paid_at', start.toISOString())
+    .lte('paid_at', end.toISOString())
+    .order('paid_at', { ascending: false });
 
-  if (error) { areaEl.innerHTML = `<div class="msg err">Não tens permissão para ver relatórios financeiros, ou a tua conta ainda não está associada a um barbeiro.</div>`; console.error(error); return; }
+  if (error) { areaEl.innerHTML = `<div class="msg err">Erro ao carregar relatório. ${error.message}</div>`; console.error(error); return; }
 
   const total = (data||[]).reduce((sum, p) => sum + Number(p.amount_eur), 0);
   const count = (data||[]).length;
-  const byBarber = {};
-  (data||[]).forEach(p => {
-    const name = p.barber_name || 'Sem barbeiro';
-    byBarber[name] = (byBarber[name] || 0) + Number(p.amount_eur);
-  });
 
   areaEl.innerHTML = `
     <div class="eyebrow" style="margin-bottom:14px; display:block;">${label}</div>
@@ -1442,649 +1527,3 @@ async function runReport(start, end, label){
       <div class="stat-card"><span class="eyebrow">Faturação</span><div class="value">€ ${total.toFixed(0)}</div></div>
       <div class="stat-card"><span class="eyebrow">Marcações pagas</span><div class="value">${count}</div></div>
     </div>
-    <div class="eyebrow" style="margin-bottom:10px; display:block;">Por barbeiro</div>
-    ${Object.entries(byBarber).map(([name, val]) => `
-      <div style="display:flex; justify-content:space-between; padding:8px 0; border-bottom:1px dashed var(--brass-dim);">
-        <span>${name}</span><span class="mono">€ ${val.toFixed(0)}</span>
-      </div>
-    `).join('') || '<p style="color:var(--ink-muted);">Sem pagamentos neste período.</p>'}
-
-    <div class="eyebrow" style="margin:22px 0 10px; display:block;">Pagamentos</div>
-    ${(data||[]).map(p => `
-      <div class="client-row">
-        <div style="flex:1;">
-          <div class="client-name">${p.client_name || 'Cliente'} · ${p.service_name?.split('|')[0].trim() || ''}</div>
-          <div class="client-meta">${p.barber_name || ''} · ${new Date(p.paid_at).toLocaleDateString('pt-PT')} às ${new Date(p.paid_at).toLocaleTimeString('pt-PT', {hour:'2-digit', minute:'2-digit'})} · <span class="mono">€ ${Number(p.amount_eur).toFixed(0)}</span></div>
-        </div>
-        <button class="btn btn-ghost btn-sm" onclick="cancelPayment('${p.id}')">Cancelar pagamento</button>
-      </div>
-    `).join('') || '<p style="color:var(--ink-muted);">Sem pagamentos neste período.</p>'}
-  `;
-}
-
-async function cancelPayment(paymentId){
-  if (!confirm('Cancelar este pagamento? Esta ação não pode ser desfeita.')) return;
-  const { error } = await sb.from('payments').delete().eq('id', paymentId);
-  if (error) { alert('Erro ao cancelar o pagamento.'); console.error(error); return; }
-  if (currentReportRange) runReport(currentReportRange.start, currentReportRange.end, currentReportRange.label);
-}
-
-function toggleClientForm(){ document.getElementById('client-form').classList.toggle('hidden'); }
-
-async function submitNewClient(){
-  const name = document.getElementById('new-client-name').value.trim();
-  const phone = normalizePhone(document.getElementById('new-client-phone').value.trim());
-  const email = document.getElementById('new-client-email').value.trim();
-  const msgEl = document.getElementById('new-client-msg');
-  msgEl.innerHTML = '';
-
-  if (!name || !phone) { msgEl.innerHTML = '<div class="msg err">Preenche o nome e o telemóvel.</div>'; return; }
-
-  const { error } = await sb.from('clients').insert({ name, phone, email: email || null });
-  if (error) { msgEl.innerHTML = '<div class="msg err">Erro ao adicionar. O telemóvel já pode estar registado.</div>'; console.error(error); return; }
-
-  document.getElementById('new-client-name').value = '';
-  document.getElementById('new-client-phone').value = '';
-  document.getElementById('new-client-email').value = '';
-  toggleClientForm();
-  loadClients();
-}
-
-async function removeClient(clientId){
-  if (!confirm('Remover este cliente? O histórico de marcações mantém-se, mas deixa de estar ligado a um nome.')) return;
-  const { error } = await sb.from('clients').delete().eq('id', clientId);
-  if (error) { alert('Erro ao remover o cliente.'); console.error(error); return; }
-  loadClients();
-}
-
-async function loadClients(){
-  const listEl = document.getElementById('clients-list');
-  listEl.innerHTML = 'A carregar…';
-  const { data: clients, error } = await sb.from('clients').select('*').order('name');
-  if (error) { listEl.innerHTML = `<div class="msg err">Erro a carregar clientes.</div>`; console.error(error); return; }
-
-  const { data: appts } = await sb.from('appointments').select('client_id').neq('status','cancelled');
-  const visitCounts = {};
-  (appts||[]).forEach(a => { visitCounts[a.client_id] = (visitCounts[a.client_id]||0) + 1; });
-
-  if (!clients || clients.length === 0) { listEl.innerHTML = '<p style="color:var(--ink-muted);">Ainda não há clientes registados.</p>'; return; }
-
-  listEl.innerHTML = clients.map(c => `
-    <div class="client-row">
-      <div class="client-avatar">${(c.name||'?').charAt(0).toUpperCase()}</div>
-      <div style="flex:1;">
-        <div class="client-name">${c.name}</div>
-        <div class="client-meta">${c.phone}${c.email ? ' · ' + c.email : ''}</div>
-      </div>
-      <div class="client-visits">${visitCounts[c.id] || 0} marcações</div>
-      <button class="btn btn-danger btn-sm" onclick="removeClient('${c.id}')">Remover</button>
-    </div>
-  `).join('');
-}
-
-function toggleSubForm(){ document.getElementById('sub-form').classList.toggle('hidden'); }
-
-async function submitSubscription(){
-  const name = document.getElementById('sub-client-name').value.trim();
-  const phone = normalizePhone(document.getElementById('sub-client-phone').value.trim());
-  const planName = document.getElementById('sub-plan-name').value.trim();
-  const serviceId = document.getElementById('sub-service').value;
-  const totalServices = parseInt(document.getElementById('sub-total-services').value, 10) || 1;
-  const startDate = document.getElementById('sub-start-date').value;
-  const endDate = document.getElementById('sub-end-date').value;
-  const msgEl = document.getElementById('sub-msg');
-  msgEl.innerHTML = '';
-
-  if (!name || !phone || !startDate || !endDate) {
-    msgEl.innerHTML = '<div class="msg err">Preenche nome, telemóvel e as datas.</div>';
-    return;
-  }
-
-  try {
-    let { data: existing } = await sb.from('clients').select('id').eq('phone', phone).maybeSingle();
-    let clientId = existing?.id;
-    if (!clientId) {
-      const { data: created, error } = await sb.from('clients').insert({ name, phone }).select('id').single();
-      if (error) throw error;
-      clientId = created.id;
-    }
-    const { error: subErr } = await sb.from('subscriptions').insert({
-      client_id: clientId, service_id: serviceId, plan_name: planName || null, start_date: startDate, end_date: endDate, total_services: totalServices,
-    });
-    if (subErr) throw subErr;
-
-    document.getElementById('sub-client-name').value = '';
-    document.getElementById('sub-plan-name').value = '';
-    document.getElementById('sub-client-phone').value = '';
-    toggleSubForm();
-    loadSubscriptions();
-  } catch (err) {
-    console.error(err);
-    msgEl.innerHTML = '<div class="msg err">Erro ao adicionar a assinatura. Confirma se já correste a migration_03_advanced.sql no Supabase.</div>';
-  }
-}
-
-let editingSubscriptionId = null;
-
-let subscriptionsData = [];
-
-async function loadSubscriptions(){
-  const listEl = document.getElementById('subscriptions-list');
-  listEl.innerHTML = 'A carregar…';
-  const { data, error } = await sb
-    .from('subscriptions')
-    .select('*, clients(name,phone), services(name)')
-    .order('end_date', { ascending: true });
-
-  if (error) {
-    listEl.innerHTML = `<div class="msg err">Não consegui carregar assinantes. Confirma se já correste a migration_03_advanced.sql no Supabase.</div>`;
-    console.error(error);
-    return;
-  }
-  if (!data || data.length === 0) { listEl.innerHTML = '<p style="color:var(--ink-muted);">Ainda não há assinantes registados.</p>'; return; }
-
-  subscriptionsData = data;
-
-  const { data: usageRows } = await sb.from('appointments').select('subscription_id').neq('status','cancelled').not('subscription_id','is',null);
-  const usageCounts = {};
-  (usageRows||[]).forEach(r => { usageCounts[r.subscription_id] = (usageCounts[r.subscription_id]||0) + 1; });
-
-  const today = toLocalDateStr(new Date());
-  listEl.innerHTML = data.map(s => {
-    const isActive = s.end_date >= today;
-    const used = usageCounts[s.id] || 0;
-    return `
-      <div class="subscription-row" onclick="showSubscriptionDetail('${s.id}')">
-        <div style="flex:1;">
-          <div class="subscription-name">${s.clients?.name || ''}</div>
-          <div class="subscription-status" style="color:${isActive ? 'var(--ok)' : 'var(--err)'};">${isActive ? '✓ Ativo' : '✗ Expirado'}</div>
-        </div>
-        <div class="subscription-usage">${used}/${s.total_services}</div>
-      </div>
-    `;
-  }).join('');
-}
-
-function showSubscriptionDetail(subscriptionId){
-  const sub = subscriptionsData.find(s => s.id === subscriptionId);
-  if(!sub) return;
-  
-  const usageRows = sb.from('appointments').select('subscription_id').eq('subscription_id', subscriptionId).neq('status','cancelled');
-  usageRows.then(({ data }) => {
-    const used = (data || []).length;
-    const today = toLocalDateStr(new Date());
-    const isActive = sub.end_date >= today;
-    
-    document.getElementById('subscription-detail-content').innerHTML = `
-      <div style="padding:20px; line-height:1.8;">
-        <div style="margin-bottom:20px;">
-          <div class="eyebrow">Cliente</div>
-          <div style="font-size:1.1rem; font-family:'Fraunces',serif; color:var(--primary); font-weight:600;">${sub.clients?.name || '—'}</div>
-        </div>
-        
-        <div class="appt-detail">
-          <div class="row"><span>Telemóvel:</span><span>${sub.clients?.phone || '—'}</span></div>
-          <div class="row"><span>Plano:</span><span>${sub.plan_name || sub.services?.name || '—'}</span></div>
-          <div class="row"><span>Serviço:</span><span>${sub.services?.name?.split('|')[0].trim() || '—'}</span></div>
-          <div class="row"><span>Usados:</span><span>${used} de ${sub.total_services}</span></div>
-          <div class="row"><span>Validade:</span><span>${new Date(sub.end_date+'T00:00:00').toLocaleDateString('pt-PT')}</span></div>
-          <div class="row"><span>Código:</span><span style="font-weight:600; font-family:'IBM Plex Mono',monospace;">${sub.access_code}</span></div>
-          <div class="row"><span>Status:</span><span style="color:${isActive ? 'var(--ok)' : 'var(--err)'}; font-weight:600;">${isActive ? '✓ Ativo' : '✗ Expirado'}</span></div>
-        </div>
-        
-        <div style="display:flex; gap:8px; margin-top:20px; flex-wrap:wrap;">
-          <button class="btn btn-primary btn-sm" onclick="editClientData('${sub.id}')">Editar cliente</button>
-          <button class="btn btn-ghost btn-sm" onclick="renewSubscription('${sub.id}')">Renovar</button>
-          <button class="btn btn-ghost btn-sm" onclick="closeSubscriptionDetail(); startEditSubscriptionService('${sub.id}')">Editar serviço</button>
-          <button class="btn btn-danger btn-sm" onclick="closeSubscriptionDetail(); deleteSubscription('${sub.id}')">Apagar</button>
-        </div>
-      </div>
-    `;
-    
-    document.getElementById('subscription-detail-modal').classList.remove('hidden');
-  });
-}
-
-function closeSubscriptionDetail(){
-  document.getElementById('subscription-detail-modal').classList.add('hidden');
-}
-
-function startEditSubscriptionService(subscriptionId){
-  editingSubscriptionId = subscriptionId;
-  loadSubscriptions();
-}
-
-function cancelEditSubscriptionService(){
-  editingSubscriptionId = null;
-  loadSubscriptions();
-}
-
-async function saveSubscriptionService(subscriptionId){
-  const select = document.getElementById(`edit-sub-service-${subscriptionId}`);
-  const planNameInput = document.getElementById(`edit-sub-planname-${subscriptionId}`);
-  const newServiceId = select.value;
-  const newPlanName = planNameInput.value.trim();
-  const { error } = await sb.from('subscriptions').update({ service_id: newServiceId, plan_name: newPlanName || null }).eq('id', subscriptionId);
-  if (error) { alert('Erro ao atualizar a assinatura.'); console.error(error); return; }
-  editingSubscriptionId = null;
-  loadSubscriptions();
-}
-
-async function deleteSubscription(subscriptionId){
-  if (!confirm('Apagar esta assinatura? Esta ação não pode ser desfeita.')) return;
-  const { error } = await sb.from('subscriptions').delete().eq('id', subscriptionId);
-  if (error) { alert('Erro ao apagar a assinatura.'); console.error(error); return; }
-  loadSubscriptions();
-}
-
-async function editClientData(subscriptionId){
-  const sub = subscriptionsData.find(s => s.id === subscriptionId);
-  if(!sub) return;
-  
-  const newName = prompt('Nome do cliente:', sub.clients?.name || '');
-  if(!newName) return;
-  
-  const newPhone = prompt('Telemóvel:', sub.clients?.phone || '');
-  
-  const { error } = await sb.from('clients').update({ name: newName, phone: newPhone || null }).eq('id', sub.client_id);
-  if(error) { alert('Erro ao atualizar cliente.'); console.error(error); return; }
-  
-  alert('Dados do cliente atualizados!');
-  closeSubscriptionDetail();
-  loadSubscriptions();
-}
-
-async function renewSubscription(subscriptionId){
-  const { data: sub } = await sb.from('subscriptions').select('*').eq('id', subscriptionId).single();
-  if(!sub) return;
-  
-  const days = prompt('Quantos dias deseja renovar?', '30');
-  if(!days) return;
-  
-  const currentEnd = new Date(sub.end_date+'T00:00:00');
-  const newEnd = new Date(currentEnd.getTime() + parseInt(days) * 24 * 60 * 60 * 1000);
-  const newServices = prompt('Quantos serviços incluir?', sub.total_services.toString());
-  if(!newServices) return;
-  
-  const { error } = await sb.from('subscriptions').update({ 
-    end_date: toLocalDateStr(newEnd),
-    total_services: parseInt(newServices)
-  }).eq('id', subscriptionId);
-  
-  if(error) { alert('Erro ao renovar.'); console.error(error); return; }
-  alert(`Renovada até ${newEnd.toLocaleDateString('pt-PT')}!`);
-  loadSubscriptions();
-}
-
-let categories = [];
-
-async function loadCategories(){
-  const { data, error } = await sb.from('categories').select('*').order('sort_order');
-  if (error) { console.error(error); return; }
-  categories = data || [];
-}
-
-function renderCategoriesList(){
-  const listEl = document.getElementById('categories-list');
-  if (categories.length === 0) { listEl.innerHTML = '<p style="color:var(--ink-muted);">Sem categorias ainda. Corre a migration_04_categories.sql no Supabase.</p>'; return; }
-
-  listEl.innerHTML = categories.map((c, i) => `
-    <div class="client-row" style="align-items:center;">
-      <div style="display:flex; flex-direction:column; gap:2px; margin-right:6px;">
-        <button class="btn btn-ghost btn-sm" style="padding:2px 8px;" title="Mover para cima"
-          ${i === 0 ? 'disabled' : ''} onclick="moveCategory('${c.name}','up')">▲</button>
-        <button class="btn btn-ghost btn-sm" style="padding:2px 8px;" title="Mover para baixo"
-          ${i === categories.length - 1 ? 'disabled' : ''} onclick="moveCategory('${c.name}','down')">▼</button>
-      </div>
-      <div class="client-name" style="flex:1; ${c.active ? '' : 'opacity:0.5; text-decoration:line-through;'}">${c.name}</div>
-      <button class="btn btn-ghost btn-sm" onclick="renameCategory('${c.name}')">Renomear</button>
-      <button class="btn btn-ghost btn-sm" onclick="toggleCategoryActive('${c.name}', ${c.active})">${c.active ? 'Esconder do cliente' : 'Mostrar ao cliente'}</button>
-    </div>
-  `).join('');
-
-  const svcCatSelect = document.getElementById('new-service-category');
-  if (svcCatSelect) {
-    svcCatSelect.innerHTML = categories.map(c => `<option value="${c.name}">${c.name}</option>`).join('');
-  }
-}
-
-async function submitNewCategory(){
-  const nameInput = document.getElementById('new-category-name');
-  const name = nameInput.value.trim();
-  const msgEl = document.getElementById('category-msg');
-  msgEl.innerHTML = '';
-  if (!name) { msgEl.innerHTML = '<div class="msg err">Escreve o nome da categoria.</div>'; return; }
-
-  const nextOrder = categories.length ? Math.max(...categories.map(c => c.sort_order)) + 1 : 0;
-  const { error } = await sb.from('categories').insert({ name, sort_order: nextOrder });
-  if (error) { msgEl.innerHTML = '<div class="msg err">Erro ao adicionar. Talvez já exista uma categoria com este nome.</div>'; console.error(error); return; }
-
-  nameInput.value = '';
-  await loadCategories();
-  renderCategoriesList();
-}
-
-async function renameCategory(oldName){
-  const newName = prompt('Novo nome para esta categoria:', oldName);
-  if (!newName || newName.trim() === '' || newName.trim() === oldName) return;
-  const trimmed = newName.trim();
-
-  const { error: catErr } = await sb.from('categories').update({ name: trimmed }).eq('name', oldName);
-  if (catErr) { alert('Erro ao renomear a categoria.'); console.error(catErr); return; }
-
-  const { error: svcErr } = await sb.from('services').update({ category: trimmed }).eq('category', oldName);
-  if (svcErr) { alert('A categoria foi renomeada, mas houve um erro a atualizar os serviços.'); console.error(svcErr); }
-
-  await loadCategories();
-  renderCategoriesList();
-  loadCatalog();
-}
-
-async function toggleCategoryActive(name, currentlyActive){
-  const { error } = await sb.from('categories').update({ active: !currentlyActive }).eq('name', name);
-  if (error) { alert('Erro ao atualizar a categoria.'); console.error(error); return; }
-  await loadCategories();
-  renderCategoriesList();
-}
-
-async function moveCategory(name, direction){
-  const idx = categories.findIndex(c => c.name === name);
-  const swapIdx = direction === 'up' ? idx - 1 : idx + 1;
-  if (swapIdx < 0 || swapIdx >= categories.length) return;
-
-  [categories[idx], categories[swapIdx]] = [categories[swapIdx], categories[idx]];
-  const updates = categories.map((c, i) => sb.from('categories').update({ sort_order: i }).eq('name', c.name));
-  const results = await Promise.all(updates);
-  const failed = results.find(r => r.error);
-  if (failed) { alert('Erro ao reordenar.'); console.error(failed.error); return; }
-
-  await loadCategories();
-  renderCategoriesList();
-}
-
-async function updateServiceCategory(serviceId, newCategory){
-  const { error } = await sb.from('services').update({ category: newCategory }).eq('id', serviceId);
-  if (error) { alert('Erro ao mudar a categoria do serviço.'); console.error(error); return; }
-  loadCatalog();
-}
-
-function toggleServiceForm(){ document.getElementById('service-form').classList.toggle('hidden'); }
-
-async function submitNewService(){
-  const name = document.getElementById('new-service-name').value.trim();
-  const category = document.getElementById('new-service-category').value;
-  const duration = parseInt(document.getElementById('new-service-duration').value, 10) || 30;
-  const priceRaw = document.getElementById('new-service-price').value;
-  const price = priceRaw === '' ? null : parseFloat(priceRaw);
-  const msgEl = document.getElementById('new-service-msg');
-  msgEl.innerHTML = '';
-
-  if (!name) { msgEl.innerHTML = '<div class="msg err">Escreve o nome do serviço.</div>'; return; }
-  if (!category) { msgEl.innerHTML = '<div class="msg err">Cria pelo menos uma categoria primeiro.</div>'; return; }
-
-  const { error } = await sb.from('services').insert({
-    name, category, duration_minutes: duration, price_eur: price, active: true, sort_order: 99,
-  });
-  if (error) { msgEl.innerHTML = '<div class="msg err">Erro ao adicionar o serviço.</div>'; console.error(error); return; }
-
-  document.getElementById('new-service-name').value = '';
-  document.getElementById('new-service-price').value = '';
-  toggleServiceForm();
-  const { data: refreshed } = await sb.from('services').select('*').order('category').order('sort_order');
-  services = refreshed || services;
-  loadCatalog();
-}
-
-async function loadCatalog(){
-  const listEl = document.getElementById('catalog-list');
-  listEl.innerHTML = 'A carregar…';
-
-  await loadCategories();
-  renderCategoriesList();
-
-  const { data, error } = await sb.from('services').select('*').order('category').order('sort_order');
-  if (error) { listEl.innerHTML = `<div class="msg err">Erro a carregar o catálogo.</div>`; console.error(error); return; }
-
-  services = data || [];
-  const byCategory = {};
-  services.forEach(s => { (byCategory[s.category] ||= []).push(s); });
-
-  const orderedCatNames = categories.length
-    ? [...categories.map(c => c.name), ...Object.keys(byCategory).filter(c => !categories.some(cat => cat.name === c))]
-    : Object.keys(byCategory).sort();
-
-  const categoryOptionsHtml = categories.map(c => `<option value="${c.name}">${c.name}</option>`).join('');
-
-  listEl.innerHTML = orderedCatNames.filter(cat => byCategory[cat]).map(cat => {
-    const list = byCategory[cat];
-    const catMeta = categories.find(c => c.name === cat);
-    const hiddenNote = catMeta && !catMeta.active ? ' <span style="color:var(--err); font-size:0.72rem;">(escondida do cliente)</span>' : '';
-    return `
-    <div class="eyebrow" style="display:block; margin:18px 0 8px;">${cat}${hiddenNote}</div>
-    ${list.map((s, i) => `
-      <div class="client-row" style="align-items:center;">
-        <div style="display:flex; flex-direction:column; gap:2px; margin-right:6px;">
-          <button class="btn btn-ghost btn-sm" style="padding:2px 8px;" title="Mover para cima"
-            ${i === 0 ? 'disabled' : ''} onclick="moveService('${s.id}','${cat}','up')">▲</button>
-          <button class="btn btn-ghost btn-sm" style="padding:2px 8px;" title="Mover para baixo"
-            ${i === list.length - 1 ? 'disabled' : ''} onclick="moveService('${s.id}','${cat}','down')">▼</button>
-        </div>
-        <div style="flex:1;">
-          <div class="client-name" style="${s.active ? '' : 'opacity:0.5; text-decoration:line-through;'}">${s.name.split('|')[0].trim()}</div>
-          <div class="client-meta">${s.duration_minutes} min</div>
-        </div>
-        <select style="width:150px;" onchange="updateServiceCategory('${s.id}', this.value)">
-          ${categoryOptionsHtml.replace(`value="${cat}"`, `value="${cat}" selected`)}
-        </select>
-        <input type="number" value="${s.price_eur ?? ''}" placeholder="a confirmar" step="0.5" min="0"
-          style="width:90px;" onchange="updateServicePrice('${s.id}', this.value)">
-        <button class="btn btn-ghost btn-sm" onclick="toggleServiceActive('${s.id}', ${s.active})">${s.active ? 'Desativar' : 'Ativar'}</button>
-      </div>
-    `).join('')}
-  `;
-  }).join('');
-}
-
-async function moveService(serviceId, category, direction){
-  const list = services.filter(s => s.category === category).sort((a,b) => a.sort_order - b.sort_order);
-  const idx = list.findIndex(s => s.id === serviceId);
-  const swapIdx = direction === 'up' ? idx - 1 : idx + 1;
-  if (swapIdx < 0 || swapIdx >= list.length) return;
-
-  [list[idx], list[swapIdx]] = [list[swapIdx], list[idx]];
-
-  const updates = list.map((s, i) => sb.from('services').update({ sort_order: i }).eq('id', s.id));
-  const results = await Promise.all(updates);
-  const failed = results.find(r => r.error);
-  if (failed) { alert('Erro ao reordenar o serviço.'); console.error(failed.error); return; }
-
-  loadCatalog();
-}
-
-async function updateServicePrice(serviceId, value){
-  const price = value === '' ? null : parseFloat(value);
-  const { error } = await sb.from('services').update({ price_eur: price }).eq('id', serviceId);
-  if (error) { alert('Erro ao atualizar o preço.'); console.error(error); }
-}
-
-async function toggleServiceActive(serviceId, currentlyActive){
-  const { error } = await sb.from('services').update({ active: !currentlyActive }).eq('id', serviceId);
-  if (error) { alert('Erro ao atualizar o serviço.'); console.error(error); return; }
-  loadCatalog();
-}
-
-async function loadMarketingAudienceCount(){
-  const countEl = document.getElementById('mkt-audience-count');
-  const { count, error } = await sb.from('clients').select('id', { count: 'exact', head: true }).not('email', 'is', null);
-  if (error) { countEl.textContent = ''; return; }
-  countEl.textContent = `Vai ser enviado a ${count || 0} cliente(s) com email registado.`;
-}
-
-async function sendMarketingCampaign(){
-  const subject = document.getElementById('mkt-subject').value.trim();
-  const body = document.getElementById('mkt-body').value.trim();
-  const msgEl = document.getElementById('mkt-msg');
-  msgEl.innerHTML = '';
-
-  if (!subject || !body) { msgEl.innerHTML = '<div class="msg err">Preenche o assunto e a mensagem.</div>'; return; }
-  if (!confirm('Enviar esta campanha para todos os clientes com email registado?')) return;
-
-  msgEl.innerHTML = '<div class="msg">A enviar…</div>';
-  try {
-    const { data, error } = await sb.functions.invoke('send-marketing', {
-      body: { subject, html: `<div style="font-family:sans-serif; max-width:480px; margin:0 auto;">${body.replace(/\n/g,'<br>')}</div>` },
-    });
-    if (error) throw error;
-    msgEl.innerHTML = `<div class="msg ok">Campanha enviada!</div>`;
-  } catch (err) {
-    console.error(err);
-    msgEl.innerHTML = '<div class="msg err">Não foi possível enviar. Confirma se já publicaste a função send-marketing e ligaste o Resend (ver README, Fase 2).</div>';
-  }
-}
-
-let currentQuickPaymentValue = '';
-
-async function openClientPicker(){
-  document.getElementById('client-picker-modal').classList.remove('hidden');
-  const searchEl = document.getElementById('client-picker-search');
-  searchEl.value = '';
-  searchEl.oninput = (e) => renderClientPickerList(e.target.value);
-  renderClientPickerList('');
-}
-
-function closeClientPicker(){
-  document.getElementById('client-picker-modal').classList.add('hidden');
-}
-
-async function renderClientPickerList(query){
-  const listEl = document.getElementById('client-picker-list');
-  const q = query.trim().toLowerCase();
-  
-  let clients = [];
-  if(q.length > 0){
-    const { data } = await sb.from('clients').select('id, name, phone').ilike('name', `%${q}%`).limit(20);
-    clients = data || [];
-    if(clients.length === 0){
-      const { data: byPhone } = await sb.from('clients').select('id, name, phone').ilike('phone', `%${q}%`).limit(20);
-      clients = byPhone || [];
-    }
-  }
-
-  if(clients.length === 0){
-    listEl.innerHTML = `
-      <button type="button" class="client-pick-item" onclick="addNewClientFromPicker()" style="justify-content:center; color:var(--brass); font-weight:600;">
-        + Adicionar novo cliente
-      </button>
-      <button type="button" class="client-pick-item" onclick="selectClientFromPicker(null, 'Sem marcação')" style="justify-content:center; color:var(--ink-muted);">
-        👤 Sem marcação
-      </button>
-    `;
-  } else {
-    listEl.innerHTML = `
-      <button type="button" class="client-pick-item" onclick="addNewClientFromPicker()" style="justify-content:center; color:var(--brass); font-weight:600;">
-        + Adicionar novo cliente
-      </button>
-      <button type="button" class="client-pick-item" onclick="selectClientFromPicker(null, 'Sem marcação')" style="justify-content:center; color:var(--ink-muted);">
-        👤 Sem marcação
-      </button>
-      ${clients.map(c => `
-        <button type="button" class="client-pick-item" onclick="selectClientFromPicker('${c.id}', '${(c.name || '').replace(/'/g, "\\'")}', '${(c.phone || '').replace(/'/g, "\\'")}')" style="border:none; background:none; padding:14px 12px;">
-          <div class="client-pick-avatar">${(c.name || '?').charAt(0).toUpperCase()}</div>
-          <div class="client-pick-info">
-            <div class="client-pick-name">${c.name || 'Cliente'}</div>
-            <div class="client-pick-phone">${c.phone || '—'}</div>
-          </div>
-        </button>
-      `).join('')}
-    `;
-  }
-}
-
-function selectClientFromPicker(clientId, name, phone){
-  document.getElementById('manual-name').value = name;
-  document.getElementById('manual-phone').value = phone || '';
-  const btnLabel = phone ? `${name} (${phone})` : name;
-  document.getElementById('manual-client-btn-label').textContent = btnLabel;
-  closeClientPicker();
-}
-
-function addNewClientFromPicker(){
-  // Modal para criar novo cliente rápido
-  const name = prompt('Nome do cliente:');
-  if(!name) return;
-  const phone = prompt('Telemóvel (opcional):');
-  selectClientFromPicker(null, name, phone || '');
-}
-
-function toggleActionMenu(){
-  const menu = document.getElementById('fab-menu');
-  menu.classList.toggle('hidden');
-}
-
-function openQuickPayment(){
-  currentQuickPaymentValue = '';
-  document.getElementById('quick-payment-modal').classList.remove('hidden');
-  document.getElementById('quick-payment-amount').textContent = '0 €';
-  document.getElementById('quick-payment-msg').innerHTML = '';
-  toggleActionMenu();
-}
-
-function closeQuickPayment(){
-  document.getElementById('quick-payment-modal').classList.add('hidden');
-  currentQuickPaymentValue = '';
-}
-
-function appendToQuickPayment(char){
-  if(char === '.' && currentQuickPaymentValue.includes('.')) return;
-  currentQuickPaymentValue += char;
-  updateQuickPaymentDisplay();
-}
-
-function deleteQuickPayment(){
-  currentQuickPaymentValue = currentQuickPaymentValue.slice(0, -1);
-  updateQuickPaymentDisplay();
-}
-
-function updateQuickPaymentDisplay(){
-  const value = currentQuickPaymentValue === '' ? '0' : parseFloat(currentQuickPaymentValue).toFixed(2);
-  document.getElementById('quick-payment-amount').textContent = `${value} €`;
-}
-
-async function submitQuickPayment(){
-  if(!currentQuickPaymentValue || parseFloat(currentQuickPaymentValue) <= 0){
-    document.getElementById('quick-payment-msg').innerHTML = '<div class="msg err">Escreve um valor válido.</div>';
-    return;
-  }
-
-  const amount = parseFloat(currentQuickPaymentValue);
-  const msgEl = document.getElementById('quick-payment-msg');
-  msgEl.innerHTML = '';
-
-  try {
-    const { error } = await sb.from('payments').insert({
-      appointment_id: null,
-      amount_eur: amount,
-      method: 'dinheiro',
-      paid_at: new Date().toISOString(),
-    });
-    if(error) throw error;
-
-    msgEl.innerHTML = '<div class="msg ok">Pagamento registado!</div>';
-    setTimeout(() => {
-      closeQuickPayment();
-      if(currentAgendaDateStr) loadAgenda(currentAgendaDateStr);
-    }, 1500);
-  } catch(err) {
-    console.error(err);
-    msgEl.innerHTML = '<div class="msg err">Erro ao registar o pagamento.</div>';
-  }
-}
-
-function openQuickSale(){
-  // Implementação similar para Venda rápida
-  console.log('Venda rápida - em desenvolvimento');
-  toggleActionMenu();
-}
-</script>
-</body>
-</html>
