@@ -15,6 +15,71 @@
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Fraunces:wght@600;700&family=IBM+Plex+Mono:wght@400;500&family=IBM+Plex+Sans:wght@400;500&display=swap" rel="stylesheet">
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script>
+// Definir funções no início para estarem disponíveis para onclick handlers
+const SUPABASE_URL = "https://kjhaphbaoxwxyankdkmk.supabase.co";
+const SUPABASE_ANON_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImtqaGFwaGJhb3h3eHlhbmtka21rIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODQxOTI2ODIsImV4cCI6MjA5OTc2ODY4Mn0.IIHToQLp68HRHf7uOUblWd0YtiLRnLmsE35RVU-Cq14";
+const sb = window.supabase ? window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY) : null;
+
+async function login(){
+  const msgEl = document.getElementById('login-msg');
+  msgEl.innerHTML = '';
+  if (!sb) {
+    msgEl.innerHTML = `<div class="msg err">Não consegui carregar a biblioteca do Supabase. Verifica a ligação à internet ou bloqueadores de anúncios.</div>`;
+    return;
+  }
+  const email = document.getElementById('login-email').value.trim();
+  const password = document.getElementById('login-password').value;
+  const rememberMe = document.getElementById('login-remember').checked;
+  
+  if (!email || !password) {
+    msgEl.innerHTML = `<div class="msg err">Preenche o email e a palavra-passe.</div>`;
+    return;
+  }
+  
+  msgEl.innerHTML = '<div class="msg ok">A entrar...</div>';
+  
+  const { data, error } = await sb.auth.signInWithPassword({ email, password });
+  if (error) { 
+    console.error('Login error:', error);
+    msgEl.innerHTML = `<div class="msg err">Email ou palavra-passe incorretos.</div>`; 
+    return; 
+  }
+  
+  console.log('Login successful:', data);
+  
+  if (rememberMe) {
+    localStorage.setItem('tch-remember-login', 'true');
+  } else {
+    localStorage.removeItem('tch-remember-login');
+  }
+  
+  try {
+    await showDashboard();
+  } catch (err) {
+    console.error('Error loading dashboard:', err);
+    msgEl.innerHTML = `<div class="msg err">Erro ao carregar dashboard: ${err.message}</div>`;
+  }
+}
+
+function openSidebar(){
+  document.getElementById('mobile-sidebar').classList.add('open');
+  document.getElementById('sidebar-overlay').classList.add('open');
+}
+
+function closeSidebar(){
+  document.getElementById('mobile-sidebar').classList.remove('open');
+  document.getElementById('sidebar-overlay').classList.remove('open');
+}
+
+async function logout(){
+  await sb.auth.signOut();
+  closeSidebar();
+  document.getElementById('login-view').classList.remove('hidden');
+  document.getElementById('dashboard-view').classList.add('hidden');
+  document.getElementById('logout-btn').classList.add('hidden');
+}
+</script>
 <style>
   :root{
     --bg:#F5EFE0; --bg-alt:#EDE3D0; --bg-card:#E5D9BE;
@@ -620,24 +685,6 @@
 </div>
 
 <script>
-const SUPABASE_URL = "https://kjhaphbaoxwxyankdkmk.supabase.co";
-const SUPABASE_ANON_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImtqaGFwaGJhb3h3eHlhbmtka21rIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODQxOTI2ODIsImV4cCI6MjA5OTc2ODY4Mn0.IIHToQLp68HRHf7uOUblWd0YtiLRnLmsE35RVU-Cq14";
-const sb = window.supabase ? window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY) : null;
-
-// Verificar sessão ao carregar
-if (sb) {
-  sb.auth.getSession().then(({ data: { session } }) => {
-    console.log('Session check on load:', session ? 'Active' : 'No session');
-    if (session) {
-      showDashboard();
-    }
-  }).catch(err => {
-    console.error('Error checking session:', err);
-  });
-} else {
-  console.warn('Supabase client not initialized');
-}
-
 const CAL_START_HOUR = 8;
 const CAL_END_HOUR = 20;
 let calZoom = 1;
@@ -647,65 +694,6 @@ let manualSelectedSlot = null; // { start: Date, end: Date }
 let editSelectedSlot = null;   // { start: Date, end: Date } — usado ao editar uma marcação existente
 let currentAgendaDateStr = null;
 let touchStartX = null;
-
-// Função login - definida cedo para estar disponível para onclick handlers
-async function login(){
-  const msgEl = document.getElementById('login-msg');
-  msgEl.innerHTML = '';
-  if (!sb) {
-    msgEl.innerHTML = `<div class="msg err">Não consegui carregar a biblioteca do Supabase. Verifica a ligação à internet ou bloqueadores de anúncios.</div>`;
-    return;
-  }
-  const email = document.getElementById('login-email').value.trim();
-  const password = document.getElementById('login-password').value;
-  const rememberMe = document.getElementById('login-remember').checked;
-  
-  if (!email || !password) {
-    msgEl.innerHTML = `<div class="msg err">Preenche o email e a palavra-passe.</div>`;
-    return;
-  }
-  
-  msgEl.innerHTML = '<div class="msg ok">A entrar...</div>';
-  
-  const { data, error } = await sb.auth.signInWithPassword({ email, password });
-  if (error) { 
-    console.error('Login error:', error);
-    msgEl.innerHTML = `<div class="msg err">Email ou palavra-passe incorretos.</div>`; 
-    return; 
-  }
-  
-  console.log('Login successful:', data);
-  
-  if (rememberMe) {
-    localStorage.setItem('tch-remember-login', 'true');
-  } else {
-    localStorage.removeItem('tch-remember-login');
-  }
-  
-  try {
-    await showDashboard();
-  } catch (err) {
-    console.error('Error loading dashboard:', err);
-    msgEl.innerHTML = `<div class="msg err">Erro ao carregar dashboard: ${err.message}</div>`;
-  }
-}
-
-function openSidebar(){
-  document.getElementById('mobile-sidebar').classList.add('open');
-  document.getElementById('sidebar-overlay').classList.add('open');
-}
-function closeSidebar(){
-  document.getElementById('mobile-sidebar').classList.remove('open');
-  document.getElementById('sidebar-overlay').classList.remove('open');
-}
-
-async function logout(){
-  await sb.auth.signOut();
-  closeSidebar();
-  document.getElementById('login-view').classList.remove('hidden');
-  document.getElementById('dashboard-view').classList.add('hidden');
-  document.getElementById('logout-btn').classList.add('hidden');
-}
 
 function toggleForgotPassword(){
   document.getElementById('forgot-password-panel').classList.toggle('hidden');
