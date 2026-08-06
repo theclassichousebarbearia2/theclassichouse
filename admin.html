@@ -455,6 +455,9 @@
           <label>Nome do plano (o que aparece na lista de assinantes)
             <input type="text" id="sub-plan-name" placeholder='ex: "Cabelo e Barba 2x ao mês"'>
           </label>
+          <label>Categoria
+            <select id="sub-category" onchange="filterSubServicesByCategory()"></select>
+          </label>
           <label>Serviço avulso que desconta desta assinatura
             <select id="sub-service"></select>
           </label>
@@ -711,8 +714,12 @@ async function showDashboard(){
   barberSelect.addEventListener('change', renderManualSlots);
   manualDateInput.addEventListener('change', renderManualSlots);
 
+  const subCategorySelect = document.getElementById('sub-category');
+  const uniqueCategories = [...new Set(services.map(s => s.category))];
+  subCategorySelect.innerHTML = uniqueCategories.map(cat => `<option value="${cat}">${cat}</option>`).join('');
+
   const subServiceSelect = document.getElementById('sub-service');
-  subServiceSelect.innerHTML = services.map(s => `<option value="${s.id}">${s.name.split('|')[0].trim()}</option>`).join('');
+  subServiceSelect.innerHTML = services.filter(s => s.category === uniqueCategories[0]).map(s => `<option value="${s.id}">${s.name.split('|')[0].trim()}</option>`).join('');
   document.getElementById('sub-start-date').value = toLocalDateStr(new Date());
   const in30 = new Date(); in30.setDate(in30.getDate()+30);
   document.getElementById('sub-end-date').value = toLocalDateStr(in30);
@@ -723,6 +730,12 @@ async function showDashboard(){
 }
 
 function euro(v){ return v === null || v === undefined ? 'a confirmar' : `€ ${Number(v).toFixed(0)}`; }
+
+function filterSubServicesByCategory(){
+  const category = document.getElementById('sub-category').value;
+  const subServiceSelect = document.getElementById('sub-service');
+  subServiceSelect.innerHTML = services.filter(s => s.category === category).map(s => `<option value="${s.id}">${s.name.split('|')[0].trim()}</option>`).join('');
+}
 
 const SERVICE_PICKER_COLORS = ['#5da8dd','#e0964a','#69c17e','#b26b8c','#8a6bb2','#c9a227','#4a9b8e'];
 function servicePickerCategoryColor(catName){
@@ -1408,31 +1421,42 @@ async function runReport(start, end, label){
   const areaEl = document.getElementById('report-area');
   areaEl.innerHTML = 'A calcular…';
 
-  const { data, error } = await sb.rpc('get_my_payments', {
+  const { data, error } = await sb.rpc('get_revenue_report', {
     p_start: start.toISOString(),
     p_end: end.toISOString(),
   });
 
-  if (error) { areaEl.innerHTML = `<div class="msg err">Erro ao carregar relatório. ${error.message}</div>`; console.error(error); return; }
+  if (error) { areaEl.innerHTML = `<div class="msg err">Não tens permissão para ver relatórios financeiros, ou a tua conta ainda não está associada a um barbeiro.</div>`; console.error(error); return; }
 
   const total = (data||[]).reduce((sum, p) => sum + Number(p.amount_eur), 0);
   const count = (data||[]).length;
+  const byBarber = {};
+  (data||[]).forEach(p => {
+    const name = p.barber_name || 'Sem barbeiro';
+    byBarber[name] = (byBarber[name] || 0) + Number(p.amount_eur);
+  });
 
   areaEl.innerHTML = `
     <div class="eyebrow" style="margin-bottom:14px; display:block;">${label}</div>
     <div class="stat-grid">
-      <div class="stat-card"><span class="eyebrow">Faturação Total</span><div class="value">€ ${total.toFixed(0)}</div></div>
-      <div class="stat-card"><span class="eyebrow">Total de Pagamentos</span><div class="value">${count}</div></div>
+      <div class="stat-card"><span class="eyebrow">Faturação</span><div class="value">€ ${total.toFixed(0)}</div></div>
+      <div class="stat-card"><span class="eyebrow">Marcações pagas</span><div class="value">${count}</div></div>
     </div>
+    <div class="eyebrow" style="margin-bottom:10px; display:block;">Por barbeiro</div>
+    ${Object.entries(byBarber).map(([name, val]) => `
+      <div style="display:flex; justify-content:space-between; padding:8px 0; border-bottom:1px dashed var(--brass-dim);">
+        <span>${name}</span><span class="mono">€ ${val.toFixed(0)}</span>
+      </div>
+    `).join('') || '<p style="color:var(--ink-muted);">Sem pagamentos neste período.</p>'}
 
     <div class="eyebrow" style="margin:22px 0 10px; display:block;">Pagamentos</div>
     ${(data||[]).map(p => `
       <div class="client-row">
         <div style="flex:1;">
-          <div class="client-name">${p.client_name || 'Cliente'} · ${p.service_name || 'Venda rápida'}</div>
-          <div class="client-meta">${new Date(p.paid_at).toLocaleDateString('pt-PT')} às ${new Date(p.paid_at).toLocaleTimeString('pt-PT', {hour:'2-digit', minute:'2-digit'})} · <span class="mono">€ ${Number(p.amount_eur).toFixed(0)}</span></div>
+          <div class="client-name">${p.client_name || 'Cliente'} · ${p.service_name?.split('|')[0].trim() || ''}</div>
+          <div class="client-meta">${p.barber_name || ''} · ${new Date(p.paid_at).toLocaleDateString('pt-PT')} às ${new Date(p.paid_at).toLocaleTimeString('pt-PT', {hour:'2-digit', minute:'2-digit'})} · <span class="mono">€ ${Number(p.amount_eur).toFixed(0)}</span></div>
         </div>
-        <button class="btn btn-ghost btn-sm" onclick="cancelPayment('${p.id}')">Cancelar</button>
+        <button class="btn btn-ghost btn-sm" onclick="cancelPayment('${p.id}')">Cancelar pagamento</button>
       </div>
     `).join('') || '<p style="color:var(--ink-muted);">Sem pagamentos neste período.</p>'}
   `;
@@ -1611,7 +1635,8 @@ function showSubscriptionDetail(subscriptionId){
         <div style="display:flex; gap:8px; margin-top:20px; flex-wrap:wrap;">
           <button class="btn btn-primary btn-sm" onclick="editClientData('${sub.id}')">Editar cliente</button>
           <button class="btn btn-ghost btn-sm" onclick="renewSubscription('${sub.id}')">Renovar</button>
-          <button class="btn btn-ghost btn-sm" onclick="deleteSubscription('${sub.id}')">Apagar</button>
+          <button class="btn btn-ghost btn-sm" onclick="closeSubscriptionDetail(); startEditSubscriptionService('${sub.id}')">Editar serviço</button>
+          <button class="btn btn-danger btn-sm" onclick="closeSubscriptionDetail(); deleteSubscription('${sub.id}')">Apagar</button>
         </div>
       </div>
     `;
@@ -1652,7 +1677,6 @@ async function deleteSubscription(subscriptionId){
   loadSubscriptions();
 }
 
-
 async function editClientData(subscriptionId){
   const sub = subscriptionsData.find(s => s.id === subscriptionId);
   if(!sub) return;
@@ -1666,23 +1690,24 @@ async function editClientData(subscriptionId){
   if(error) { alert('Erro ao atualizar cliente.'); console.error(error); return; }
   
   alert('Dados do cliente atualizados!');
+  closeSubscriptionDetail();
   loadSubscriptions();
 }
 
 async function renewSubscription(subscriptionId){
-  const sub = subscriptionsData.find(s => s.id === subscriptionId);
+  const { data: sub } = await sb.from('subscriptions').select('*').eq('id', subscriptionId).single();
   if(!sub) return;
   
   const days = prompt('Quantos dias deseja renovar?', '30');
   if(!days) return;
   
-  const currentEnd = new Date(sub.end_date);
+  const currentEnd = new Date(sub.end_date+'T00:00:00');
   const newEnd = new Date(currentEnd.getTime() + parseInt(days) * 24 * 60 * 60 * 1000);
   const newServices = prompt('Quantos serviços incluir?', sub.total_services.toString());
   if(!newServices) return;
   
   const { error } = await sb.from('subscriptions').update({ 
-    end_date: newEnd.toISOString().split('T')[0],
+    end_date: toLocalDateStr(newEnd),
     total_services: parseInt(newServices)
   }).eq('id', subscriptionId);
   
@@ -1690,6 +1715,7 @@ async function renewSubscription(subscriptionId){
   alert(`Renovada até ${newEnd.toLocaleDateString('pt-PT')}!`);
   loadSubscriptions();
 }
+
 let categories = [];
 
 async function loadCategories(){
@@ -2034,12 +2060,9 @@ async function submitQuickPayment(){
   const msgEl = document.getElementById('quick-payment-msg');
   msgEl.innerHTML = '';
 
-  const user = await sb.auth.getUser();
-
   try {
     const { error } = await sb.from('payments').insert({
       appointment_id: null,
-      user_id: user.data.user.id,
       amount_eur: amount,
       method: 'dinheiro',
       paid_at: new Date().toISOString(),
