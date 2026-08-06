@@ -202,7 +202,7 @@ const sb = window.supabase ? window.supabase.createClient(SUPABASE_URL, SUPABASE
 const WHATSAPP_NUMBER = "351926323222";
 
 const state = {
-  services: [], barbers: [], hours: [],
+  services: [], barbers: [], hours: [], barberShifts: [],
   selectedService: null,
   selectedBarber: null,
   selectedDate: null,
@@ -210,7 +210,6 @@ const state = {
 };
 
 function euro(v){ return v === null || v === undefined ? 'a confirmar' : `€ ${Number(v).toFixed(0)}`; }
-function normalizePhone(p){ return String(p||'').replace(/\D/g,'').slice(-9); }
 function fmtDuration(mins){ return mins >= 60 ? `${(mins/60).toFixed(mins%60===0?0:1)} h` : `${mins} min`; }
 
 function toggleMyBookings(){
@@ -226,7 +225,7 @@ function toggleMySubscription(){
 }
 
 async function lookupMySubscription(){
-  const phone = normalizePhone(document.getElementById('sub-phone-input').value.trim());
+  const phone = document.getElementById('sub-phone-input').value.trim();
   const code = document.getElementById('sub-code-input').value.trim();
   const resultsEl = document.getElementById('my-sub-results');
   resultsEl.innerHTML = 'A procurar…';
@@ -250,7 +249,7 @@ async function lookupMySubscription(){
 }
 
 async function lookupMyBookings(){
-  const phone = normalizePhone(document.getElementById('my-phone-input').value.trim());
+  const phone = document.getElementById('my-phone-input').value.trim();
   const resultsEl = document.getElementById('my-bookings-results');
   resultsEl.innerHTML = 'A procurar…';
   if (!sb || !phone) { resultsEl.innerHTML = '<div class="msg err">Escreve o teu telemóvel.</div>'; return; }
@@ -302,11 +301,12 @@ async function init(){
   }
 
   try {
-    const [svcRes, barRes, hrsRes, catRes] = await Promise.all([
+    const [svcRes, barRes, hrsRes, catRes, shiftsRes] = await Promise.all([
       sb.from('services').select('*').eq('active', true).order('category').order('sort_order'),
       sb.from('barbers').select('*').eq('active', true),
       sb.from('business_hours').select('*'),
       sb.from('categories').select('*').order('sort_order'),
+      sb.from('barber_shifts').select('*'),
     ]);
     if (svcRes.error) throw svcRes.error;
     if (barRes.error) throw barRes.error;
@@ -314,6 +314,7 @@ async function init(){
     state.services = svcRes.data;
     state.barbers = barRes.data;
     state.hours = hrsRes.data;
+    state.barberShifts = (!shiftsRes.error && shiftsRes.data) ? shiftsRes.data : [];
     // Se a tabela categories já existir, só mostra serviços de categorias ativas,
     // pela ordem escolhida no admin. Se ainda não existir (migration_04 por
     // correr), mostra tudo, sem filtrar.
@@ -444,12 +445,31 @@ async function renderSlots(){
   const slots = [];
   const nowBuffer = new Date();
 
+  // Filtra barbeiros que estão de folga neste dia da semana
+  const workingBarberIds = barberIds.filter(barberId => {
+    const shift = state.barberShifts.find(s => s.barber_id === barberId && s.day_of_week === dow);
+    return !shift || !shift.is_off;
+  });
+
+  if (workingBarberIds.length === 0) {
+    areaEl.innerHTML = '<div class="msg err">Sem barbeiros disponíveis neste dia. Tenta outra data.</div>';
+    return;
+  }
+
   for (let start = openMin; start + duration <= closeMin; start += 30) {
     const slotStart = new Date(state.selectedDate + 'T' + minutesToTimeStr(start) + ':00');
     const slotEnd = new Date(slotStart.getTime() + duration*60000);
     if (slotStart < nowBuffer) continue;
 
-    for (const barberId of barberIds) {
+    for (const barberId of workingBarberIds) {
+      // Respeita o horário individual do turno do barbeiro (se definido)
+      const shift = state.barberShifts.find(s => s.barber_id === barberId && s.day_of_week === dow);
+      if (shift && shift.start_time && shift.end_time) {
+        const shiftStartMin = timeStrToMinutes(shift.start_time.slice(0,5));
+        const shiftEndMin = timeStrToMinutes(shift.end_time.slice(0,5));
+        if (start < shiftStartMin || start + duration > shiftEndMin) continue;
+      }
+
       const conflict = (busy||[]).some(b =>
         b.barber_id === barberId &&
         new Date(b.start_time) < slotEnd &&
@@ -507,7 +527,7 @@ function renderSummary(){
 
 async function submitBooking(){
   const name = document.getElementById('name-input').value.trim();
-  const phone = normalizePhone(document.getElementById('phone-input').value.trim());
+  const phone = document.getElementById('phone-input').value.trim();
   const email = document.getElementById('email-input').value.trim();
   const msgEl = document.getElementById('form-msg');
   msgEl.innerHTML = '';
