@@ -648,15 +648,7 @@ let editSelectedSlot = null;   // { start: Date, end: Date } — usado ao editar
 let currentAgendaDateStr = null;
 let touchStartX = null;
 
-function openSidebar(){
-  document.getElementById('mobile-sidebar').classList.add('open');
-  document.getElementById('sidebar-overlay').classList.add('open');
-}
-function closeSidebar(){
-  document.getElementById('mobile-sidebar').classList.remove('open');
-  document.getElementById('sidebar-overlay').classList.remove('open');
-}
-
+// Função login - definida cedo para estar disponível para onclick handlers
 async function login(){
   const msgEl = document.getElementById('login-msg');
   msgEl.innerHTML = '';
@@ -696,6 +688,15 @@ async function login(){
     console.error('Error loading dashboard:', err);
     msgEl.innerHTML = `<div class="msg err">Erro ao carregar dashboard: ${err.message}</div>`;
   }
+}
+
+function openSidebar(){
+  document.getElementById('mobile-sidebar').classList.add('open');
+  document.getElementById('sidebar-overlay').classList.add('open');
+}
+function closeSidebar(){
+  document.getElementById('mobile-sidebar').classList.remove('open');
+  document.getElementById('sidebar-overlay').classList.remove('open');
 }
 
 async function logout(){
