@@ -54,12 +54,12 @@ async function login(){
     localStorage.removeItem('tch-remember-login');
   }
   
-  try {
-    await showDashboard();
-  } catch (err) {
-    console.error('Error loading dashboard:', err);
-    msgEl.innerHTML = `<div class="msg err">Erro ao carregar dashboard: ${err.message}</div>`;
-  }
+  // Chamar showDashboard quando ele estiver disponível
+  setTimeout(() => {
+    if (typeof showDashboard === 'function') {
+      showDashboard();
+    }
+  }, 100);
 }
 
 function openSidebar(){
@@ -1561,3 +1561,20 @@ async function runReport(start, end, label){
       <div class="stat-card"><span class="eyebrow">Faturação</span><div class="value">€ ${total.toFixed(0)}</div></div>
       <div class="stat-card"><span class="eyebrow">Marcações pagas</span><div class="value">${count}</div></div>
     </div>
+  `;
+}
+
+// Verificar sessão ao carregar a página
+if (sb) {
+  sb.auth.getSession().then(({ data: { session } }) => {
+    console.log('Session check on load:', session ? 'Active' : 'No session');
+    if (session) {
+      showDashboard();
+    }
+  }).catch(err => {
+    console.error('Error checking session:', err);
+  });
+}
+</script>
+</body>
+</html>
