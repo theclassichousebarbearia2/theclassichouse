@@ -455,9 +455,6 @@
           <label>Nome do plano (o que aparece na lista de assinantes)
             <input type="text" id="sub-plan-name" placeholder='ex: "Cabelo e Barba 2x ao mês"'>
           </label>
-          <label>Categoria
-            <select id="sub-category" onchange="filterSubServicesByCategory()"></select>
-          </label>
           <label>Serviço avulso que desconta desta assinatura
             <select id="sub-service"></select>
           </label>
@@ -714,12 +711,8 @@ async function showDashboard(){
   barberSelect.addEventListener('change', renderManualSlots);
   manualDateInput.addEventListener('change', renderManualSlots);
 
-  const subCategorySelect = document.getElementById('sub-category');
-  const uniqueCategories = [...new Set(services.map(s => s.category))];
-  subCategorySelect.innerHTML = uniqueCategories.map(cat => `<option value="${cat}">${cat}</option>`).join('');
-
   const subServiceSelect = document.getElementById('sub-service');
-  subServiceSelect.innerHTML = services.filter(s => s.category === uniqueCategories[0]).map(s => `<option value="${s.id}">${s.name.split('|')[0].trim()}</option>`).join('');
+  subServiceSelect.innerHTML = services.map(s => `<option value="${s.id}">${s.name.split('|')[0].trim()}</option>`).join('');
   document.getElementById('sub-start-date').value = toLocalDateStr(new Date());
   const in30 = new Date(); in30.setDate(in30.getDate()+30);
   document.getElementById('sub-end-date').value = toLocalDateStr(in30);
@@ -730,12 +723,6 @@ async function showDashboard(){
 }
 
 function euro(v){ return v === null || v === undefined ? 'a confirmar' : `€ ${Number(v).toFixed(0)}`; }
-
-function filterSubServicesByCategory(){
-  const category = document.getElementById('sub-category').value;
-  const subServiceSelect = document.getElementById('sub-service');
-  subServiceSelect.innerHTML = services.filter(s => s.category === category).map(s => `<option value="${s.id}">${s.name.split('|')[0].trim()}</option>`).join('');
-}
 
 const SERVICE_PICKER_COLORS = ['#5da8dd','#e0964a','#69c17e','#b26b8c','#8a6bb2','#c9a227','#4a9b8e'];
 function servicePickerCategoryColor(catName){
@@ -1421,12 +1408,23 @@ async function runReport(start, end, label){
   const areaEl = document.getElementById('report-area');
   areaEl.innerHTML = 'A calcular…';
 
-  const { data, error } = await sb.rpc('get_revenue_report', {
-    p_start: start.toISOString(),
-    p_end: end.toISOString(),
-  });
+  // Buscar os dados direto da BD, filtrados por barbeiro do utilizador logado
+  const user = await sb.auth.getUser();
+  const { data: userRole } = await sb.from('staff_roles').select('barber_id').eq('user_id', user.data.user.id).single();
+  
+  if(!userRole?.barber_id) {
+    areaEl.innerHTML = `<div class="msg err">A tua conta ainda não está associada a um barbeiro. Contacta o admin.</div>`;
+    return;
+  }
 
-  if (error) { areaEl.innerHTML = `<div class="msg err">Não tens permissão para ver relatórios financeiros, ou a tua conta ainda não está associada a um barbeiro.</div>`; console.error(error); return; }
+  const { data, error } = await sb
+    .from('payments')
+    .select('*, appointments(barber_id, clients(name), services(name))')
+    .gte('paid_at', start.toISOString())
+    .lte('paid_at', end.toISOString())
+    .or(`appointments.barber_id.eq.${userRole.barber_id},barber_id.eq.${userRole.barber_id}`);
+
+  if (error) { areaEl.innerHTML = `<div class="msg err">Erro ao carregar relatório. ${error.message}</div>`; console.error(error); return; }
 
   const total = (data||[]).reduce((sum, p) => sum + Number(p.amount_eur), 0);
   const count = (data||[]).length;
@@ -1635,8 +1633,7 @@ function showSubscriptionDetail(subscriptionId){
         <div style="display:flex; gap:8px; margin-top:20px; flex-wrap:wrap;">
           <button class="btn btn-primary btn-sm" onclick="editClientData('${sub.id}')">Editar cliente</button>
           <button class="btn btn-ghost btn-sm" onclick="renewSubscription('${sub.id}')">Renovar</button>
-          <button class="btn btn-ghost btn-sm" onclick="closeSubscriptionDetail(); startEditSubscriptionService('${sub.id}')">Editar serviço</button>
-          <button class="btn btn-danger btn-sm" onclick="closeSubscriptionDetail(); deleteSubscription('${sub.id}')">Apagar</button>
+          <button class="btn btn-ghost btn-sm" onclick="deleteSubscription('${sub.id}')">Apagar</button>
         </div>
       </div>
     `;
@@ -1677,6 +1674,7 @@ async function deleteSubscription(subscriptionId){
   loadSubscriptions();
 }
 
+
 async function editClientData(subscriptionId){
   const sub = subscriptionsData.find(s => s.id === subscriptionId);
   if(!sub) return;
@@ -1690,24 +1688,23 @@ async function editClientData(subscriptionId){
   if(error) { alert('Erro ao atualizar cliente.'); console.error(error); return; }
   
   alert('Dados do cliente atualizados!');
-  closeSubscriptionDetail();
   loadSubscriptions();
 }
 
 async function renewSubscription(subscriptionId){
-  const { data: sub } = await sb.from('subscriptions').select('*').eq('id', subscriptionId).single();
+  const sub = subscriptionsData.find(s => s.id === subscriptionId);
   if(!sub) return;
   
   const days = prompt('Quantos dias deseja renovar?', '30');
   if(!days) return;
   
-  const currentEnd = new Date(sub.end_date+'T00:00:00');
+  const currentEnd = new Date(sub.end_date);
   const newEnd = new Date(currentEnd.getTime() + parseInt(days) * 24 * 60 * 60 * 1000);
   const newServices = prompt('Quantos serviços incluir?', sub.total_services.toString());
   if(!newServices) return;
   
   const { error } = await sb.from('subscriptions').update({ 
-    end_date: toLocalDateStr(newEnd),
+    end_date: newEnd.toISOString().split('T')[0],
     total_services: parseInt(newServices)
   }).eq('id', subscriptionId);
   
@@ -1715,7 +1712,6 @@ async function renewSubscription(subscriptionId){
   alert(`Renovada até ${newEnd.toLocaleDateString('pt-PT')}!`);
   loadSubscriptions();
 }
-
 let categories = [];
 
 async function loadCategories(){
