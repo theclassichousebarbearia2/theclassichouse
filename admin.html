@@ -2117,8 +2117,10 @@ async function submitQuickPayment(){
   msgEl.innerHTML = '';
 
   try {
+    const user = await sb.auth.getUser();
     const { error } = await sb.from('payments').insert({
       appointment_id: null,
+      user_id: user.data.user.id,
       amount_eur: amount,
       method: 'dinheiro',
       paid_at: new Date().toISOString(),
