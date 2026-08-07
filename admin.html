@@ -91,93 +91,204 @@
 
   .cal-scroll{ overflow-x:hidden; overflow-y:auto; max-height:70vh; border:2px solid var(--brass-dim); background:var(--bg-alt); touch-action:pan-y; border-radius:3px; }
 
-  .service-picker-btn{
-    width:100%; text-align:left; padding:12px 14px; background:var(--bg-alt);
-    border:1px solid var(--brass-dim); color:var(--ink); font-size:0.95rem;
-    cursor:pointer; display:flex; justify-content:space-between; align-items:center;
-    border-radius:6px; transition:all .2s ease;
-  }
-  .service-picker-btn:hover{ border-color:var(--brass); background:rgba(184,134,11,.05); }
-  .service-picker-btn .chev{ color:var(--ink-muted); font-size:1.25rem; line-height:1; }
+  .service-picker-btn{ width:100%; text-align:left; padding:11px 13px; background:var(--bg-alt); border:1px solid var(--brass-dim); color:var(--ink); font-size:0.95rem; cursor:pointer; display:flex; justify-content:space-between; align-items:center; border-radius:3px; transition:all 0.2s; }
+  .service-picker-btn:hover{ border-color:var(--brass); background:rgba(184,134,11,0.05); }
+  .service-picker-btn .chev{ color:var(--ink-muted); }
+  .modal-overlay{ position:fixed; inset:0; background:rgba(42,31,21,0.55); z-index:200; display:flex; align-items:flex-end; justify-content:center; }
+  @media (min-width:760px){ .modal-overlay{ align-items:center; } }
+  .modal-sheet{ background:var(--bg); width:100%; max-width:520px; max-height:88vh; overflow-y:auto; border-top:2px solid var(--brass-dim); padding:20px; border-radius:3px; }
+  @media (min-width:760px){ .modal-sheet{ border:2px solid var(--brass-dim); } }
+  .modal-header{ display:flex; justify-content:space-between; align-items:center; margin-bottom:14px; }
+  .modal-header h3{ margin:0; font-size:1.1rem; font-family:'Fraunces',serif; color:var(--primary); }
+  .modal-close{ background:none; border:none; font-size:1.4rem; line-height:1; color:var(--ink-muted); cursor:pointer; padding:4px 8px; transition:color 0.2s; }
+  .modal-close:hover{ color:var(--primary); }
+  .service-search-input{ width:100%; box-sizing:border-box; margin-bottom:18px; border-radius:3px; }
+  .service-cat-title{ font-weight:600; font-size:1.02rem; margin:18px 0 10px; display:flex; align-items:center; gap:8px; font-family:'Fraunces',serif; color:var(--primary); }
+  .service-cat-title .count{ background:var(--bg-alt); color:var(--ink-muted); border-radius:50%; width:22px; height:22px; display:inline-flex; align-items:center; justify-content:center; font-size:0.72rem; }
+  .service-pick-card{ display:flex; gap:12px; padding:10px 0 10px 12px; border-left:3px solid var(--brass); cursor:pointer; margin-bottom:8px; border-radius:2px; transition:all 0.2s; }
+  .service-pick-card:hover{ background:var(--bg-alt); }
+  .service-pick-card.selected{ background:var(--bg-alt); border-left-width:4px; }
+  .service-pick-info{ flex:1; }
+  .service-pick-name{ font-size:0.98rem; color:var(--ink); font-weight:500; }
+  .service-pick-duration{ font-size:0.8rem; color:var(--ink-muted); margin-top:2px; }
+  .service-pick-price{ font-weight:600; color:var(--brass); white-space:nowrap; }
 
-  /* Seletor de serviços — estilo inspirado no layout mobile enviado */
-  .modal-overlay{
-    position:fixed; inset:0; background:rgba(0,0,0,.48); z-index:200;
-    display:flex; align-items:flex-end; justify-content:center;
-    padding:0;
-  }
-  .modal-overlay.hidden{ display:none; }
-  .modal-sheet{
-    background:var(--bg); width:100%; max-width:760px; height:min(88vh,760px);
-    max-height:92vh; overflow:hidden; border:0; border-radius:22px 22px 0 0;
-    padding:0; box-shadow:0 -8px 30px rgba(0,0,0,.18);
-    display:flex; flex-direction:column;
-  }
-  @media (min-width:760px){
-    .modal-overlay{ align-items:center; padding:24px; }
-    .modal-sheet{ height:min(82vh,760px); border:1px solid var(--brass-dim); border-radius:18px; }
-  }
+  .cal-grid{ display:grid; width:100%; }
+  .cal-header-row{ display:grid; grid-template-columns:44px repeat(var(--n-barbers,2), 1fr); border-bottom:2px solid var(--brass-dim); position:sticky; top:0; background:var(--bg-alt); z-index:2; }
+  .cal-corner{ border-right:2px solid var(--brass-dim); background:rgba(184,134,11,0.08); }
+  .cal-barber-header{ padding:10px 4px; text-align:center; font-weight:600; font-size:0.82rem; border-right:2px solid var(--brass-dim); font-family:'Fraunces',serif; }
+  .cal-barber-header:last-child{ border-right:none; }
+  .cal-barber-header.barber-bruno{ background:var(--bruno-bg); color:var(--bruno-ink); }
+  .cal-barber-header.barber-joao{ background:var(--joao-bg); color:var(--joao-ink); }
 
-  .modal-header{
-    display:flex; justify-content:space-between; align-items:center;
-    padding:22px 24px 14px; margin:0; flex-shrink:0;
-  }
-  .modal-header h3{
-    margin:0; font-size:1.35rem; font-family:'Fraunces',serif;
-    color:var(--primary); font-weight:700;
-  }
-  .modal-close{
-    background:none; border:0; font-size:2rem; line-height:1; color:var(--ink);
-    cursor:pointer; padding:0 2px; transition:transform .15s ease, color .2s ease;
-  }
-  .modal-close:hover{ color:var(--brass); transform:scale(1.05); }
+  .cal-body-row{ display:grid; grid-template-columns:44px repeat(var(--n-barbers,2), 1fr); position:relative; }
+  .cal-gutter{ position:relative; border-right:2px solid var(--brass-dim); background:rgba(184,134,11,0.04); }
+  .cal-gutter-label{ position:absolute; right:4px; transform:translateY(-50%); font-family:'Fraunces',serif; font-size:0.7rem; color:var(--brass); font-weight:600; }
 
-  .service-search-input{
-    width:calc(100% - 48px); box-sizing:border-box; margin:0 24px 18px;
-    padding:15px 16px 15px 48px; border:1px solid #d6d6d6; border-radius:14px;
-    background:var(--bg); color:var(--ink); font-size:1rem; outline:none;
-    box-shadow:0 1px 2px rgba(0,0,0,.03);
-    flex-shrink:0;
-    background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='24' height='24' viewBox='0 0 24 24' fill='none' stroke='%23666' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Ccircle cx='11' cy='11' r='7'/%3E%3Cpath d='m20 20-4-4'/%3E%3C/svg%3E");
-    background-repeat:no-repeat; background-position:16px center; background-size:22px;
+  .cal-column{
+    position:relative; border-right:2px solid var(--brass-dim); cursor:pointer;
+    background-image:linear-gradient(to bottom, 
+      transparent 0%, 
+      transparent calc(50% - 1px), 
+      rgba(184,134,11,0.15) calc(50% - 1px), 
+      rgba(184,134,11,0.15) 50%, 
+      transparent 50%, 
+      transparent 100%);
+    background-size: 100% var(--cal-slot-height, 60px);
+    background-position: 0 0;
+    background-repeat: repeat;
   }
-  .service-search-input:focus{ border-color:var(--brass); box-shadow:0 0 0 3px rgba(184,134,11,.10); }
+  .cal-column:last-child{ border-right:none; }
+  .cal-column.barber-bruno{ background-color:#eaf5fd; }
+  .cal-column.barber-joao{ background-color:#eef9f0; }
 
-  #service-picker-list,
-  #sub-service-picker-list{
-    overflow-y:auto; flex:1; padding:0 24px 26px;
-    -webkit-overflow-scrolling:touch;
-  }
-  #service-picker-list::-webkit-scrollbar,
-  #sub-service-picker-list::-webkit-scrollbar{ width:5px; }
-  #service-picker-list::-webkit-scrollbar-thumb,
-  #sub-service-picker-list::-webkit-scrollbar-thumb{ background:var(--brass-dim); border-radius:10px; }
-
-  .service-cat-title{
-    font-weight:700; font-size:1.12rem; margin:14px 0 10px; padding:0;
-    display:flex; align-items:center; gap:8px; font-family:'Fraunces',serif;
-    color:var(--primary); border:0;
-  }
-  .service-cat-title:first-child{ margin-top:2px; }
-  .service-cat-title .count{
-    background:#f1f1f1; color:#777; border-radius:50%; width:25px; height:25px;
-    display:inline-flex; align-items:center; justify-content:center;
-    font-size:.72rem; font-family:inherit; font-weight:600;
+  .cal-offshift{
+    position:absolute; left:0; right:0; z-index:1; pointer-events:none;
+    background:repeating-linear-gradient(45deg, rgba(61,40,23,0.12), rgba(61,40,23,0.12) 6px, rgba(61,40,23,0.05) 6px, rgba(61,40,23,0.05) 12px);
   }
 
-  .service-pick-card{
-    display:flex; align-items:center; gap:14px; width:100%; box-sizing:border-box;
-    padding:15px 2px 15px 14px; margin:0 0 2px; border:0;
-    border-left:5px solid var(--brass); border-radius:2px; background:transparent;
-    cursor:pointer; text-align:left; transition:background .15s ease, transform .1s ease;
+  .cal-appt{
+    position:absolute; left:3px; right:3px; overflow:hidden;
+    background:var(--brass); color:#fff; border-radius:3px; padding:4px 6px;
+    font-size:0.72rem; line-height:1.25; cursor:pointer; border:1px solid rgba(0,0,0,0.15);
+    border-left-width:4px; transition:all 0.2s; font-weight:500;
   }
-  .service-pick-card:hover{ background:rgba(184,134,11,.055); }
-  .service-pick-card:active{ transform:scale(.995); }
-  .service-pick-card.selected{ background:rgba(184,134,11,.09); border-left-width:5px; }
-  .service-pick-info{ flex:1; min-width:0; }
-  .service-pick-name{ font-size:1rem; line-height:1.35; color:var(--ink); font-weight:500; }
-  .service-pick-duration{ font-size:.86rem; color:var(--ink-muted); margin-top:5px; }
-  .service-pick-price{ font-weight:600; color:var(--ink); white-space:nowrap; font-size:1rem; padding-right:2px; }
+  .cal-appt:hover{ box-shadow:0 2px 8px rgba(0,0,0,0.15); transform:translateY(-1px); }
+  .cal-appt.barber-bruno{ background:var(--bruno-fill); color:var(--bruno-ink); border-color:var(--bruno-border); }
+  .cal-appt.barber-joao{ background:var(--joao-fill); color:var(--joao-ink); border-color:var(--joao-border); }
+  .cal-appt.neutral{ background:#D4BFA0; color:#3D2817; border-color:#B8A08C; }
+  .cal-appt.is-paid{ border-left-color:#3D5F2A; border-left-width:5px; }
+  .cal-appt strong{ display:block; font-size:0.76rem; }
+  .cal-appt .tag{ opacity:0.9; font-size:0.66rem; }
+
+  .appt-detail{ border:2px solid var(--brass-dim); background:var(--bg-alt); padding:16px 18px; margin-top:16px; border-radius:3px; }
+  .appt-detail .row{ display:flex; justify-content:space-between; padding:6px 0; font-size:0.9rem; border-bottom:1px dashed var(--brass-dim); }
+  .appt-detail .row:last-of-type{ border-bottom:none; }
+  .appt-detail .actions{ display:flex; gap:8px; margin-top:14px; flex-wrap:wrap; }
+
+  .range-buttons{ display:flex; gap:8px; margin-bottom:16px; flex-wrap:wrap; align-items:flex-end; }
+  .custom-range{ display:flex; gap:10px; align-items:flex-end; flex-wrap:wrap; margin-bottom:20px; padding:14px; border:2px solid var(--brass-dim); background:var(--bg-alt); border-radius:3px; }
+  .stat-grid{ display:grid; grid-template-columns:repeat(auto-fit,minmax(160px,1fr)); gap:14px; margin-bottom:26px; }
+  .stat-card{ border:2px solid var(--brass-dim); background:var(--bg-alt); padding:18px; border-radius:3px; }
+  .stat-card .eyebrow{ display:block; margin-bottom:8px; }
+  .stat-card .value{ font-family:'Fraunces',serif; font-size:2rem; color:var(--primary); font-weight:700; }
+
+  .client-row{ display:flex; align-items:center; gap:12px; padding:12px 0; border-bottom:1px dashed var(--brass-dim); transition:all 0.2s; }
+  .client-row:hover{ background:rgba(184,134,11,0.05); padding:12px 8px; border-radius:2px; margin:0 -8px; }
+  .client-avatar{ width:38px; height:38px; border-radius:50%; background:var(--bg-card); color:var(--brass); border:2px solid var(--brass-dim); display:flex; align-items:center; justify-content:center; font-family:'Fraunces',serif; font-weight:600; flex-shrink:0; }
+  .client-name{ font-weight:500; font-family:'Fraunces',serif; color:var(--primary); }
+  .client-meta{ color:var(--ink-muted); font-size:0.82rem; margin-top:2px; }
+  .client-visits{ margin-left:auto; color:var(--ink-muted); font-size:0.82rem; white-space:nowrap; text-align:right; }
+
+  .msg{ font-size:0.85rem; padding:10px 12px; border-radius:3px; margin:10px 0; border-left:4px solid; }
+  .msg.err{ background:rgba(168,64,47,0.1); color:var(--err); border-left-color:var(--err); }
+  .msg.ok{ background:rgba(91,140,90,0.1); color:var(--ok); border-left-color:var(--ok); }
+  .hidden{ display:none !important; }
+  .manual-form{ border:2px solid var(--brass-dim); background:var(--bg-alt); padding:18px; margin-bottom:20px; border-radius:3px; }
+
+  .shift-row{ display:grid; grid-template-columns:90px 1fr 1fr auto; gap:8px; align-items:center; padding:8px 0; border-bottom:1px dashed var(--brass-dim); }
+  .shift-row:last-child{ border-bottom:none; }
+  .shift-row input[type=time]{ width:100%; }
+  .shift-day-label{ font-size:0.85rem; color:var(--ink-muted); font-weight:500; }
+
+  .manual-slots{ display:grid; grid-template-columns:repeat(auto-fill, minmax(84px,1fr)); gap:8px; margin-top:14px; }
+  .manual-slot-btn{
+    padding:10px 6px; text-align:center; font-family:'Fraunces',serif;
+    background:var(--bg); border:2px solid var(--brass-dim); color:var(--ink);
+    border-radius:3px; cursor:pointer; font-size:0.9rem; font-weight:500; transition:all 0.2s;
+  }
+  .manual-slot-btn:hover{ border-color:var(--brass); background:rgba(184,134,11,0.05); }
+  .manual-slot-btn.selected{ background:var(--primary); border-color:var(--primary); color:var(--bg); }
+
+  .form-grid{ display:grid; gap:12px; grid-template-columns:1fr 1fr; }
+  @media (max-width:600px){ .form-grid{ grid-template-columns:1fr; } }
+
+  .floating-action-menu{ position:fixed; bottom:30px; right:30px; z-index:100; }
+  .fab-main{
+    width:60px; height:60px; border-radius:50%; background:var(--brass); color:white;
+    border:none; cursor:pointer; font-size:2rem; display:flex; align-items:center; justify-content:center;
+    box-shadow:0 4px 12px rgba(0,0,0,0.2); transition:all 0.3s; font-weight:700;
+  }
+  .fab-main:hover{ transform:scale(1.1); box-shadow:0 6px 16px rgba(0,0,0,0.3); }
+  .fab-menu{
+    position:absolute; bottom:80px; right:0; background:white; border-radius:12px;
+    box-shadow:0 4px 16px rgba(0,0,0,0.15); overflow:hidden; min-width:200px;
+  }
+  .fab-menu.hidden{ display:none; }
+  .fab-item{
+    width:100%; padding:16px 14px; border:none; background:none; cursor:pointer;
+    display:flex; align-items:center; gap:12px; text-align:left; transition:all 0.2s;
+    border-bottom:1px solid var(--brass-dim);
+  }
+  .fab-item:last-child{ border-bottom:none; }
+  .fab-item:hover{ background:rgba(184,134,11,0.08); }
+  .fab-icon{ font-size:1.3rem; }
+  .fab-label{ font-size:0.95rem; color:var(--ink); font-weight:500; }
+
+  .keypad-grid{
+    display:grid; grid-template-columns:repeat(3, 1fr); gap:12px;
+    max-width:300px; margin:0 auto;
+  }
+  .keypad-btn{
+    padding:18px; background:white; border:2px solid var(--brass-dim);
+    border-radius:8px; font-size:1.4rem; font-weight:600; color:var(--ink);
+    cursor:pointer; transition:all 0.2s;
+  }
+  .keypad-btn:hover{ border-color:var(--brass); background:rgba(184,134,11,0.05); transform:scale(1.05); }
+  .keypad-btn:active{ transform:scale(0.95); }
+  .keypad-delete{ color:var(--err); border-color:var(--err); }
+
+  .client-pick-item{
+    display:flex; gap:12px; padding:14px 12px; border-bottom:1px solid var(--brass-dim);
+    cursor:pointer; align-items:center; transition:all 0.2s;
+  }
+  .client-pick-item:hover{ background:rgba(184,134,11,0.05); }
+  .client-pick-avatar{ width:40px; height:40px; border-radius:50%; background:rgba(184,134,11,0.15);
+    display:flex; align-items:center; justify-content:center; color:var(--brass); font-weight:600; flex-shrink:0; }
+  .client-pick-info{ flex:1; }
+  .client-pick-name{ font-weight:500; color:var(--ink); }
+  .client-pick-phone{ font-size:0.8rem; color:var(--ink-muted); margin-top:2px; }
+
+  .subscription-row{
+    display:flex; align-items:center; justify-content:space-between; padding:12px 0;
+    border-bottom:1px dashed var(--brass-dim); cursor:pointer; transition:all 0.2s;
+  }
+  .subscription-row:hover{ background:rgba(184,134,11,0.05); padding:12px 8px; margin:0 -8px; border-radius:2px; }
+  .subscription-name{ font-weight:500; font-family:'Fraunces',serif; color:var(--primary); }
+  .subscription-status{ font-size:0.75rem; font-weight:600; margin-top:2px; }
+  .subscription-usage{ font-weight:600; color:var(--brass); font-family:'Fraunces',serif; white-space:nowrap; }
+
+.service-picker-btn {
+  background: var(--bg); border: 2px solid var(--brass-dim); border-radius: 3px;
+  padding: 8px 12px; font-size: 0.9rem; cursor: pointer;
+  display: flex; justify-content: space-between; align-items: center; width: 100%;
+  transition: all 0.2s ease;
+}
+.service-picker-btn:hover { border-color: var(--primary); background: var(--bg-hover); }
+.service-picker-btn .chev { margin-left: 8px; font-size: 1.2rem; }
+
+.service-search-input {
+  width: 100%; padding: 10px 14px; border: none; border-bottom: 2px solid var(--brass-dim);
+  font-size: 0.95rem;
+}
+.service-search-input:focus { outline: none; border-color: var(--primary); }
+
+.service-cat-title {
+  padding: 12px 14px; font-weight: 600; color: var(--primary); font-family: 'Fraunces', serif;
+  border-top: 1px dashed var(--brass-dim);
+}
+.service-cat-title .count { font-size: 0.8rem; color: var(--ink-muted); font-weight: normal; }
+
+.service-pick-card {
+  display: flex; justify-content: space-between; align-items: center; width: 100%;
+  padding: 10px 14px; border: none; background: transparent; cursor: pointer;
+  transition: all 0.2s ease;
+}
+.service-pick-card:hover { background: var(--bg-hover); }
+.service-pick-info { flex: 1; }
+.service-pick-name { font-size: 0.95rem; font-weight: 500; color: var(--ink); }
+.service-pick-duration { font-size: 0.8rem; color: var(--ink-muted); }
+.service-pick-price { font-weight: 600; color: var(--primary); font-family: 'IBM Plex Mono', monospace; }
 
 </style>
 </head>
@@ -326,10 +437,10 @@
     <div class="modal-overlay hidden" id="sub-service-picker-modal">
       <div class="modal-sheet">
         <div class="modal-header">
-          <h3>Selecionar serviço</h3>
+          <h3>Selecionar Serviço</h3>
           <button class="modal-close" onclick="closeSubServicePicker()">×</button>
         </div>
-        <input type="text" id="sub-service-picker-search" class="service-search-input" placeholder="Pesquisar por nome de serviço" oninput="renderSubServicePickerList(this.value)">
+        <input type="text" id="sub-service-picker-search" class="service-search-input" placeholder="Pesquisar serviço..." oninput="renderSubServicePickerList(this.value)">
         <div id="sub-service-picker-list"></div>
       </div>
     </div>
@@ -709,7 +820,6 @@ function openServicePicker(){
   searchEl.value = '';
   searchEl.oninput = (e) => renderServicePickerList(e.target.value);
   renderServicePickerList('');
-  requestAnimationFrame(() => searchEl.focus());
 }
 function closeServicePicker(){
   document.getElementById('service-picker-modal').classList.add('hidden');
@@ -731,7 +841,7 @@ function renderServicePickerList(query){
         <div class="service-pick-card ${s.id===currentId?'selected':''}" style="border-left-color:${color};" onclick="selectServiceFromPicker('${s.id}')">
           <div class="service-pick-info">
             <div class="service-pick-name">${s.name.split('|')[0].trim()}</div>
-            <div class="service-pick-duration">${s.duration_minutes || 0}min</div>
+            <div class="service-pick-duration">${s.duration_minutes}min</div>
           </div>
           <div class="service-pick-price">${euro(s.price_eur)}</div>
         </div>
@@ -2036,10 +2146,7 @@ function openSubServicePicker(){
   if(!modal) return;
   
   modal.classList.remove('hidden');
-  const searchEl = document.getElementById('sub-service-picker-search');
-  searchEl.value = '';
   renderSubServicePickerList('');
-  requestAnimationFrame(() => searchEl.focus());
 }
 
 function closeSubServicePicker(){
@@ -2048,53 +2155,39 @@ function closeSubServicePicker(){
 
 function renderSubServicePickerList(query){
   const listEl = document.getElementById('sub-service-picker-list');
-  const q = String(query || '').trim().toLowerCase();
-  const currentId = document.getElementById('sub-service').value;
+  const q = query.trim().toLowerCase();
   
-  const filtered = services.filter(s =>
-    !q ||
-    String(s.name || '').toLowerCase().includes(q) ||
-    String(s.category || '').toLowerCase().includes(q)
-  );
+  let filtered = services;
+  if(q.length > 0){
+    filtered = services.filter(s => s.name.toLowerCase().includes(q) || (s.category && s.category.toLowerCase().includes(q)));
+  }
 
   const byCat = {};
   filtered.forEach(s => {
-    const cat = s.category || 'Outros';
-    if(!byCat[cat]) byCat[cat] = [];
-    byCat[cat].push(s);
+    if(!byCat[s.category]) byCat[s.category] = [];
+    byCat[s.category].push(s);
   });
 
-  const catNames = Object.keys(byCat);
-  if(!catNames.length){
-    listEl.innerHTML = '<p style="color:var(--ink-muted); padding:12px 0;">Nenhum serviço encontrado.</p>';
-    return;
-  }
-
-  listEl.innerHTML = catNames.map(cat => `
-    <div class="service-cat-title">${cat} <span class="count">${byCat[cat].length}</span></div>
-    ${byCat[cat].map(s => `
-      <button type="button" class="service-pick-card ${s.id === currentId ? 'selected' : ''}"
-        style="border-left-color:${servicePickerCategoryColor(cat)};"
-        onclick="selectSubServiceFromPicker('${s.id}')">
+  listEl.innerHTML = Object.entries(byCat).map(([cat, items]) => `
+    <div class="service-cat-title">${cat} <span class="count">${items.length}</span></div>
+    ${items.map(s => `
+      <button type="button" class="service-pick-card" onclick="selectSubServiceFromPicker('${s.id}', '${(s.name || '').replace(/'/g, "\'")}', ${s.price_eur || 0})">
         <div class="service-pick-info">
           <div class="service-pick-name">${s.name?.split('|')[0].trim() || ''}</div>
-          <div class="service-pick-duration">${s.duration_minutes || 0}min</div>
+          <div class="service-pick-duration">${s.duration_minutes} min</div>
         </div>
-        <div class="service-pick-price">${euro(s.price_eur)}</div>
+        <div class="service-pick-price">€ ${Number(s.price_eur || 0).toFixed(0)}</div>
       </button>
     `).join('')}
   `).join('');
 }
 
-function selectSubServiceFromPicker(serviceId){
-  const service = services.find(s => s.id === serviceId);
-  if(!service) return;
+function selectSubServiceFromPicker(serviceId, serviceName, price){
   document.getElementById('sub-service').value = serviceId;
-  const btnLabel = `${service.name?.split('|')[0].trim() || 'Serviço'} (${euro(service.price_eur)})`;
+  const btnLabel = `${serviceName} (€${Number(price).toFixed(0)})`;
   document.getElementById('sub-service-btn-label').textContent = btnLabel;
   closeSubServicePicker();
 }
-
 
 </script>
 </body>
