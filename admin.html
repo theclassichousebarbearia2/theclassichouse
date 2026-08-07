@@ -434,18 +434,6 @@
       <div id="calendar-area">A carregar…</div>
       <div id="appt-detail-area"></div>
     
-    <div class="modal-overlay hidden" id="sub-service-picker-modal">
-      <div class="modal-sheet">
-        <div class="modal-header">
-          <h3>Selecionar Serviço</h3>
-          <button class="modal-close" onclick="closeSubServicePicker()">×</button>
-        </div>
-        <input type="text" id="sub-service-picker-search" class="service-search-input" placeholder="Pesquisar serviço..." oninput="renderSubServicePickerList(this.value)">
-        <div id="sub-service-picker-list"></div>
-      </div>
-    </div>
-</section>
-
     <div class="modal-overlay hidden" id="service-picker-modal">
       <div class="modal-sheet">
         <div class="modal-header">
@@ -456,6 +444,7 @@
         <div id="service-picker-list"></div>
       </div>
     </div>
+</section>
 
     <section id="tab-relatorios" class="hidden">
       <div class="range-buttons">
@@ -529,6 +518,17 @@
         <button class="btn btn-primary" onclick="submitSubscription()">Adicionar assinatura</button>
       </div>
       <div id="subscriptions-list">A carregar…</div>
+    
+    <div class="modal-overlay hidden" id="sub-service-picker-modal">
+      <div class="modal-sheet">
+        <div class="modal-header">
+          <h3>Selecionar Serviço</h3>
+          <button class="modal-close" onclick="closeSubServicePicker()">×</button>
+        </div>
+        <input type="text" id="sub-service-picker-search" class="service-search-input" placeholder="Pesquisar serviço..." oninput="renderSubServicePickerList(this.value)">
+        <div id="sub-service-picker-list"></div>
+      </div>
+    </div>
     </section>
 
     <section id="tab-catalogo" class="hidden">
