@@ -639,7 +639,7 @@ if(sb) {
           loginView.classList.add('hidden');
           dashboardView.classList.remove('hidden');
           document.getElementById('logout-btn')?.classList.remove('hidden');
-          loadInitialData();
+          showDashboard();
         }
       }, 300);
     } else {
@@ -732,34 +732,6 @@ if (sb) {
       document.getElementById('reset-password-view').classList.remove('hidden');
     }
   });
-}
-
-async function loadInitialData(){
-  try {
-    const [svcRes, barRes, hrsRes, catRes, shiftsRes, subRes] = await Promise.all([
-      sb.from('services').select('*').eq('active', true).order('category').order('sort_order'),
-      sb.from('barbers').select('*').eq('active', true),
-      sb.from('business_hours').select('*'),
-      sb.from('categories').select('*').order('sort_order'),
-      sb.from('barber_shifts').select('*'),
-      sb.from('subscriptions').select('*'),
-    ]);
-    
-    if(!svcRes.error) services = svcRes.data;
-    if(!barRes.error) barbers = barRes.data;
-    if(!hrsRes.error) hours = hrsRes.data;
-    if(!catRes.error) categories = catRes.data;
-    if(!shiftsRes.error) barberShifts = shiftsRes.data;
-    if(!subRes.error) subscriptionsData = subRes.data;
-    
-    loadServices();
-    loadBarbers();
-    loadCategories();
-    loadSubscriptions();
-    loadAgendaDatePicker();
-  } catch(err) {
-    console.error('Erro ao carregar dados iniciais:', err);
-  }
 }
 
 async function showDashboard(){
@@ -2137,21 +2109,9 @@ function openQuickSale(){
 
 
 function openSubServicePicker(){
-  console.log('openSubServicePicker chamada. Services:', services.length);
-  
   const modal = document.getElementById('sub-service-picker-modal');
-  if(!modal) {
-    console.error('Modal não encontrado!');
-    return;
-  }
+  if(!modal) return;
   
-  if(!services || services.length === 0) {
-    console.warn('Sem serviços carregados');
-    alert('A carregar serviços... Tenta novamente em alguns segundos.');
-    return;
-  }
-  
-  console.log('Abrindo modal com', services.length, 'serviços');
   modal.classList.remove('hidden');
   renderSubServicePickerList('');
 }
