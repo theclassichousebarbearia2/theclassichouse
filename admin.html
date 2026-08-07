@@ -2137,12 +2137,22 @@ function openQuickSale(){
 
 
 function openSubServicePicker(){
-  // Se services estiver vazio, carrega primeiro
-  if(!services || services.length === 0) {
-    alert('A carregar serviços... Tenta novamente.');
+  console.log('openSubServicePicker chamada. Services:', services.length);
+  
+  const modal = document.getElementById('sub-service-picker-modal');
+  if(!modal) {
+    console.error('Modal não encontrado!');
     return;
   }
-  document.getElementById('sub-service-picker-modal').classList.remove('hidden');
+  
+  if(!services || services.length === 0) {
+    console.warn('Sem serviços carregados');
+    alert('A carregar serviços... Tenta novamente em alguns segundos.');
+    return;
+  }
+  
+  console.log('Abrindo modal com', services.length, 'serviços');
+  modal.classList.remove('hidden');
   renderSubServicePickerList('');
 }
 
