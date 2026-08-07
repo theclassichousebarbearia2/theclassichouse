@@ -127,8 +127,16 @@
 
   .cal-column{
     position:relative; border-right:2px solid var(--brass-dim); cursor:pointer;
-    background-size: 100% 60px;
-    background-image:repeating-linear-gradient(to bottom, transparent 0, transparent calc(50% - 1px), rgba(184,134,11,0.15) calc(50% - 1px), rgba(184,134,11,0.15) 50%, transparent 50%, transparent 100%);
+    background-image:linear-gradient(to bottom, 
+      transparent 0%, 
+      transparent calc(50% - 1px), 
+      rgba(184,134,11,0.15) calc(50% - 1px), 
+      rgba(184,134,11,0.15) 50%, 
+      transparent 50%, 
+      transparent 100%);
+    background-size: 100% var(--cal-slot-height, 60px);
+    background-position: 0 0;
+    background-repeat: repeat;
   }
   .cal-column:last-child{ border-right:none; }
   .cal-column.barber-bruno{ background-color:#eaf5fd; }
@@ -1086,7 +1094,7 @@ function buildCalendarSkeleton(dateStr){
         if (shiftEndMin < totalMinutes) offShiftHtml += `<div class="cal-offshift" style="top:${shiftEndMin*pxPerMin}px; height:${(totalMinutes-shiftEndMin)*pxPerMin}px;"></div>`;
       }
     }
-    return `<div class="cal-column ${barberColorClass(b.name)}" data-barber-id="${b.id}" style="height:${totalHeight}px;">${offShiftHtml}</div>`;
+    return `<div class="cal-column ${barberColorClass(b.name)}" data-barber-id="${b.id}" style="height:${totalHeight}px; --cal-slot-height: ${30 * pxPerMin}px;">${offShiftHtml}</div>`;
   }).join('');
 
   return `
