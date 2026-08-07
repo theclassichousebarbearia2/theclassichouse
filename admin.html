@@ -1485,47 +1485,74 @@ async function runReport(start, end, label){
   areaEl.innerHTML = 'A calcular…';
 
   const user = await sb.auth.getUser();
+  
+  // Buscar TODOS os pagamentos do utilizador (com ou sem user_id, se associado a uma marcação do utilizador)
   const { data, error } = await sb
     .from('payments')
-    .select('*, appointments(clients(name), services(name))')
-    .eq('user_id', user.data.user.id)
+    .select(`
+      id, amount_eur, paid_at, user_id, appointment_id,
+      appointments!inner(
+        id, barber_id, client_id,
+        barbers(id, name),
+        clients(id, name),
+        services(id, name, duration_minutes)
+      )
+    `)
     .gte('paid_at', start.toISOString())
     .lte('paid_at', end.toISOString())
     .order('paid_at', { ascending: false });
 
-  if (error) { areaEl.innerHTML = `<div class="msg err">Erro ao carregar relatório: ${error.message}</div>`; console.error(error); return; }
+  if (error) { 
+    // Se a query com inner join falhar, tenta outra abordagem
+    const { data: allPayments, error: err2 } = await sb
+      .from('payments')
+      .select('*')
+      .eq('user_id', user.data.user.id)
+      .gte('paid_at', start.toISOString())
+      .lte('paid_at', end.toISOString())
+      .order('paid_at', { ascending: false });
+    
+    if(err2) { 
+      areaEl.innerHTML = `<div class="msg err">Erro ao carregar relatório: ${err2.message}</div>`; 
+      console.error(err2); 
+      return; 
+    }
+    
+    renderReportData(allPayments, label, areaEl);
+    return;
+  }
 
+  renderReportData(data, label, areaEl);
+}
+
+function renderReportData(data, label, areaEl){
   const total = (data||[]).reduce((sum, p) => sum + Number(p.amount_eur), 0);
   const count = (data||[]).length;
-  const byBarber = {};
-  (data||[]).forEach(p => {
-    const name = p.barber_name || 'Sem barbeiro';
-    byBarber[name] = (byBarber[name] || 0) + Number(p.amount_eur);
-  });
 
   areaEl.innerHTML = `
     <div class="eyebrow" style="margin-bottom:14px; display:block;">${label}</div>
     <div class="stat-grid">
-      <div class="stat-card"><span class="eyebrow">Faturação</span><div class="value">€ ${total.toFixed(0)}</div></div>
-      <div class="stat-card"><span class="eyebrow">Marcações pagas</span><div class="value">${count}</div></div>
+      <div class="stat-card"><span class="eyebrow">Faturação Total</span><div class="value">€ ${total.toFixed(0)}</div></div>
+      <div class="stat-card"><span class="eyebrow">Total de Pagamentos</span><div class="value">${count}</div></div>
     </div>
-    <div class="eyebrow" style="margin-bottom:10px; display:block;">Por barbeiro</div>
-    ${Object.entries(byBarber).map(([name, val]) => `
-      <div style="display:flex; justify-content:space-between; padding:8px 0; border-bottom:1px dashed var(--brass-dim);">
-        <span>${name}</span><span class="mono">€ ${val.toFixed(0)}</span>
-      </div>
-    `).join('') || '<p style="color:var(--ink-muted);">Sem pagamentos neste período.</p>'}
 
     <div class="eyebrow" style="margin:22px 0 10px; display:block;">Pagamentos</div>
-    ${(data||[]).map(p => `
-      <div class="client-row">
-        <div style="flex:1;">
-          <div class="client-name">${p.client_name || 'Cliente'} · ${p.service_name?.split('|')[0].trim() || ''}</div>
-          <div class="client-meta">${p.barber_name || ''} · ${new Date(p.paid_at).toLocaleDateString('pt-PT')} às ${new Date(p.paid_at).toLocaleTimeString('pt-PT', {hour:'2-digit', minute:'2-digit'})} · <span class="mono">€ ${Number(p.amount_eur).toFixed(0)}</span></div>
+    ${(data||[]).map(p => {
+      const apt = p.appointments;
+      const barberName = apt?.barbers?.name || 'Venda rápida';
+      const clientName = apt?.clients?.name || '—';
+      const serviceName = apt?.services?.name?.split('|')[0].trim() || '—';
+      
+      return `
+        <div class="client-row">
+          <div style="flex:1;">
+            <div class="client-name">${clientName} · ${serviceName}</div>
+            <div class="client-meta">${barberName} · ${new Date(p.paid_at).toLocaleDateString('pt-PT')} às ${new Date(p.paid_at).toLocaleTimeString('pt-PT', {hour:'2-digit', minute:'2-digit'})} · <span class="mono">€ ${Number(p.amount_eur).toFixed(0)}</span></div>
+          </div>
+          <button class="btn btn-ghost btn-sm" onclick="cancelPayment('${p.id}')">Cancelar</button>
         </div>
-        <button class="btn btn-ghost btn-sm" onclick="cancelPayment('${p.id}')">Cancelar pagamento</button>
-      </div>
-    `).join('') || '<p style="color:var(--ink-muted);">Sem pagamentos neste período.</p>'}
+      `;
+    }).join('') || '<p style="color:var(--ink-muted);">Sem pagamentos neste período.</p>'}
   `;
 }
 
