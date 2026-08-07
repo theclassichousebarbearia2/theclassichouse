@@ -15,78 +15,6 @@
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Fraunces:wght@600;700&family=IBM+Plex+Mono:wght@400;500&family=IBM+Plex+Sans:wght@400;500&display=swap" rel="stylesheet">
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-<script>
-// Definir funções no início para estarem disponíveis para onclick handlers
-const SUPABASE_URL = "https://kjhaphbaoxwxyankdkmk.supabase.co";
-const SUPABASE_ANON_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImtqaGFwaGJhb3h3eHlhbmtka21rIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODQxOTI2ODIsImV4cCI6MjA5OTc2ODY4Mn0.IIHToQLp68HRHf7uOUblWd0YtiLRnLmsE35RVU-Cq14";
-const sb = window.supabase ? window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY) : null;
-
-async function login(){
-  const msgEl = document.getElementById('login-msg');
-  msgEl.innerHTML = '';
-  if (!sb) {
-    msgEl.innerHTML = `<div class="msg err">Não consegui carregar a biblioteca do Supabase. Verifica a ligação à internet ou bloqueadores de anúncios.</div>`;
-    return;
-  }
-  const email = document.getElementById('login-email').value.trim();
-  const password = document.getElementById('login-password').value;
-  const rememberMe = document.getElementById('login-remember').checked;
-  
-  if (!email || !password) {
-    msgEl.innerHTML = `<div class="msg err">Preenche o email e a palavra-passe.</div>`;
-    return;
-  }
-  
-  msgEl.innerHTML = '<div class="msg ok">A entrar...</div>';
-  
-  const { data, error } = await sb.auth.signInWithPassword({ email, password });
-  if (error) { 
-    console.error('Login error:', error);
-    msgEl.innerHTML = `<div class="msg err">Email ou palavra-passe incorretos.</div>`; 
-    return; 
-  }
-  
-  console.log('Login successful:', data);
-  
-  if (rememberMe) {
-    localStorage.setItem('tch-remember-login', 'true');
-  } else {
-    localStorage.removeItem('tch-remember-login');
-  }
-  
-  // Mostrar dashboard e carregar dados
-  document.getElementById('login-view').classList.add('hidden');
-  document.getElementById('dashboard-view').classList.remove('hidden');
-  document.getElementById('logout-btn').classList.remove('hidden');
-  
-  // Chamar showDashboard quando ele estiver disponível
-  setTimeout(() => {
-    if (typeof showDashboard === 'function') {
-      showDashboard().catch(err => {
-        console.error('Dashboard loading error:', err);
-      });
-    }
-  }, 100);
-}
-
-function openSidebar(){
-  document.getElementById('mobile-sidebar').classList.add('open');
-  document.getElementById('sidebar-overlay').classList.add('open');
-}
-
-function closeSidebar(){
-  document.getElementById('mobile-sidebar').classList.remove('open');
-  document.getElementById('sidebar-overlay').classList.remove('open');
-}
-
-async function logout(){
-  await sb.auth.signOut();
-  closeSidebar();
-  document.getElementById('login-view').classList.remove('hidden');
-  document.getElementById('dashboard-view').classList.add('hidden');
-  document.getElementById('logout-btn').classList.add('hidden');
-}
-</script>
 <style>
   :root{
     --bg:#F5EFE0; --bg-alt:#EDE3D0; --bg-card:#E5D9BE;
@@ -175,15 +103,15 @@ async function logout(){
   .modal-close{ background:none; border:none; font-size:1.4rem; line-height:1; color:var(--ink-muted); cursor:pointer; padding:4px 8px; transition:color 0.2s; }
   .modal-close:hover{ color:var(--primary); }
   .service-search-input{ width:100%; box-sizing:border-box; margin-bottom:18px; border-radius:3px; }
-  .service-cat-title{ font-weight:600; font-size:1.02rem; margin:18px 0 10px; display:flex; align-items:center; gap:8px; font-family:'Fraunces',serif; color:var(--primary); }
-  .service-cat-title .count{ background:var(--bg-alt); color:var(--ink-muted); border-radius:50%; width:22px; height:22px; display:inline-flex; align-items:center; justify-content:center; font-size:0.72rem; }
-  .service-pick-card{ display:flex; gap:12px; padding:10px 0 10px 12px; border-left:3px solid var(--brass); cursor:pointer; margin-bottom:8px; border-radius:2px; transition:all 0.2s; }
-  .service-pick-card:hover{ background:var(--bg-alt); }
-  .service-pick-card.selected{ background:var(--bg-alt); border-left-width:4px; }
-  .service-pick-info{ flex:1; }
-  .service-pick-name{ font-size:0.98rem; color:var(--ink); font-weight:500; }
-  .service-pick-duration{ font-size:0.8rem; color:var(--ink-muted); margin-top:2px; }
-  .service-pick-price{ font-weight:600; color:var(--brass); white-space:nowrap; }
+  .service-cat-title{ font-weight:700; font-size:1.1rem; margin:24px 0 12px; display:flex; align-items:center; gap:10px; font-family:'Fraunces',serif; color:var(--ink); letter-spacing:-0.3px; }
+  .service-cat-title .count{ background:var(--bg-alt); color:var(--ink-muted); border-radius:4px; padding:2px 8px; font-size:0.8rem; font-weight:500; }
+  .service-pick-card{ display:flex; gap:16px; padding:14px 16px; border-left:4px solid var(--brass); cursor:pointer; margin-bottom:10px; border-radius:4px; transition:all 0.2s; background:var(--bg); align-items:stretch; }
+  .service-pick-card:hover{ background:var(--bg-alt); transform:translateX(2px); }
+  .service-pick-card.selected{ background:var(--bg-alt); border-left-width:5px; }
+  .service-pick-info{ flex:1; display:flex; flex-direction:column; justify-content:space-between; }
+  .service-pick-name{ font-weight:600; font-size:1rem; color:var(--ink); margin-bottom:4px; }
+  .service-pick-duration{ font-size:0.85rem; color:var(--ink-muted); }
+  .service-pick-price{ font-weight:700; font-size:1.05rem; color:var(--ink); white-space:nowrap; align-self:center; }
 
   .cal-grid{ display:grid; width:100%; }
   .cal-header-row{ display:grid; grid-template-columns:44px repeat(var(--n-barbers,2), 1fr); border-bottom:2px solid var(--brass-dim); position:sticky; top:0; background:var(--bg-alt); z-index:2; }
@@ -199,8 +127,16 @@ async function logout(){
 
   .cal-column{
     position:relative; border-right:2px solid var(--brass-dim); cursor:pointer;
-    background-size: 100% 60px;
-    background-image:repeating-linear-gradient(to bottom, transparent 0, transparent calc(50% - 1px), rgba(184,134,11,0.15) calc(50% - 1px), rgba(184,134,11,0.15) 50%, transparent 50%, transparent 100%);
+    background-image:linear-gradient(to bottom, 
+      transparent 0%, 
+      transparent calc(50% - 1px), 
+      rgba(184,134,11,0.15) calc(50% - 1px), 
+      rgba(184,134,11,0.15) 50%, 
+      transparent 50%, 
+      transparent 100%);
+    background-size: 100% var(--cal-slot-height, 60px);
+    background-position: 0 0;
+    background-repeat: repeat;
   }
   .cal-column:last-child{ border-right:none; }
   .cal-column.barber-bruno{ background-color:#eaf5fd; }
@@ -323,34 +259,30 @@ async function logout(){
   .subscription-usage{ font-weight:600; color:var(--brass); font-family:'Fraunces',serif; white-space:nowrap; }
 
 .service-picker-btn {
-  background: var(--bg);
-  border: 2px solid var(--brass-dim);
-  border-radius: 3px;
-  padding: 8px 12px;
-  font-size: 0.9rem;
-  cursor: pointer;
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  width: 100%;
+  background: var(--bg); border: 2px solid var(--brass-dim); border-radius: 3px;
+  padding: 8px 12px; font-size: 0.9rem; cursor: pointer;
+  display: flex; justify-content: space-between; align-items: center; width: 100%;
   transition: all 0.2s ease;
 }
 .service-picker-btn:hover { border-color: var(--primary); background: var(--bg-hover); }
 .service-picker-btn .chev { margin-left: 8px; font-size: 1.2rem; }
 
-#sub-service-picker-modal { display: none; position: fixed; top: 0; left: 0; right: 0; bottom: 0; background: rgba(0,0,0,0.5); z-index: 9999; }
-#sub-service-picker-modal.hidden { display: none; }
-#sub-service-picker-modal:not(.hidden) { display: flex; align-items: flex-end; }
-
-.service-search-input { padding: 10px 14px; border: none; border-bottom: 2px solid var(--brass-dim); font-size: 0.95rem; }
+.service-search-input {
+  width: 100%; padding: 10px 14px; border: none; border-bottom: 2px solid var(--brass-dim);
+  font-size: 0.95rem;
+}
 .service-search-input:focus { outline: none; border-color: var(--primary); }
 
-.service-cat-title { padding: 12px 14px; font-weight: 600; color: var(--primary); font-family: 'Fraunces', serif; border-top: 1px dashed var(--brass-dim); }
+.service-cat-title {
+  padding: 12px 14px; font-weight: 600; color: var(--primary); font-family: 'Fraunces', serif;
+  border-top: 1px dashed var(--brass-dim);
+}
 .service-cat-title .count { font-size: 0.8rem; color: var(--ink-muted); font-weight: normal; }
 
 .service-pick-card {
-  display: flex; justify-content: space-between; align-items: center; width: 100%; padding: 10px 14px;
-  border: none; background: transparent; cursor: pointer; text-align: left; transition: all 0.2s ease;
+  display: flex; justify-content: space-between; align-items: center; width: 100%;
+  padding: 10px 14px; border: none; background: transparent; cursor: pointer;
+  transition: all 0.2s ease;
 }
 .service-pick-card:hover { background: var(--bg-hover); }
 .service-pick-info { flex: 1; }
@@ -392,10 +324,6 @@ async function logout(){
     </label>
     <label>Palavra-passe
       <input type="password" id="login-password">
-    </label>
-    <label style="display:flex; align-items:center; margin-bottom:14px;">
-      <input type="checkbox" id="login-remember" style="width:auto; margin:0 8px 0 0;">
-      <span style="font-size:0.85rem;">Manter sessão iniciada</span>
     </label>
     <div id="login-msg"></div>
     <button class="btn btn-primary" style="width:100%;" onclick="login()">Entrar</button>
@@ -505,7 +433,18 @@ async function logout(){
 
       <div id="calendar-area">A carregar…</div>
       <div id="appt-detail-area"></div>
-    </section>
+    
+    <div class="modal-overlay hidden" id="sub-service-picker-modal">
+      <div class="modal-sheet">
+        <div class="modal-header">
+          <h3>Selecionar Serviço</h3>
+          <button class="modal-close" onclick="closeSubServicePicker()">×</button>
+        </div>
+        <input type="text" id="sub-service-picker-search" class="service-search-input" placeholder="Pesquisar serviço..." oninput="renderSubServicePickerList(this.value)">
+        <div id="sub-service-picker-list"></div>
+      </div>
+    </div>
+</section>
 
     <div class="modal-overlay hidden" id="service-picker-modal">
       <div class="modal-sheet">
@@ -692,6 +631,38 @@ async function logout(){
 </div>
 
 <script>
+const SUPABASE_URL = "https://kjhaphbaoxwxyankdkmk.supabase.co";
+const SUPABASE_ANON_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImtqaGFwaGJhb3h3eHlhbmtka21rIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODQxOTI2ODIsImV4cCI6MjA5OTc2ODY4Mn0.IIHToQLp68HRHf7uOUblWd0YtiLRnLmsE35RVU-Cq14";
+const sb = window.supabase ? window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY) : null;
+
+// Persistência de sessão - verifica se já está logado ao carregar página
+if(sb) {
+  sb.auth.onAuthStateChange((event, session) => {
+    if(session) {
+      // Utilizador está logado - mostra o dashboard
+      setTimeout(() => {
+        const loginView = document.getElementById('login-view');
+        const dashboardView = document.getElementById('dashboard-view');
+        if(loginView && dashboardView) {
+          loginView.classList.add('hidden');
+          dashboardView.classList.remove('hidden');
+          document.getElementById('logout-btn')?.classList.remove('hidden');
+          showDashboard();
+        }
+      }, 300);
+    } else {
+      // Utilizador fez logout - mostra login
+      const loginView = document.getElementById('login-view');
+      const dashboardView = document.getElementById('dashboard-view');
+      if(loginView && dashboardView) {
+        loginView.classList.remove('hidden');
+        dashboardView.classList.add('hidden');
+        document.getElementById('logout-btn')?.classList.add('hidden');
+      }
+    }
+  });
+}
+
 const CAL_START_HOUR = 8;
 const CAL_END_HOUR = 20;
 let calZoom = 1;
@@ -701,6 +672,37 @@ let manualSelectedSlot = null; // { start: Date, end: Date }
 let editSelectedSlot = null;   // { start: Date, end: Date } — usado ao editar uma marcação existente
 let currentAgendaDateStr = null;
 let touchStartX = null;
+
+function openSidebar(){
+  document.getElementById('mobile-sidebar').classList.add('open');
+  document.getElementById('sidebar-overlay').classList.add('open');
+}
+function closeSidebar(){
+  document.getElementById('mobile-sidebar').classList.remove('open');
+  document.getElementById('sidebar-overlay').classList.remove('open');
+}
+
+async function login(){
+  const msgEl = document.getElementById('login-msg');
+  msgEl.innerHTML = '';
+  if (!sb) {
+    msgEl.innerHTML = `<div class="msg err">Não consegui carregar a biblioteca do Supabase. Verifica a ligação à internet ou bloqueadores de anúncios.</div>`;
+    return;
+  }
+  const email = document.getElementById('login-email').value.trim();
+  const password = document.getElementById('login-password').value;
+  const { error } = await sb.auth.signInWithPassword({ email, password });
+  if (error) { msgEl.innerHTML = `<div class="msg err">Email ou palavra-passe incorretos.</div>`; return; }
+  showDashboard();
+}
+
+async function logout(){
+  await sb.auth.signOut();
+  closeSidebar();
+  document.getElementById('login-view').classList.remove('hidden');
+  document.getElementById('dashboard-view').classList.add('hidden');
+  document.getElementById('logout-btn').classList.add('hidden');
+}
 
 function toggleForgotPassword(){
   document.getElementById('forgot-password-panel').classList.toggle('hidden');
@@ -793,12 +795,8 @@ async function showDashboard(){
   barberSelect.addEventListener('change', renderManualSlots);
   manualDateInput.addEventListener('change', renderManualSlots);
 
-  const subCategorySelect = document.getElementById('sub-category');
-  const uniqueCategories = [...new Set(services.map(s => s.category))];
-  subCategorySelect.innerHTML = uniqueCategories.map(cat => `<option value="${cat}">${cat}</option>`).join('');
-
   const subServiceSelect = document.getElementById('sub-service');
-  subServiceSelect.innerHTML = services.filter(s => s.category === uniqueCategories[0]).map(s => `<option value="${s.id}">${s.name.split('|')[0].trim()}</option>`).join('');
+  subServiceSelect.innerHTML = services.map(s => `<option value="${s.id}">${s.name.split('|')[0].trim()}</option>`).join('');
   document.getElementById('sub-start-date').value = toLocalDateStr(new Date());
   const in30 = new Date(); in30.setDate(in30.getDate()+30);
   document.getElementById('sub-end-date').value = toLocalDateStr(in30);
@@ -809,60 +807,6 @@ async function showDashboard(){
 }
 
 function euro(v){ return v === null || v === undefined ? 'a confirmar' : `€ ${Number(v).toFixed(0)}`; }
-
-function filterSubServicesByCategory(){
-  const category = document.getElementById('sub-category').value;
-  const subServiceSelect = document.getElementById('sub-service');
-  subServiceSelect.innerHTML = services.filter(s => s.category === category).map(s => `<option value="${s.id}">${s.name.split('|')[0].trim()}</option>`).join('');
-}
-
-function openSubServicePicker(){
-  document.getElementById('sub-service-picker-modal').classList.remove('hidden');
-  const searchEl = document.getElementById('sub-service-picker-search');
-  searchEl.value = '';
-  searchEl.oninput = (e) => renderSubServicePickerList(e.target.value);
-  renderSubServicePickerList('');
-}
-
-function closeSubServicePicker(){
-  document.getElementById('sub-service-picker-modal').classList.add('hidden');
-}
-
-function renderSubServicePickerList(query){
-  const listEl = document.getElementById('sub-service-picker-list');
-  const q = query.trim().toLowerCase();
-  
-  let filtered = services;
-  if(q.length > 0){
-    filtered = services.filter(s => s.name.toLowerCase().includes(q) || (s.category && s.category.toLowerCase().includes(q)));
-  }
-
-  const byCat = {};
-  filtered.forEach(s => {
-    if(!byCat[s.category]) byCat[s.category] = [];
-    byCat[s.category].push(s);
-  });
-
-  listEl.innerHTML = Object.entries(byCat).map(([cat, items]) => `
-    <div class="service-cat-title">${cat} <span class="count">${items.length}</span></div>
-    ${items.map(s => `
-      <button type="button" class="service-pick-card" onclick="selectSubServiceFromPicker('${s.id}', '${(s.name || '').replace(/'/g, "\\'")}', ${s.price_eur || 0})">
-        <div class="service-pick-info">
-          <div class="service-pick-name">${s.name?.split('|')[0].trim() || ''}</div>
-          <div class="service-pick-duration">${s.duration_minutes} min</div>
-        </div>
-        <div class="service-pick-price">€ ${Number(s.price_eur || 0).toFixed(0)}</div>
-      </button>
-    `).join('')}
-  `).join('');
-}
-
-function selectSubServiceFromPicker(serviceId, serviceName, price){
-  document.getElementById('sub-service').value = serviceId;
-  const btnLabel = `${serviceName} (€${Number(price).toFixed(0)})`;
-  document.getElementById('sub-service-btn-label').textContent = btnLabel;
-  closeSubServicePicker();
-}
 
 const SERVICE_PICKER_COLORS = ['#5da8dd','#e0964a','#69c17e','#b26b8c','#8a6bb2','#c9a227','#4a9b8e'];
 function servicePickerCategoryColor(catName){
@@ -887,7 +831,7 @@ function renderServicePickerList(query){
   const byCategory = {};
   services.filter(s => !q || s.name.toLowerCase().includes(q)).forEach(s => { (byCategory[s.category] ||= []).push(s); });
   const catNames = Object.keys(byCategory);
-  if (catNames.length === 0) { listEl.innerHTML = '<p style="color:var(--ink-muted);">Nenhum serviço encontrado.</p>'; return; }
+  if (catNames.length === 0) { listEl.innerHTML = '<p style="color:var(--ink-muted); text-align:center; padding:20px;">Nenhum serviço encontrado.</p>'; return; }
   listEl.innerHTML = catNames.map(cat => {
     const list = byCategory[cat];
     const color = servicePickerCategoryColor(cat);
@@ -1150,7 +1094,7 @@ function buildCalendarSkeleton(dateStr){
         if (shiftEndMin < totalMinutes) offShiftHtml += `<div class="cal-offshift" style="top:${shiftEndMin*pxPerMin}px; height:${(totalMinutes-shiftEndMin)*pxPerMin}px;"></div>`;
       }
     }
-    return `<div class="cal-column ${barberColorClass(b.name)}" data-barber-id="${b.id}" style="height:${totalHeight}px;">${offShiftHtml}</div>`;
+    return `<div class="cal-column ${barberColorClass(b.name)}" data-barber-id="${b.id}" style="height:${totalHeight}px; --cal-slot-height: ${30 * pxPerMin}px;">${offShiftHtml}</div>`;
   }).join('');
 
   return `
@@ -1549,39 +1493,710 @@ async function runReport(start, end, label){
   areaEl.innerHTML = 'A calcular…';
 
   const user = await sb.auth.getUser();
+  if (!user?.data?.user?.id) {
+    areaEl.innerHTML = '<div class="msg err">Sessão inválida. Faz login novamente.</div>';
+    return;
+  }
+
+  // Pagamentos rápidos têm appointment_id = null, por isso a relação com
+  // appointments deve ser opcional (sem !inner).
   const { data, error } = await sb
     .from('payments')
-    .select('*, appointments(clients(name), services(name))')
+    .select(`
+      id, amount_eur, paid_at, user_id, appointment_id, method,
+      appointments(
+        id, barber_id, client_id,
+        barbers(id, name),
+        clients(id, name),
+        services(id, name, duration_minutes)
+      )
+    `)
     .eq('user_id', user.data.user.id)
     .gte('paid_at', start.toISOString())
     .lte('paid_at', end.toISOString())
     .order('paid_at', { ascending: false });
 
-  if (error) { areaEl.innerHTML = `<div class="msg err">Erro ao carregar relatório. ${error.message}</div>`; console.error(error); return; }
+  if (error) {
+    areaEl.innerHTML = `<div class="msg err">Erro ao carregar relatório: ${error.message}</div>`;
+    console.error(error);
+    return;
+  }
 
+  renderReportData(data || [], label, areaEl);
+}
+
+function renderReportData(data, label, areaEl){
   const total = (data||[]).reduce((sum, p) => sum + Number(p.amount_eur), 0);
   const count = (data||[]).length;
 
   areaEl.innerHTML = `
     <div class="eyebrow" style="margin-bottom:14px; display:block;">${label}</div>
     <div class="stat-grid">
-      <div class="stat-card"><span class="eyebrow">Faturação</span><div class="value">€ ${total.toFixed(0)}</div></div>
-      <div class="stat-card"><span class="eyebrow">Marcações pagas</span><div class="value">${count}</div></div>
+      <div class="stat-card"><span class="eyebrow">Faturação Total</span><div class="value">€ ${total.toFixed(0)}</div></div>
+      <div class="stat-card"><span class="eyebrow">Total de Pagamentos</span><div class="value">${count}</div></div>
     </div>
+
+    <div class="eyebrow" style="margin:22px 0 10px; display:block;">Pagamentos</div>
+    ${(data||[]).map(p => {
+      const apt = Array.isArray(p.appointments) ? p.appointments[0] : p.appointments;
+      const isQuickPayment = !p.appointment_id;
+      const barberName = apt?.barbers?.name || (isQuickPayment ? 'Pagamento rápido' : 'Venda rápida');
+      const clientName = apt?.clients?.name || (isQuickPayment ? 'Pagamento rápido' : '—');
+      const serviceName = apt?.services?.name?.split('|')[0].trim() || (isQuickPayment ? 'Pagamento em dinheiro' : '—');
+      
+      return `
+        <div class="client-row">
+          <div style="flex:1;">
+            <div class="client-name">${clientName} · ${serviceName}</div>
+            <div class="client-meta">${barberName} · ${new Date(p.paid_at).toLocaleDateString('pt-PT')} às ${new Date(p.paid_at).toLocaleTimeString('pt-PT', {hour:'2-digit', minute:'2-digit'})} · <span class="mono">€ ${Number(p.amount_eur).toFixed(0)}</span></div>
+          </div>
+          <button class="btn btn-ghost btn-sm" onclick="cancelPayment('${p.id}')">Cancelar</button>
+        </div>
+      `;
+    }).join('') || '<p style="color:var(--ink-muted);">Sem pagamentos neste período.</p>'}
   `;
 }
 
-// Verificar sessão ao carregar a página
-if (sb) {
-  sb.auth.getSession().then(({ data: { session } }) => {
-    console.log('Session check on load:', session ? 'Active' : 'No session');
-    if (session) {
-      showDashboard();
+async function cancelPayment(paymentId){
+  if (!confirm('Cancelar este pagamento? Esta ação não pode ser desfeita.')) return;
+  const { error } = await sb.from('payments').delete().eq('id', paymentId);
+  if (error) { alert('Erro ao cancelar o pagamento.'); console.error(error); return; }
+  if (currentReportRange) runReport(currentReportRange.start, currentReportRange.end, currentReportRange.label);
+}
+
+function toggleClientForm(){ document.getElementById('client-form').classList.toggle('hidden'); }
+
+async function submitNewClient(){
+  const name = document.getElementById('new-client-name').value.trim();
+  const phone = normalizePhone(document.getElementById('new-client-phone').value.trim());
+  const email = document.getElementById('new-client-email').value.trim();
+  const msgEl = document.getElementById('new-client-msg');
+  msgEl.innerHTML = '';
+
+  if (!name || !phone) { msgEl.innerHTML = '<div class="msg err">Preenche o nome e o telemóvel.</div>'; return; }
+
+  const { error } = await sb.from('clients').insert({ name, phone, email: email || null });
+  if (error) { msgEl.innerHTML = '<div class="msg err">Erro ao adicionar. O telemóvel já pode estar registado.</div>'; console.error(error); return; }
+
+  document.getElementById('new-client-name').value = '';
+  document.getElementById('new-client-phone').value = '';
+  document.getElementById('new-client-email').value = '';
+  toggleClientForm();
+  loadClients();
+}
+
+async function removeClient(clientId){
+  if (!confirm('Remover este cliente? O histórico de marcações mantém-se, mas deixa de estar ligado a um nome.')) return;
+  const { error } = await sb.from('clients').delete().eq('id', clientId);
+  if (error) { alert('Erro ao remover o cliente.'); console.error(error); return; }
+  loadClients();
+}
+
+async function loadClients(){
+  const listEl = document.getElementById('clients-list');
+  listEl.innerHTML = 'A carregar…';
+  const { data: clients, error } = await sb.from('clients').select('*').order('name');
+  if (error) { listEl.innerHTML = `<div class="msg err">Erro a carregar clientes.</div>`; console.error(error); return; }
+
+  const { data: appts } = await sb.from('appointments').select('client_id').neq('status','cancelled');
+  const visitCounts = {};
+  (appts||[]).forEach(a => { visitCounts[a.client_id] = (visitCounts[a.client_id]||0) + 1; });
+
+  if (!clients || clients.length === 0) { listEl.innerHTML = '<p style="color:var(--ink-muted);">Ainda não há clientes registados.</p>'; return; }
+
+  listEl.innerHTML = clients.map(c => `
+    <div class="client-row">
+      <div class="client-avatar">${(c.name||'?').charAt(0).toUpperCase()}</div>
+      <div style="flex:1;">
+        <div class="client-name">${c.name}</div>
+        <div class="client-meta">${c.phone}${c.email ? ' · ' + c.email : ''}</div>
+      </div>
+      <div class="client-visits">${visitCounts[c.id] || 0} marcações</div>
+      <button class="btn btn-danger btn-sm" onclick="removeClient('${c.id}')">Remover</button>
+    </div>
+  `).join('');
+}
+
+function toggleSubForm(){ document.getElementById('sub-form').classList.toggle('hidden'); }
+
+async function submitSubscription(){
+  const name = document.getElementById('sub-client-name').value.trim();
+  const phone = normalizePhone(document.getElementById('sub-client-phone').value.trim());
+  const planName = document.getElementById('sub-plan-name').value.trim();
+  const serviceId = document.getElementById('sub-service').value;
+  const totalServices = parseInt(document.getElementById('sub-total-services').value, 10) || 1;
+  const startDate = document.getElementById('sub-start-date').value;
+  const endDate = document.getElementById('sub-end-date').value;
+  const msgEl = document.getElementById('sub-msg');
+  msgEl.innerHTML = '';
+
+  if (!name || !phone || !startDate || !endDate) {
+    msgEl.innerHTML = '<div class="msg err">Preenche nome, telemóvel e as datas.</div>';
+    return;
+  }
+
+  try {
+    let { data: existing } = await sb.from('clients').select('id').eq('phone', phone).maybeSingle();
+    let clientId = existing?.id;
+    if (!clientId) {
+      const { data: created, error } = await sb.from('clients').insert({ name, phone }).select('id').single();
+      if (error) throw error;
+      clientId = created.id;
     }
-  }).catch(err => {
-    console.error('Error checking session:', err);
+    const { error: subErr } = await sb.from('subscriptions').insert({
+      client_id: clientId, service_id: serviceId, plan_name: planName || null, start_date: startDate, end_date: endDate, total_services: totalServices,
+    });
+    if (subErr) throw subErr;
+
+    document.getElementById('sub-client-name').value = '';
+    document.getElementById('sub-plan-name').value = '';
+    document.getElementById('sub-client-phone').value = '';
+    toggleSubForm();
+    loadSubscriptions();
+  } catch (err) {
+    console.error(err);
+    msgEl.innerHTML = '<div class="msg err">Erro ao adicionar a assinatura. Confirma se já correste a migration_03_advanced.sql no Supabase.</div>';
+  }
+}
+
+let editingSubscriptionId = null;
+
+let subscriptionsData = [];
+
+async function loadSubscriptions(){
+  const listEl = document.getElementById('subscriptions-list');
+  listEl.innerHTML = 'A carregar…';
+  const { data, error } = await sb
+    .from('subscriptions')
+    .select('*, clients(name,phone), services(name)')
+    .order('end_date', { ascending: true });
+
+  if (error) {
+    listEl.innerHTML = `<div class="msg err">Não consegui carregar assinantes. Confirma se já correste a migration_03_advanced.sql no Supabase.</div>`;
+    console.error(error);
+    return;
+  }
+  if (!data || data.length === 0) { listEl.innerHTML = '<p style="color:var(--ink-muted);">Ainda não há assinantes registados.</p>'; return; }
+
+  subscriptionsData = data;
+
+  const { data: usageRows } = await sb.from('appointments').select('subscription_id').neq('status','cancelled').not('subscription_id','is',null);
+  const usageCounts = {};
+  (usageRows||[]).forEach(r => { usageCounts[r.subscription_id] = (usageCounts[r.subscription_id]||0) + 1; });
+
+  const today = toLocalDateStr(new Date());
+  listEl.innerHTML = data.map(s => {
+    const isActive = s.end_date >= today;
+    const used = usageCounts[s.id] || 0;
+    return `
+      <div class="subscription-row" onclick="showSubscriptionDetail('${s.id}')">
+        <div style="flex:1;">
+          <div class="subscription-name">${s.clients?.name || ''}</div>
+          <div class="subscription-status" style="color:${isActive ? 'var(--ok)' : 'var(--err)'};">${isActive ? '✓ Ativo' : '✗ Expirado'}</div>
+        </div>
+        <div class="subscription-usage">${used}/${s.total_services}</div>
+      </div>
+    `;
+  }).join('');
+}
+
+function showSubscriptionDetail(subscriptionId){
+  const sub = subscriptionsData.find(s => s.id === subscriptionId);
+  if(!sub) return;
+  
+  const usageRows = sb.from('appointments').select('subscription_id').eq('subscription_id', subscriptionId).neq('status','cancelled');
+  usageRows.then(({ data }) => {
+    const used = (data || []).length;
+    const today = toLocalDateStr(new Date());
+    const isActive = sub.end_date >= today;
+    
+    document.getElementById('subscription-detail-content').innerHTML = `
+      <div style="padding:20px; line-height:1.8;">
+        <div style="margin-bottom:20px;">
+          <div class="eyebrow">Cliente</div>
+          <div style="font-size:1.1rem; font-family:'Fraunces',serif; color:var(--primary); font-weight:600;">${sub.clients?.name || '—'}</div>
+        </div>
+        
+        <div class="appt-detail">
+          <div class="row"><span>Telemóvel:</span><span>${sub.clients?.phone || '—'}</span></div>
+          <div class="row"><span>Plano:</span><span>${sub.plan_name || sub.services?.name || '—'}</span></div>
+          <div class="row"><span>Serviço:</span><span>${sub.services?.name?.split('|')[0].trim() || '—'}</span></div>
+          <div class="row"><span>Usados:</span><span>${used} de ${sub.total_services}</span></div>
+          <div class="row"><span>Validade:</span><span>${new Date(sub.end_date+'T00:00:00').toLocaleDateString('pt-PT')}</span></div>
+          <div class="row"><span>Código:</span><span style="font-weight:600; font-family:'IBM Plex Mono',monospace;">${sub.access_code}</span></div>
+          <div class="row"><span>Status:</span><span style="color:${isActive ? 'var(--ok)' : 'var(--err)'}; font-weight:600;">${isActive ? '✓ Ativo' : '✗ Expirado'}</span></div>
+        </div>
+      </div>
+    `;
+    
+    document.getElementById('subscription-detail-modal').classList.remove('hidden');
   });
 }
+
+function closeSubscriptionDetail(){
+  document.getElementById('subscription-detail-modal').classList.add('hidden');
+}
+
+function startEditSubscriptionService(subscriptionId){
+  editingSubscriptionId = subscriptionId;
+  loadSubscriptions();
+}
+
+function cancelEditSubscriptionService(){
+  editingSubscriptionId = null;
+  loadSubscriptions();
+}
+
+async function saveSubscriptionService(subscriptionId){
+  const select = document.getElementById(`edit-sub-service-${subscriptionId}`);
+  const planNameInput = document.getElementById(`edit-sub-planname-${subscriptionId}`);
+  const newServiceId = select.value;
+  const newPlanName = planNameInput.value.trim();
+  const { error } = await sb.from('subscriptions').update({ service_id: newServiceId, plan_name: newPlanName || null }).eq('id', subscriptionId);
+  if (error) { alert('Erro ao atualizar a assinatura.'); console.error(error); return; }
+  editingSubscriptionId = null;
+  loadSubscriptions();
+}
+
+async function deleteSubscription(subscriptionId){
+  if (!confirm('Apagar esta assinatura? Esta ação não pode ser desfeita.')) return;
+  const { error } = await sb.from('subscriptions').delete().eq('id', subscriptionId);
+  if (error) { alert('Erro ao apagar a assinatura.'); console.error(error); return; }
+  loadSubscriptions();
+}
+
+let categories = [];
+
+async function loadCategories(){
+  const { data, error } = await sb.from('categories').select('*').order('sort_order');
+  if (error) { console.error(error); return; }
+  categories = data || [];
+}
+
+function renderCategoriesList(){
+  const listEl = document.getElementById('categories-list');
+  if (categories.length === 0) { listEl.innerHTML = '<p style="color:var(--ink-muted);">Sem categorias ainda. Corre a migration_04_categories.sql no Supabase.</p>'; return; }
+
+  listEl.innerHTML = categories.map((c, i) => `
+    <div class="client-row" style="align-items:center;">
+      <div style="display:flex; flex-direction:column; gap:2px; margin-right:6px;">
+        <button class="btn btn-ghost btn-sm" style="padding:2px 8px;" title="Mover para cima"
+          ${i === 0 ? 'disabled' : ''} onclick="moveCategory('${c.name}','up')">▲</button>
+        <button class="btn btn-ghost btn-sm" style="padding:2px 8px;" title="Mover para baixo"
+          ${i === categories.length - 1 ? 'disabled' : ''} onclick="moveCategory('${c.name}','down')">▼</button>
+      </div>
+      <div class="client-name" style="flex:1; ${c.active ? '' : 'opacity:0.5; text-decoration:line-through;'}">${c.name}</div>
+      <button class="btn btn-ghost btn-sm" onclick="renameCategory('${c.name}')">Renomear</button>
+      <button class="btn btn-ghost btn-sm" onclick="toggleCategoryActive('${c.name}', ${c.active})">${c.active ? 'Esconder do cliente' : 'Mostrar ao cliente'}</button>
+    </div>
+  `).join('');
+
+  const svcCatSelect = document.getElementById('new-service-category');
+  if (svcCatSelect) {
+    svcCatSelect.innerHTML = categories.map(c => `<option value="${c.name}">${c.name}</option>`).join('');
+  }
+}
+
+async function submitNewCategory(){
+  const nameInput = document.getElementById('new-category-name');
+  const name = nameInput.value.trim();
+  const msgEl = document.getElementById('category-msg');
+  msgEl.innerHTML = '';
+  if (!name) { msgEl.innerHTML = '<div class="msg err">Escreve o nome da categoria.</div>'; return; }
+
+  const nextOrder = categories.length ? Math.max(...categories.map(c => c.sort_order)) + 1 : 0;
+  const { error } = await sb.from('categories').insert({ name, sort_order: nextOrder });
+  if (error) { msgEl.innerHTML = '<div class="msg err">Erro ao adicionar. Talvez já exista uma categoria com este nome.</div>'; console.error(error); return; }
+
+  nameInput.value = '';
+  await loadCategories();
+  renderCategoriesList();
+}
+
+async function renameCategory(oldName){
+  const newName = prompt('Novo nome para esta categoria:', oldName);
+  if (!newName || newName.trim() === '' || newName.trim() === oldName) return;
+  const trimmed = newName.trim();
+
+  const { error: catErr } = await sb.from('categories').update({ name: trimmed }).eq('name', oldName);
+  if (catErr) { alert('Erro ao renomear a categoria.'); console.error(catErr); return; }
+
+  const { error: svcErr } = await sb.from('services').update({ category: trimmed }).eq('category', oldName);
+  if (svcErr) { alert('A categoria foi renomeada, mas houve um erro a atualizar os serviços.'); console.error(svcErr); }
+
+  await loadCategories();
+  renderCategoriesList();
+  loadCatalog();
+}
+
+async function toggleCategoryActive(name, currentlyActive){
+  const { error } = await sb.from('categories').update({ active: !currentlyActive }).eq('name', name);
+  if (error) { alert('Erro ao atualizar a categoria.'); console.error(error); return; }
+  await loadCategories();
+  renderCategoriesList();
+}
+
+async function moveCategory(name, direction){
+  const idx = categories.findIndex(c => c.name === name);
+  const swapIdx = direction === 'up' ? idx - 1 : idx + 1;
+  if (swapIdx < 0 || swapIdx >= categories.length) return;
+
+  [categories[idx], categories[swapIdx]] = [categories[swapIdx], categories[idx]];
+  const updates = categories.map((c, i) => sb.from('categories').update({ sort_order: i }).eq('name', c.name));
+  const results = await Promise.all(updates);
+  const failed = results.find(r => r.error);
+  if (failed) { alert('Erro ao reordenar.'); console.error(failed.error); return; }
+
+  await loadCategories();
+  renderCategoriesList();
+}
+
+async function updateServiceCategory(serviceId, newCategory){
+  const { error } = await sb.from('services').update({ category: newCategory }).eq('id', serviceId);
+  if (error) { alert('Erro ao mudar a categoria do serviço.'); console.error(error); return; }
+  loadCatalog();
+}
+
+function toggleServiceForm(){ document.getElementById('service-form').classList.toggle('hidden'); }
+
+async function submitNewService(){
+  const name = document.getElementById('new-service-name').value.trim();
+  const category = document.getElementById('new-service-category').value;
+  const duration = parseInt(document.getElementById('new-service-duration').value, 10) || 30;
+  const priceRaw = document.getElementById('new-service-price').value;
+  const price = priceRaw === '' ? null : parseFloat(priceRaw);
+  const msgEl = document.getElementById('new-service-msg');
+  msgEl.innerHTML = '';
+
+  if (!name) { msgEl.innerHTML = '<div class="msg err">Escreve o nome do serviço.</div>'; return; }
+  if (!category) { msgEl.innerHTML = '<div class="msg err">Cria pelo menos uma categoria primeiro.</div>'; return; }
+
+  const { error } = await sb.from('services').insert({
+    name, category, duration_minutes: duration, price_eur: price, active: true, sort_order: 99,
+  });
+  if (error) { msgEl.innerHTML = '<div class="msg err">Erro ao adicionar o serviço.</div>'; console.error(error); return; }
+
+  document.getElementById('new-service-name').value = '';
+  document.getElementById('new-service-price').value = '';
+  toggleServiceForm();
+  const { data: refreshed } = await sb.from('services').select('*').order('category').order('sort_order');
+  services = refreshed || services;
+  loadCatalog();
+}
+
+async function loadCatalog(){
+  const listEl = document.getElementById('catalog-list');
+  listEl.innerHTML = 'A carregar…';
+
+  await loadCategories();
+  renderCategoriesList();
+
+  const { data, error } = await sb.from('services').select('*').order('category').order('sort_order');
+  if (error) { listEl.innerHTML = `<div class="msg err">Erro a carregar o catálogo.</div>`; console.error(error); return; }
+
+  services = data || [];
+  const byCategory = {};
+  services.forEach(s => { (byCategory[s.category] ||= []).push(s); });
+
+  const orderedCatNames = categories.length
+    ? [...categories.map(c => c.name), ...Object.keys(byCategory).filter(c => !categories.some(cat => cat.name === c))]
+    : Object.keys(byCategory).sort();
+
+  const categoryOptionsHtml = categories.map(c => `<option value="${c.name}">${c.name}</option>`).join('');
+
+  listEl.innerHTML = orderedCatNames.filter(cat => byCategory[cat]).map(cat => {
+    const list = byCategory[cat];
+    const catMeta = categories.find(c => c.name === cat);
+    const hiddenNote = catMeta && !catMeta.active ? ' <span style="color:var(--err); font-size:0.72rem;">(escondida do cliente)</span>' : '';
+    return `
+    <div class="eyebrow" style="display:block; margin:18px 0 8px;">${cat}${hiddenNote}</div>
+    ${list.map((s, i) => `
+      <div class="client-row" style="align-items:center;">
+        <div style="display:flex; flex-direction:column; gap:2px; margin-right:6px;">
+          <button class="btn btn-ghost btn-sm" style="padding:2px 8px;" title="Mover para cima"
+            ${i === 0 ? 'disabled' : ''} onclick="moveService('${s.id}','${cat}','up')">▲</button>
+          <button class="btn btn-ghost btn-sm" style="padding:2px 8px;" title="Mover para baixo"
+            ${i === list.length - 1 ? 'disabled' : ''} onclick="moveService('${s.id}','${cat}','down')">▼</button>
+        </div>
+        <div style="flex:1;">
+          <div class="client-name" style="${s.active ? '' : 'opacity:0.5; text-decoration:line-through;'}">${s.name.split('|')[0].trim()}</div>
+          <div class="client-meta">${s.duration_minutes} min</div>
+        </div>
+        <select style="width:150px;" onchange="updateServiceCategory('${s.id}', this.value)">
+          ${categoryOptionsHtml.replace(`value="${cat}"`, `value="${cat}" selected`)}
+        </select>
+        <input type="number" value="${s.price_eur ?? ''}" placeholder="a confirmar" step="0.5" min="0"
+          style="width:90px;" onchange="updateServicePrice('${s.id}', this.value)">
+        <button class="btn btn-ghost btn-sm" onclick="toggleServiceActive('${s.id}', ${s.active})">${s.active ? 'Desativar' : 'Ativar'}</button>
+      </div>
+    `).join('')}
+  `;
+  }).join('');
+}
+
+async function moveService(serviceId, category, direction){
+  const list = services.filter(s => s.category === category).sort((a,b) => a.sort_order - b.sort_order);
+  const idx = list.findIndex(s => s.id === serviceId);
+  const swapIdx = direction === 'up' ? idx - 1 : idx + 1;
+  if (swapIdx < 0 || swapIdx >= list.length) return;
+
+  [list[idx], list[swapIdx]] = [list[swapIdx], list[idx]];
+
+  const updates = list.map((s, i) => sb.from('services').update({ sort_order: i }).eq('id', s.id));
+  const results = await Promise.all(updates);
+  const failed = results.find(r => r.error);
+  if (failed) { alert('Erro ao reordenar o serviço.'); console.error(failed.error); return; }
+
+  loadCatalog();
+}
+
+async function updateServicePrice(serviceId, value){
+  const price = value === '' ? null : parseFloat(value);
+  const { error } = await sb.from('services').update({ price_eur: price }).eq('id', serviceId);
+  if (error) { alert('Erro ao atualizar o preço.'); console.error(error); }
+}
+
+async function toggleServiceActive(serviceId, currentlyActive){
+  const { error } = await sb.from('services').update({ active: !currentlyActive }).eq('id', serviceId);
+  if (error) { alert('Erro ao atualizar o serviço.'); console.error(error); return; }
+  loadCatalog();
+}
+
+async function loadMarketingAudienceCount(){
+  const countEl = document.getElementById('mkt-audience-count');
+  const { count, error } = await sb.from('clients').select('id', { count: 'exact', head: true }).not('email', 'is', null);
+  if (error) { countEl.textContent = ''; return; }
+  countEl.textContent = `Vai ser enviado a ${count || 0} cliente(s) com email registado.`;
+}
+
+async function sendMarketingCampaign(){
+  const subject = document.getElementById('mkt-subject').value.trim();
+  const body = document.getElementById('mkt-body').value.trim();
+  const msgEl = document.getElementById('mkt-msg');
+  msgEl.innerHTML = '';
+
+  if (!subject || !body) { msgEl.innerHTML = '<div class="msg err">Preenche o assunto e a mensagem.</div>'; return; }
+  if (!confirm('Enviar esta campanha para todos os clientes com email registado?')) return;
+
+  msgEl.innerHTML = '<div class="msg">A enviar…</div>';
+  try {
+    const { data, error } = await sb.functions.invoke('send-marketing', {
+      body: { subject, html: `<div style="font-family:sans-serif; max-width:480px; margin:0 auto;">${body.replace(/\n/g,'<br>')}</div>` },
+    });
+    if (error) throw error;
+    msgEl.innerHTML = `<div class="msg ok">Campanha enviada!</div>`;
+  } catch (err) {
+    console.error(err);
+    msgEl.innerHTML = '<div class="msg err">Não foi possível enviar. Confirma se já publicaste a função send-marketing e ligaste o Resend (ver README, Fase 2).</div>';
+  }
+}
+
+let currentQuickPaymentValue = '';
+
+async function openClientPicker(){
+  document.getElementById('client-picker-modal').classList.remove('hidden');
+  const searchEl = document.getElementById('client-picker-search');
+  searchEl.value = '';
+  searchEl.oninput = (e) => renderClientPickerList(e.target.value);
+  renderClientPickerList('');
+}
+
+function closeClientPicker(){
+  document.getElementById('client-picker-modal').classList.add('hidden');
+}
+
+async function renderClientPickerList(query){
+  const listEl = document.getElementById('client-picker-list');
+  const q = query.trim().toLowerCase();
+  
+  let clients = [];
+  if(q.length > 0){
+    const { data } = await sb.from('clients').select('id, name, phone').ilike('name', `%${q}%`).limit(20);
+    clients = data || [];
+    if(clients.length === 0){
+      const { data: byPhone } = await sb.from('clients').select('id, name, phone').ilike('phone', `%${q}%`).limit(20);
+      clients = byPhone || [];
+    }
+  }
+
+  if(clients.length === 0){
+    listEl.innerHTML = `
+      <button type="button" class="client-pick-item" onclick="addNewClientFromPicker()" style="justify-content:center; color:var(--brass); font-weight:600;">
+        + Adicionar novo cliente
+      </button>
+      <button type="button" class="client-pick-item" onclick="selectClientFromPicker(null, 'Sem marcação')" style="justify-content:center; color:var(--ink-muted);">
+        👤 Sem marcação
+      </button>
+    `;
+  } else {
+    listEl.innerHTML = `
+      <button type="button" class="client-pick-item" onclick="addNewClientFromPicker()" style="justify-content:center; color:var(--brass); font-weight:600;">
+        + Adicionar novo cliente
+      </button>
+      <button type="button" class="client-pick-item" onclick="selectClientFromPicker(null, 'Sem marcação')" style="justify-content:center; color:var(--ink-muted);">
+        👤 Sem marcação
+      </button>
+      ${clients.map(c => `
+        <button type="button" class="client-pick-item" onclick="selectClientFromPicker('${c.id}', '${(c.name || '').replace(/'/g, "\\'")}', '${(c.phone || '').replace(/'/g, "\\'")}')" style="border:none; background:none; padding:14px 12px;">
+          <div class="client-pick-avatar">${(c.name || '?').charAt(0).toUpperCase()}</div>
+          <div class="client-pick-info">
+            <div class="client-pick-name">${c.name || 'Cliente'}</div>
+            <div class="client-pick-phone">${c.phone || '—'}</div>
+          </div>
+        </button>
+      `).join('')}
+    `;
+  }
+}
+
+function selectClientFromPicker(clientId, name, phone){
+  document.getElementById('manual-name').value = name;
+  document.getElementById('manual-phone').value = phone || '';
+  const btnLabel = phone ? `${name} (${phone})` : name;
+  document.getElementById('manual-client-btn-label').textContent = btnLabel;
+  closeClientPicker();
+}
+
+function addNewClientFromPicker(){
+  // Modal para criar novo cliente rápido
+  const name = prompt('Nome do cliente:');
+  if(!name) return;
+  const phone = prompt('Telemóvel (opcional):');
+  selectClientFromPicker(null, name, phone || '');
+}
+
+function toggleActionMenu(){
+  const menu = document.getElementById('fab-menu');
+  menu.classList.toggle('hidden');
+}
+
+function openQuickPayment(){
+  currentQuickPaymentValue = '';
+  document.getElementById('quick-payment-modal').classList.remove('hidden');
+  document.getElementById('quick-payment-amount').textContent = '0 €';
+  document.getElementById('quick-payment-msg').innerHTML = '';
+  toggleActionMenu();
+}
+
+function closeQuickPayment(){
+  document.getElementById('quick-payment-modal').classList.add('hidden');
+  currentQuickPaymentValue = '';
+}
+
+function appendToQuickPayment(char){
+  if(char === '.' && currentQuickPaymentValue.includes('.')) return;
+  currentQuickPaymentValue += char;
+  updateQuickPaymentDisplay();
+}
+
+function deleteQuickPayment(){
+  currentQuickPaymentValue = currentQuickPaymentValue.slice(0, -1);
+  updateQuickPaymentDisplay();
+}
+
+function updateQuickPaymentDisplay(){
+  const value = currentQuickPaymentValue === '' ? '0' : parseFloat(currentQuickPaymentValue).toFixed(2);
+  document.getElementById('quick-payment-amount').textContent = `${value} €`;
+}
+
+async function submitQuickPayment(){
+  if(!currentQuickPaymentValue || parseFloat(currentQuickPaymentValue) <= 0){
+    document.getElementById('quick-payment-msg').innerHTML = '<div class="msg err">Escreve um valor válido.</div>';
+    return;
+  }
+
+  const amount = parseFloat(currentQuickPaymentValue);
+  const msgEl = document.getElementById('quick-payment-msg');
+  msgEl.innerHTML = '';
+
+  try {
+    const user = await sb.auth.getUser();
+    const { error } = await sb.from('payments').insert({
+      appointment_id: null,
+      user_id: user.data.user.id,
+      amount_eur: amount,
+      method: 'dinheiro',
+      paid_at: new Date().toISOString(),
+    });
+    if(error) throw error;
+
+    msgEl.innerHTML = '<div class="msg ok">Pagamento registado!</div>';
+    setTimeout(() => {
+      closeQuickPayment();
+      if(currentAgendaDateStr) loadAgenda(currentAgendaDateStr);
+      if(currentReportRange) {
+        runReport(currentReportRange.start, currentReportRange.end, currentReportRange.label);
+      }
+    }, 1500);
+  } catch(err) {
+    console.error(err);
+    msgEl.innerHTML = '<div class="msg err">Erro ao registar o pagamento.</div>';
+  }
+}
+
+function openQuickSale(){
+  // Implementação similar para Venda rápida
+  console.log('Venda rápida - em desenvolvimento');
+  toggleActionMenu();
+}
+
+
+function openSubServicePicker(){
+  const modal = document.getElementById('sub-service-picker-modal');
+  if(!modal) return;
+  
+  modal.classList.remove('hidden');
+  renderSubServicePickerList('');
+}
+
+function closeSubServicePicker(){
+  document.getElementById('sub-service-picker-modal').classList.add('hidden');
+}
+
+function renderSubServicePickerList(query){
+  const listEl = document.getElementById('sub-service-picker-list');
+  const q = query.trim().toLowerCase();
+  
+  let filtered = services;
+  if(q.length > 0){
+    filtered = services.filter(s => s.name.toLowerCase().includes(q) || (s.category && s.category.toLowerCase().includes(q)));
+  }
+
+  const byCat = {};
+  filtered.forEach(s => {
+    if(!byCat[s.category]) byCat[s.category] = [];
+    byCat[s.category].push(s);
+  });
+
+  if(Object.keys(byCat).length === 0) {
+    listEl.innerHTML = '<p style="color:var(--ink-muted); text-align:center; padding:20px;">Nenhum serviço encontrado.</p>';
+    return;
+  }
+
+  listEl.innerHTML = Object.entries(byCat).map(([cat, items]) => {
+    const color = servicePickerCategoryColor(cat);
+    return `
+      <div class="service-cat-title">${cat} <span class="count">${items.length}</span></div>
+      ${items.map(s => `
+        <div class="service-pick-card" style="border-left-color:${color};" onclick="selectSubServiceFromPicker('${s.id}', '${(s.name || '').replace(/'/g, "\'")}', ${s.price_eur || 0})">
+          <div class="service-pick-info">
+            <div class="service-pick-name">${s.name?.split('|')[0].trim() || ''}</div>
+            <div class="service-pick-duration">${s.duration_minutes}min</div>
+          </div>
+          <div class="service-pick-price">${euro(s.price_eur)}</div>
+        </div>
+      `).join('')}
+    `;
+  }).join('');
+}
+
+function selectSubServiceFromPicker(serviceId, serviceName, price){
+  document.getElementById('sub-service').value = serviceId;
+  const btnLabel = `${serviceName} (€${Number(price).toFixed(0)})`;
+  document.getElementById('sub-service-btn-label').textContent = btnLabel;
+  closeSubServicePicker();
+}
+
 </script>
 </body>
 </html>
