@@ -980,8 +980,12 @@ async function openManualFormAt(barberId, dateStr, clickedMin){
   const shift = shiftForBarberOnDate(barberId, dateStr);
   if (shift && (shift.is_off || !shift.start_time || !shift.end_time)) {
     if (!confirm('Este barbeiro está de folga neste dia. Queres marcar mesmo assim?')) { formEl.classList.add('hidden'); return; }
-  } else if (shift && (clickedMin < timeStrToMinutes(shift.start_time) || clickedMin > timeStrToMinutes(shift.end_time))) {
-    if (!confirm('Esta hora está fora do turno normal deste barbeiro. Queres marcar mesmo assim?')) { formEl.classList.add('hidden'); return; }
+  } else if (shift && shift.start_time && shift.end_time) {
+    const shiftStartMin = timeStrToMinutes(shift.start_time);
+    const shiftEndMin = timeStrToMinutes(shift.end_time);
+    if (clickedMin < shiftStartMin || clickedMin >= shiftEndMin) {
+      if (!confirm('Esta hora está fora do turno normal deste barbeiro. Queres marcar mesmo assim?')) { formEl.classList.add('hidden'); return; }
+    }
   }
 
   await renderManualSlots(clickedMin);
