@@ -1493,44 +1493,36 @@ async function runReport(start, end, label){
   areaEl.innerHTML = 'A calcular…';
 
   const user = await sb.auth.getUser();
-  
-  // Buscar TODOS os pagamentos do utilizador (com ou sem user_id, se associado a uma marcação do utilizador)
+  if (!user?.data?.user?.id) {
+    areaEl.innerHTML = '<div class="msg err">Sessão inválida. Faz login novamente.</div>';
+    return;
+  }
+
+  // Pagamentos rápidos têm appointment_id = null, por isso a relação com
+  // appointments deve ser opcional (sem !inner).
   const { data, error } = await sb
     .from('payments')
     .select(`
-      id, amount_eur, paid_at, user_id, appointment_id,
-      appointments!inner(
+      id, amount_eur, paid_at, user_id, appointment_id, method,
+      appointments(
         id, barber_id, client_id,
         barbers(id, name),
         clients(id, name),
         services(id, name, duration_minutes)
       )
     `)
+    .eq('user_id', user.data.user.id)
     .gte('paid_at', start.toISOString())
     .lte('paid_at', end.toISOString())
     .order('paid_at', { ascending: false });
 
-  if (error) { 
-    // Se a query com inner join falhar, tenta outra abordagem
-    const { data: allPayments, error: err2 } = await sb
-      .from('payments')
-      .select('*')
-      .eq('user_id', user.data.user.id)
-      .gte('paid_at', start.toISOString())
-      .lte('paid_at', end.toISOString())
-      .order('paid_at', { ascending: false });
-    
-    if(err2) { 
-      areaEl.innerHTML = `<div class="msg err">Erro ao carregar relatório: ${err2.message}</div>`; 
-      console.error(err2); 
-      return; 
-    }
-    
-    renderReportData(allPayments, label, areaEl);
+  if (error) {
+    areaEl.innerHTML = `<div class="msg err">Erro ao carregar relatório: ${error.message}</div>`;
+    console.error(error);
     return;
   }
 
-  renderReportData(data, label, areaEl);
+  renderReportData(data || [], label, areaEl);
 }
 
 function renderReportData(data, label, areaEl){
@@ -1546,10 +1538,11 @@ function renderReportData(data, label, areaEl){
 
     <div class="eyebrow" style="margin:22px 0 10px; display:block;">Pagamentos</div>
     ${(data||[]).map(p => {
-      const apt = p.appointments;
-      const barberName = apt?.barbers?.name || 'Venda rápida';
-      const clientName = apt?.clients?.name || '—';
-      const serviceName = apt?.services?.name?.split('|')[0].trim() || '—';
+      const apt = Array.isArray(p.appointments) ? p.appointments[0] : p.appointments;
+      const isQuickPayment = !p.appointment_id;
+      const barberName = apt?.barbers?.name || (isQuickPayment ? 'Pagamento rápido' : 'Venda rápida');
+      const clientName = apt?.clients?.name || (isQuickPayment ? 'Pagamento rápido' : '—');
+      const serviceName = apt?.services?.name?.split('|')[0].trim() || (isQuickPayment ? 'Pagamento em dinheiro' : '—');
       
       return `
         <div class="client-row">
@@ -2131,6 +2124,9 @@ async function submitQuickPayment(){
     setTimeout(() => {
       closeQuickPayment();
       if(currentAgendaDateStr) loadAgenda(currentAgendaDateStr);
+      if(currentReportRange) {
+        runReport(currentReportRange.start, currentReportRange.end, currentReportRange.label);
+      }
     }, 1500);
   } catch(err) {
     console.error(err);
