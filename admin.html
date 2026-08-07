@@ -627,6 +627,34 @@ const SUPABASE_URL = "https://kjhaphbaoxwxyankdkmk.supabase.co";
 const SUPABASE_ANON_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImtqaGFwaGJhb3h3eHlhbmtka21rIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODQxOTI2ODIsImV4cCI6MjA5OTc2ODY4Mn0.IIHToQLp68HRHf7uOUblWd0YtiLRnLmsE35RVU-Cq14";
 const sb = window.supabase ? window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY) : null;
 
+// Persistência de sessão - verifica se já está logado ao carregar página
+if(sb) {
+  sb.auth.onAuthStateChange((event, session) => {
+    if(session) {
+      // Utilizador está logado - mostra o dashboard
+      setTimeout(() => {
+        const loginView = document.getElementById('login-view');
+        const dashboardView = document.getElementById('dashboard-view');
+        if(loginView && dashboardView) {
+          loginView.classList.add('hidden');
+          dashboardView.classList.remove('hidden');
+          document.getElementById('logout-btn')?.classList.remove('hidden');
+          loadInitialData();
+        }
+      }, 300);
+    } else {
+      // Utilizador fez logout - mostra login
+      const loginView = document.getElementById('login-view');
+      const dashboardView = document.getElementById('dashboard-view');
+      if(loginView && dashboardView) {
+        loginView.classList.remove('hidden');
+        dashboardView.classList.add('hidden');
+        document.getElementById('logout-btn')?.classList.add('hidden');
+      }
+    }
+  });
+}
+
 const CAL_START_HOUR = 8;
 const CAL_END_HOUR = 20;
 let calZoom = 1;
@@ -704,6 +732,34 @@ if (sb) {
       document.getElementById('reset-password-view').classList.remove('hidden');
     }
   });
+}
+
+async function loadInitialData(){
+  try {
+    const [svcRes, barRes, hrsRes, catRes, shiftsRes, subRes] = await Promise.all([
+      sb.from('services').select('*').eq('active', true).order('category').order('sort_order'),
+      sb.from('barbers').select('*').eq('active', true),
+      sb.from('business_hours').select('*'),
+      sb.from('categories').select('*').order('sort_order'),
+      sb.from('barber_shifts').select('*'),
+      sb.from('subscriptions').select('*'),
+    ]);
+    
+    if(!svcRes.error) services = svcRes.data;
+    if(!barRes.error) barbers = barRes.data;
+    if(!hrsRes.error) hours = hrsRes.data;
+    if(!catRes.error) categories = catRes.data;
+    if(!shiftsRes.error) barberShifts = shiftsRes.data;
+    if(!subRes.error) subscriptionsData = subRes.data;
+    
+    loadServices();
+    loadBarbers();
+    loadCategories();
+    loadSubscriptions();
+    loadAgendaDatePicker();
+  } catch(err) {
+    console.error('Erro ao carregar dados iniciais:', err);
+  }
 }
 
 async function showDashboard(){
@@ -2081,6 +2137,11 @@ function openQuickSale(){
 
 
 function openSubServicePicker(){
+  // Se services estiver vazio, carrega primeiro
+  if(!services || services.length === 0) {
+    alert('A carregar serviços... Tenta novamente.');
+    return;
+  }
   document.getElementById('sub-service-picker-modal').classList.remove('hidden');
   renderSubServicePickerList('');
 }
