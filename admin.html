@@ -127,7 +127,7 @@
 
   .cal-column{
     position:relative; border-right:2px solid var(--brass-dim); cursor:pointer;
-    background-image:linear-gradient(to bottom, 
+    background-image:repeating-linear-gradient(to bottom, 
       transparent 0%, 
       transparent calc(50% - 1px), 
       rgba(184,134,11,0.15) calc(50% - 1px), 
@@ -1726,6 +1726,13 @@ function showSubscriptionDetail(subscriptionId){
           <div class="row"><span>Código:</span><span style="font-weight:600; font-family:'IBM Plex Mono',monospace;">${sub.access_code}</span></div>
           <div class="row"><span>Status:</span><span style="color:${isActive ? 'var(--ok)' : 'var(--err)'}; font-weight:600;">${isActive ? '✓ Ativo' : '✗ Expirado'}</span></div>
         </div>
+        
+        <div style="display:flex; gap:8px; margin-top:20px; flex-wrap:wrap;">
+          <button class="btn btn-primary btn-sm" onclick="editClientData('${sub.id}')">Editar cliente</button>
+          <button class="btn btn-ghost btn-sm" onclick="renewSubscription('${sub.id}')">Renovar</button>
+          <button class="btn btn-ghost btn-sm" onclick="closeSubscriptionDetail(); startEditSubscriptionService('${sub.id}')">Editar serviço</button>
+          <button class="btn btn-danger btn-sm" onclick="closeSubscriptionDetail(); deleteSubscription('${sub.id}')">Apagar</button>
+        </div>
       </div>
     `;
     
@@ -1735,6 +1742,46 @@ function showSubscriptionDetail(subscriptionId){
 
 function closeSubscriptionDetail(){
   document.getElementById('subscription-detail-modal').classList.add('hidden');
+}
+
+async function editClientData(subscriptionId){
+  const sub = subscriptionsData.find(s => s.id === subscriptionId);
+  if(!sub) return;
+  
+  const newName = prompt('Nome do cliente:', sub.clients?.name || '');
+  if(!newName) return;
+  
+  const newPhone = prompt('Telemóvel:', sub.clients?.phone || '');
+  
+  const { error } = await sb.from('clients').update({ name: newName, phone: newPhone || null }).eq('id', sub.client_id);
+  if(error) { alert('Erro ao atualizar cliente.'); console.error(error); return; }
+  
+  alert('Dados do cliente atualizados!');
+  closeSubscriptionDetail();
+  loadSubscriptions();
+}
+
+async function renewSubscription(subscriptionId){
+  const sub = subscriptionsData.find(s => s.id === subscriptionId);
+  if(!sub) return;
+  
+  const days = prompt('Quantos dias deseja renovar?', '30');
+  if(!days) return;
+  
+  const currentEnd = new Date(sub.end_date+'T00:00:00');
+  const newEnd = new Date(currentEnd.getTime() + parseInt(days) * 24 * 60 * 60 * 1000);
+  const newServices = prompt('Quantos serviços incluir?', sub.total_services.toString());
+  if(!newServices) return;
+  
+  const { error } = await sb.from('subscriptions').update({ 
+    end_date: toLocalDateStr(newEnd),
+    total_services: parseInt(newServices)
+  }).eq('id', subscriptionId);
+  
+  if(error) { alert('Erro ao renovar.'); console.error(error); return; }
+  alert(`Renovada até ${newEnd.toLocaleDateString('pt-PT')}!`);
+  closeSubscriptionDetail();
+  loadSubscriptions();
 }
 
 function startEditSubscriptionService(subscriptionId){
