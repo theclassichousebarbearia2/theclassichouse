@@ -2154,6 +2154,7 @@ function closeSubServicePicker(){
 }
 
 function renderSubServicePickerList(query){
+  console.log('DEBUG: renderSubServicePickerList called with query:', query);
   const listEl = document.getElementById('sub-service-picker-list');
   const q = query.trim().toLowerCase();
   
