@@ -7,393 +7,315 @@
 <meta name="description" content="Barbearia clássica em Lisboa. Cortes, barba clássica e sobrancelha. Rua Professor Prado Coelho 23A. Marca já o teu horário.">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,400;0,9..144,600;0,9..144,700;1,9..144,500&family=IBM+Plex+Mono:wght@400;500&family=IBM+Plex+Sans:wght@400;500&display=swap" rel="stylesheet">
-<style>
-  :root{
-    --bg:#F6EEDF;
-    --bg-alt:#EFE3CC;
-    --bg-card:#E7D9BC;
-    --ink:#2A1F15;
-    --ink-muted:#7A6A50;
-    --brass:#A9782E;
-    --brass-dim:rgba(169,120,46,0.35);
-    --primary:#2A1F15;
-    --primary-hover:#43331F;
-    --whatsapp:#3F7A52;
-    --radius:2px;
-    --maxw:1120px;
+<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,400;0,500;0,600;0,700;1,500&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+
+<script src="https://cdn.tailwindcss.com"></script>
+<script>
+  tailwind.config = {
+    theme: {
+      extend: {
+        colors: {
+          background: 'hsl(42 17% 94%)',
+          foreground: 'hsl(0 0% 4%)',
+          card: 'hsl(42 17% 94%)',
+          secondary: 'hsl(42 14% 88%)',
+          muted: 'hsl(42 14% 88%)',
+          'muted-foreground': 'hsl(0 0% 30%)',
+          border: 'hsl(38 30% 70%)',
+          onyx: 'hsl(0 0% 4%)',
+          cream: 'hsl(42 17% 94%)',
+          brass: 'hsl(38 42% 53%)',
+          paper: 'hsl(0 0% 100%)',
+          whats: 'hsl(142 32% 35%)',
+        },
+        fontFamily: {
+          display: ['"Cormorant Garamond"', 'ui-serif', 'Georgia', 'serif'],
+          body: ['"Inter"', 'ui-sans-serif', 'system-ui', 'sans-serif'],
+        },
+        borderRadius: { DEFAULT: '2px' },
+        letterSpacing: { luxe: '0.35em', 'wide-luxe': '0.2em' },
+        keyframes: {
+          'fade-up': {
+            '0%': { transform: 'translateY(24px)', opacity: 0 },
+            '100%': { transform: 'translateY(0)', opacity: 1 },
+          },
+        },
+        animation: {
+          'fade-up': 'fade-up 0.9s cubic-bezier(0.16,1,0.3,1) both',
+        },
+      },
+    },
+  };
+</script>
+
+<style type="text/tailwindcss">
+  @layer utilities {
+    .gold-hairline{
+      height:1px; width:100%;
+      background:linear-gradient(90deg, transparent, hsl(38 42% 53%), transparent);
+    }
+    .gold-hairline-v{
+      width:1px; align-self:stretch;
+      background:linear-gradient(180deg, transparent, hsl(38 42% 53%), transparent);
+    }
+    .section-divider{ position:relative; }
+    .section-divider:before{
+      content:''; position:absolute; top:0; left:24px; right:24px; height:1px;
+      background:linear-gradient(90deg, transparent, hsl(38 42% 53% / 0.55), transparent);
+    }
   }
-  *{box-sizing:border-box;}
-  html{scroll-behavior:smooth;}
-  body{
-    margin:0;
-    background:var(--bg);
-    color:var(--ink);
-    font-family:'IBM Plex Sans', sans-serif;
-    line-height:1.55;
-  }
-  h1,h2,h3{
-    font-family:'Fraunces', serif;
-    font-weight:600;
-    margin:0;
-    letter-spacing:-0.01em;
-  }
-  .mono{ font-family:'IBM Plex Mono', monospace; }
-  .eyebrow{
-    font-family:'IBM Plex Mono', monospace;
-    text-transform:uppercase;
-    letter-spacing:0.18em;
-    font-size:0.72rem;
-    color:var(--brass);
-  }
-  a{ color:inherit; }
-  img{ max-width:100%; display:block; }
-  .wrap{ max-width:var(--maxw); margin:0 auto; padding:0 24px; }
+  html{ scroll-behavior:smooth; }
+  body{ font-family:'Inter', ui-sans-serif, system-ui, sans-serif; -webkit-font-smoothing:antialiased; }
+  h1,h2,h3{ font-family:'Cormorant Garamond', ui-serif, Georgia, serif; }
+
   @media (prefers-reduced-motion: no-preference){
-    .reveal{ opacity:0; transform:translateY(14px); transition:opacity .6s ease, transform .6s ease; }
+    .reveal{ opacity:0; transform:translateY(24px); transition:opacity .9s cubic-bezier(0.16,1,0.3,1), transform .9s cubic-bezier(0.16,1,0.3,1); }
     .reveal.in{ opacity:1; transform:translateY(0); }
   }
-
-  /* ---------- header ---------- */
-  header{
-    position:sticky; top:0; z-index:20;
-    background:rgba(246,238,223,0.92);
-    backdrop-filter:blur(6px);
-    border-bottom:1px solid var(--brass-dim);
+  .btn-tap{ transition:transform .15s ease, background-color .2s ease, border-color .2s ease, box-shadow .2s ease; }
+  .btn-tap:active{ transform:scale(0.96); }
+  .nav-link-underline{ position:relative; }
+  .nav-link-underline:after{
+    content:''; position:absolute; left:0; bottom:-4px; width:0; height:1px;
+    background:hsl(38 42% 53%); transition:width .3s cubic-bezier(0.16,1,0.3,1);
   }
-  .nav{ display:flex; align-items:center; justify-content:space-between; padding:10px 24px; gap:16px; }
-  .brand{ display:flex; align-items:center; gap:10px; font-family:'Fraunces',serif; font-weight:600; font-size:1.05rem; }
-  .corner-logo{ height:48px; width:auto; }
-  @media (max-width:600px){ .corner-logo{ height:36px; } }
-  .nav-links{ display:flex; gap:28px; list-style:none; margin:0; padding:0; }
-  .nav-links a{ text-decoration:none; font-size:0.92rem; color:var(--ink-muted); transition:color .2s; }
-  .nav-links a:hover{ color:var(--ink); }
-  .nav-links{ display:none; }
-  @media (min-width:760px){ .nav-links{ display:flex; } }
-  .btn{
-    display:inline-flex; align-items:center; gap:8px;
-    padding:12px 22px;
-    border-radius:var(--radius);
-    font-size:0.92rem; font-weight:500;
-    text-decoration:none;
-    border:1px solid transparent;
-    cursor:pointer;
-  }
-  .btn:focus-visible{ outline:2px solid var(--brass); outline-offset:2px; }
-  .btn-primary{ background:var(--primary); color:var(--bg); }
-  .btn-primary:hover{ background:var(--primary-hover); }
-  .btn-whats{ background:var(--whatsapp); color:#fff; }
-  .btn-whats:hover{ filter:brightness(1.08); }
-  .btn-ghost{ border-color:var(--brass-dim); color:var(--ink); }
-  .btn-ghost:hover{ border-color:var(--brass); }
-
-  /* ---------- hero ---------- */
-  .hero{ padding:56px 0 56px; }
-  .hero .eyebrow{ margin-bottom:18px; display:block; }
-  .hero h1{ font-size:clamp(2.6rem, 6vw, 4.6rem); line-height:0.98; }
-  .hero h1 em{ font-style:italic; color:var(--brass); font-weight:500; }
-  .hero p.lead{ max-width:520px; color:var(--ink-muted); font-size:1.05rem; margin:22px 0 30px; }
-  .hero-ctas{ display:flex; gap:14px; flex-wrap:wrap; }
-
-  .plaque{
-    margin-top:44px;
-    border:1px solid var(--brass-dim);
-    background:var(--bg-alt);
-    padding:22px 26px;
-    display:grid; gap:18px;
-    grid-template-columns:1fr;
-  }
-  @media (min-width:640px){ .plaque{ grid-template-columns:1fr 1fr; } }
-  .plaque-item .eyebrow{ margin-bottom:8px; }
-  .plaque-item p{ margin:2px 0; color:var(--ink); }
-  .plaque-item p.muted{ color:var(--ink-muted); }
-
-  /* ---------- section shell ---------- */
-  section{ padding:64px 0; border-top:1px solid var(--brass-dim); }
-  .section-head{ margin-bottom:36px; }
-  .section-head h2{ font-size:clamp(1.8rem, 4vw, 2.4rem); margin-top:8px; }
-
-  /* ---------- gallery ---------- */
-  .gallery{ display:grid; grid-template-columns:repeat(2,1fr); gap:14px; }
-  @media (min-width:640px){ .gallery{ grid-template-columns:repeat(4,1fr); } }
-  .photo-slot{
-    aspect-ratio:3/4;
-    background:
-      repeating-linear-gradient(135deg, var(--bg-alt), var(--bg-alt) 10px, var(--bg-card) 10px, var(--bg-card) 20px);
-    border:1px solid var(--brass-dim);
-    display:flex; align-items:center; justify-content:center;
-    color:var(--ink-muted); font-family:'IBM Plex Mono',monospace; font-size:0.7rem;
-    text-align:center; padding:10px;
-  }
-
-  /* ---------- ticket / services ---------- */
-  .category{ margin-bottom:38px; }
-  .category h3{ font-size:1.1rem; color:var(--brass); font-weight:600; margin-bottom:14px; }
-  .ticket-row{
-    display:flex; justify-content:space-between; align-items:baseline; gap:16px;
-    padding:13px 0;
-    border-bottom:1px dashed var(--brass-dim);
-  }
-  .ticket-row:last-child{ border-bottom:none; }
-  .ticket-name{ font-size:1rem; }
-  .ticket-meta{ color:var(--ink-muted); font-size:0.82rem; font-family:'IBM Plex Mono',monospace; }
-  .ticket-price{ font-family:'IBM Plex Mono',monospace; font-size:1.05rem; white-space:nowrap; color:var(--ink); }
-  .ticket-price.tbd{ color:var(--ink-muted); font-size:0.82rem; }
-
-  /* ---------- barbers ---------- */
-  .barbers{ display:grid; gap:18px; grid-template-columns:1fr; }
-  @media (min-width:640px){ .barbers{ grid-template-columns:1fr 1fr; } }
-  .barber-card{ border:1px solid var(--brass-dim); background:var(--bg-alt); padding:26px; text-align:center; }
-  .barber-card .avatar{
-    width:160px; height:160px; border-radius:50%;
-    background:var(--bg-card); border:1px solid var(--brass-dim);
-    overflow:hidden; margin:0 auto 16px;
-  }
-  .barber-card .avatar img{ width:100%; height:100%; object-fit:cover; object-position:center center; display:block; }
-  .barber-card h3{ font-size:1.25rem; }
-  .barber-card p{ color:var(--ink-muted); font-size:0.92rem; margin-top:6px; }
-
-  /* ---------- hours + location ---------- */
-  .hours-location{ display:grid; gap:32px; grid-template-columns:1fr; }
-  @media (min-width:800px){ .hours-location{ grid-template-columns:1fr 1fr; } }
-  .hours-table{ width:100%; border-collapse:collapse; font-family:'IBM Plex Mono',monospace; font-size:0.92rem; }
-  .hours-table td{ padding:9px 0; border-bottom:1px solid var(--brass-dim); }
-  .hours-table td:last-child{ text-align:right; }
-  .hours-table tr.closed td{ color:var(--ink-muted); }
-  .map-frame{ border:1px solid var(--brass-dim); width:100%; height:260px; filter:sepia(15%) saturate(85%); }
-
-  /* ---------- footer ---------- */
-  footer{ padding:40px 0; border-top:1px solid var(--brass-dim); }
-  .footer-row{ display:flex; flex-wrap:wrap; justify-content:space-between; gap:16px; align-items:center; }
-  footer p{ color:var(--ink-muted); font-size:0.85rem; margin:0; }
-  footer a{ text-decoration:none; color:var(--ink-muted); }
-  footer a:hover{ color:var(--brass); }
-
-  .sticky-cta{
-    position:fixed; bottom:16px; left:50%; transform:translateX(-50%);
-    display:flex; gap:10px; z-index:30;
-  }
-  @media (min-width:760px){ .sticky-cta{ display:none; } }
+  .nav-link-underline:hover:after{ width:100%; }
+  .photo-zoom img{ transition:transform .7s cubic-bezier(0.16,1,0.3,1); }
+  .photo-zoom:hover img{ transform:scale(1.06); }
+  .ticket-row-hover{ transition:padding-left .3s cubic-bezier(0.16,1,0.3,1), border-color .3s ease; }
+  .ticket-row-hover:hover{ padding-left:8px; border-color:hsl(38 42% 53% / 0.7); }
+  .barber-card-hover{ transition:transform .4s cubic-bezier(0.16,1,0.3,1), box-shadow .4s ease; }
+  .barber-card-hover:hover{ transform:translateY(-6px); box-shadow:0 18px 40px -20px rgba(0,0,0,0.35); }
+  .avatar-ring{ transition:box-shadow .4s ease; }
+  .barber-card-hover:hover .avatar-ring{ box-shadow:0 0 0 4px hsl(38 42% 53% / 0.35); }
+  .sticky-cta-in{ animation:fade-up 0.6s cubic-bezier(0.16,1,0.3,1) both; animation-delay:.4s; }
 </style>
 </head>
-<body>
+<body class="m-0 bg-background text-foreground leading-relaxed">
 
-<header>
-  <nav class="nav wrap">
-    <div class="brand">The Classic House Barbearia</div>
-    <ul class="nav-links">
-      <li><a href="#servicos">Serviços</a></li>
-      <li><a href="#barbeiros">Barbeiros</a></li>
-      <li><a href="#horario">Horário</a></li>
-    </ul>
-    <div style="display:flex; align-items:center; gap:14px;">
-      <img src="images/logo.png" alt="The Classic House Barbearia" class="corner-logo">
-      <a class="btn btn-primary" href="booking.html">Marcar horário</a>
+<header class="sticky top-0 z-20 backdrop-blur-md bg-background/90">
+  <nav class="max-w-[1120px] mx-auto flex items-center justify-between gap-4 px-6 py-3 relative">
+    <div class="flex items-center">
+      <img src="images/logo-transparent.png" alt="The Classic House Barbearia" class="h-10 sm:h-[52px] w-auto">
     </div>
+    <ul class="hidden md:flex gap-9 list-none m-0 p-0">
+      <li><a href="#servicos" class="nav-link-underline no-underline text-[0.76rem] uppercase tracking-wide-luxe text-muted-foreground hover:text-foreground transition-colors">Serviços</a></li>
+      <li><a href="#barbeiros" class="nav-link-underline no-underline text-[0.76rem] uppercase tracking-wide-luxe text-muted-foreground hover:text-foreground transition-colors">Barbeiros</a></li>
+      <li><a href="#horario" class="nav-link-underline no-underline text-[0.76rem] uppercase tracking-wide-luxe text-muted-foreground hover:text-foreground transition-colors">Horário</a></li>
+    </ul>
+    <a href="booking.html" class="btn-tap inline-flex items-center gap-2 rounded bg-onyx text-cream px-6 py-3 text-[0.78rem] font-medium uppercase tracking-wide-luxe no-underline hover:bg-[hsl(0_0%_14%)]">Marcar horário</a>
+    <div class="gold-hairline absolute left-6 right-6 bottom-0"></div>
   </nav>
 </header>
 
 <main>
-  <section class="hero">
-    <div class="wrap">
-      <span class="eyebrow">Barbearia clássica — Lisboa</span>
-      <h1>Estilo com <em>ofício</em>,<br>não com pressa.</h1>
-      <p class="lead">Cortes clássicos e modernos, barba com toalha quente e o cuidado de sempre — na Rua Professor Prado Coelho, em Lisboa.</p>
-      <div class="hero-ctas">
-        <a class="btn btn-whats" href="https://wa.me/351926323222?text=Ol%C3%A1%2C%20gostava%20de%20marcar%20um%20hor%C3%A1rio%20na%20The%20Classic%20House." target="_blank" rel="noopener">Marcar pelo WhatsApp</a>
-        <a class="btn btn-ghost" href="booking.html">Ver disponibilidade online</a>
+  <section class="pt-20 pb-16">
+    <div class="max-w-[1120px] mx-auto px-6">
+      <span class="block mb-6 text-[0.68rem] font-medium uppercase tracking-luxe text-brass animate-fade-up">Barbearia clássica — Lisboa</span>
+      <h1 class="text-[2.8rem] sm:text-[3.6rem] lg:text-[5.2rem] leading-[1.02] font-semibold animate-fade-up" style="animation-delay:.1s;">Estilo com <em class="text-brass font-medium italic">ofício</em>,<br>não com pressa.</h1>
+      <p class="max-w-[480px] text-muted-foreground text-[1.1rem] my-6 font-display animate-fade-up" style="animation-delay:.2s;">Cortes clássicos e modernos, barba com toalha quente e o cuidado de sempre — na Rua Professor Prado Coelho, em Lisboa.</p>
+      <div class="flex gap-3.5 flex-wrap animate-fade-up" style="animation-delay:.3s;">
+        <a href="https://wa.me/351926323222?text=Ol%C3%A1%2C%20gostava%20de%20marcar%20um%20hor%C3%A1rio%20na%20The%20Classic%20House." target="_blank" rel="noopener"
+          class="btn-tap inline-flex items-center gap-2 rounded bg-whats text-white px-6 py-3 text-[0.78rem] font-medium uppercase tracking-wide-luxe no-underline hover:brightness-110">Marcar pelo WhatsApp</a>
+        <a href="booking.html"
+          class="btn-tap inline-flex items-center gap-2 rounded border border-border text-foreground px-6 py-3 text-[0.78rem] font-medium uppercase tracking-wide-luxe no-underline hover:border-brass hover:bg-paper/40">Ver disponibilidade online</a>
       </div>
 
-      <div class="plaque reveal">
-        <div class="plaque-item">
-          <span class="eyebrow">Morada</span>
-          <p>Rua Professor Prado Coelho 23A</p>
-          <p class="muted">Lisboa</p>
+      <div class="reveal mt-12 border border-border bg-paper/50 p-7 grid gap-4 grid-cols-1 sm:grid-cols-[1fr_1px_1fr] sm:items-start">
+        <div>
+          <span class="text-[0.68rem] font-medium uppercase tracking-luxe text-brass block mb-2.5">Morada</span>
+          <p class="my-0.5 font-display text-[1.15rem]">Rua Professor Prado Coelho 23A</p>
+          <p class="my-0.5 text-muted-foreground text-[0.85rem] font-body">Lisboa</p>
         </div>
-        <div class="plaque-item">
-          <span class="eyebrow">Horário</span>
-          <p>Seg–Sex · 09h–19h</p>
-          <p>Sáb · 09h–18h &nbsp;·&nbsp; Dom · fechado</p>
+        <div class="gold-hairline-v hidden sm:block"></div>
+        <div>
+          <span class="text-[0.68rem] font-medium uppercase tracking-luxe text-brass block mb-2.5">Horário</span>
+          <p class="my-0.5 font-display text-[1.15rem]">Seg–Sex · 09h–19h</p>
+          <p class="my-0.5 text-muted-foreground text-[0.85rem] font-body">Sáb · 09h–18h &nbsp;·&nbsp; Dom · fechado</p>
         </div>
       </div>
     </div>
   </section>
 
-  <section id="fotos">
-    <div class="wrap">
-      <div class="section-head reveal">
-        <span class="eyebrow">O espaço</span>
-        <h2>Dentro da loja</h2>
+  <section id="fotos" class="py-16 section-divider">
+    <div class="max-w-[1120px] mx-auto px-6">
+      <div class="reveal mb-10">
+        <span class="text-[0.68rem] font-medium uppercase tracking-luxe text-brass block">O espaço</span>
+        <h2 class="text-[2rem] sm:text-[2.8rem] mt-2.5 font-semibold">Dentro da loja</h2>
       </div>
-      <div class="gallery reveal">
-        <div class="photo-slot" style="padding:0;"><img src="images/loja-1.jpg" alt="Interior da The Classic House Barbearia" style="width:100%; height:100%; object-fit:cover;"></div>
-        <div class="photo-slot" style="padding:0;"><img src="images/loja-2.jpg" alt="Cadeira de barbeiro na The Classic House" style="width:100%; height:100%; object-fit:cover;"></div>
-        <div class="photo-slot" style="padding:0;"><img src="images/loja-3.jpg" alt="Espelhos e balcão da The Classic House" style="width:100%; height:100%; object-fit:cover;"></div>
-        <div class="photo-slot" style="padding:0;"><img src="images/loja-4.jpg" alt="Ambiente da The Classic House Barbearia" style="width:100%; height:100%; object-fit:cover;"></div>
+      <div class="reveal grid grid-cols-2 md:grid-cols-4 gap-0.5 bg-brass/30">
+        <div class="photo-zoom aspect-[3/4] overflow-hidden bg-secondary"><img src="images/loja-1.jpg" alt="Interior da The Classic House Barbearia" class="w-full h-full object-cover"></div>
+        <div class="photo-zoom aspect-[3/4] overflow-hidden bg-secondary"><img src="images/loja-2.jpg" alt="Cadeira de barbeiro na The Classic House" class="w-full h-full object-cover"></div>
+        <div class="photo-zoom aspect-[3/4] overflow-hidden bg-secondary"><img src="images/loja-3.jpg" alt="Espelhos e balcão da The Classic House" class="w-full h-full object-cover"></div>
+        <div class="photo-zoom aspect-[3/4] overflow-hidden bg-secondary"><img src="images/loja-4.jpg" alt="Ambiente da The Classic House Barbearia" class="w-full h-full object-cover"></div>
       </div>
-      <div class="reveal" style="margin-top:14px; border:1px solid var(--brass-dim); overflow:hidden; max-width:360px;">
-        <video src="images/loja-video.mp4" autoplay muted loop playsinline style="width:100%; display:block;"></video>
-      </div>
-    </div>
-  </section>
-
-  <section id="servicos">
-    <div class="wrap">
-      <div class="section-head reveal">
-        <span class="eyebrow">Preçário</span>
-        <h2>Serviços</h2>
-      </div>
-
-      <div class="category reveal">
-        <h3>Corte</h3>
-        <div class="ticket-row">
-          <div><div class="ticket-name">Corte de cabelo</div><div class="ticket-meta">30 min</div></div>
-          <div class="ticket-price">€ 13</div>
-        </div>
-        <div class="ticket-row">
-          <div><div class="ticket-name">Corte de cabelo a máquina</div><div class="ticket-meta">30 min</div></div>
-          <div class="ticket-price">€ 10</div>
-        </div>
-      </div>
-
-      <div class="category reveal">
-        <h3>Barba</h3>
-        <div class="ticket-row">
-          <div><div class="ticket-name">Barba a máquina</div><div class="ticket-meta">30 min</div></div>
-          <div class="ticket-price">€ 8</div>
-        </div>
-        <div class="ticket-row">
-          <div><div class="ticket-name">Barba clássica (toalha quente)</div><div class="ticket-meta">30 min</div></div>
-          <div class="ticket-price">€ 10</div>
-        </div>
-      </div>
-
-      <div class="category reveal">
-        <h3>Corte + Barba</h3>
-        <div class="ticket-row">
-          <div><div class="ticket-name">Corte e barba clássica</div><div class="ticket-meta">1 h</div></div>
-          <div class="ticket-price">€ 18</div>
-        </div>
-        <div class="ticket-row">
-          <div><div class="ticket-name">Corte e barba a máquina</div><div class="ticket-meta">30 min</div></div>
-          <div class="ticket-price">€ 15</div>
-        </div>
-        <div class="ticket-row">
-          <div><div class="ticket-name">Corte a máquina e barba clássica</div><div class="ticket-meta">30 min</div></div>
-          <div class="ticket-price">€ 15</div>
-        </div>
-        <div class="ticket-row">
-          <div><div class="ticket-name">Cabelo e barba, tudo à máquina</div><div class="ticket-meta">30 min</div></div>
-          <div class="ticket-price">€ 13</div>
-        </div>
-      </div>
-
-      <div class="category reveal">
-        <h3>Sobrancelha</h3>
-        <div class="ticket-row">
-          <div><div class="ticket-name">Sobrancelha</div><div class="ticket-meta">30 min</div></div>
-          <div class="ticket-price">€ 5</div>
-        </div>
-        <div class="ticket-row">
-          <div><div class="ticket-name">Barba clássica e sobrancelha</div><div class="ticket-meta">30 min</div></div>
-          <div class="ticket-price">€ 13</div>
-        </div>
-        <div class="ticket-row">
-          <div><div class="ticket-name">Corte, barba clássica e sobrancelha</div><div class="ticket-meta">1 h</div></div>
-          <div class="ticket-price">€ 20</div>
-        </div>
-        <div class="ticket-row">
-          <div><div class="ticket-name">Corte e sobrancelha</div><div class="ticket-meta">30 min</div></div>
-          <div class="ticket-price">€ 15</div>
-        </div>
-      </div>
-
-      <div class="category reveal">
-        <h3>Limpeza facial</h3>
-        <div class="ticket-row">
-          <div><div class="ticket-name">Limpeza facial</div><div class="ticket-meta">30 min</div></div>
-          <div class="ticket-price tbd">a confirmar</div>
-        </div>
-        <div class="ticket-row">
-          <div><div class="ticket-name">Corte, barba clássica e limpeza facial</div><div class="ticket-meta">1 h</div></div>
-          <div class="ticket-price">€ 23</div>
-        </div>
-        <div class="ticket-row">
-          <div><div class="ticket-name">Corte e limpeza facial</div><div class="ticket-meta">1 h</div></div>
-          <div class="ticket-price">€ 18</div>
-        </div>
-      </div>
-
-      <div class="category reveal">
-        <h3>Planos de assinatura</h3>
-        <div class="ticket-row">
-          <div><div class="ticket-name">Corte 2x por mês</div><div class="ticket-meta">mensal</div></div>
-          <div class="ticket-price">€ 22 <span style="color:var(--ink-muted); font-size:0.72rem;">/mês</span></div>
-        </div>
-        <div class="ticket-row">
-          <div><div class="ticket-name">Barba 2x por mês</div><div class="ticket-meta">mensal</div></div>
-          <div class="ticket-price">€ 16 <span style="color:var(--ink-muted); font-size:0.72rem;">/mês</span></div>
-        </div>
-        <div class="ticket-row">
-          <div><div class="ticket-name">Cabelo e barba 2x por mês</div><div class="ticket-meta">mensal</div></div>
-          <div class="ticket-price">€ 28 <span style="color:var(--ink-muted); font-size:0.72rem;">/mês</span></div>
-        </div>
-        <div class="ticket-row">
-          <div><div class="ticket-name">Corte 4x por mês</div><div class="ticket-meta">mensal</div></div>
-          <div class="ticket-price">€ 44 <span style="color:var(--ink-muted); font-size:0.72rem;">/mês</span></div>
-        </div>
-        <div class="ticket-row">
-          <div><div class="ticket-name">Barba 4x por mês</div><div class="ticket-meta">mensal</div></div>
-          <div class="ticket-price">€ 32 <span style="color:var(--ink-muted); font-size:0.72rem;">/mês</span></div>
-        </div>
-        <div class="ticket-row">
-          <div><div class="ticket-name">Cabelo e barba 4x por mês</div><div class="ticket-meta">mensal</div></div>
-          <div class="ticket-price">€ 56 <span style="color:var(--ink-muted); font-size:0.72rem;">/mês</span></div>
-        </div>
-        <p style="color:var(--ink-muted); font-size:0.82rem; margin-top:14px;">Fala connosco pelo WhatsApp para ativares um plano.</p>
+      <div class="reveal mt-4 border border-border overflow-hidden max-w-[360px]">
+        <video src="images/loja-video.mp4" autoplay muted loop playsinline class="w-full block"></video>
       </div>
     </div>
   </section>
 
-  <section id="barbeiros">
-    <div class="wrap">
-      <div class="section-head reveal">
-        <span class="eyebrow">A equipa</span>
-        <h2>Barbeiros</h2>
+  <section id="servicos" class="py-16 section-divider">
+    <div class="max-w-[1120px] mx-auto px-6">
+      <div class="reveal mb-11">
+        <span class="text-[0.68rem] font-medium uppercase tracking-luxe text-brass block">Preçário</span>
+        <h2 class="text-[2rem] sm:text-[2.8rem] mt-2.5 font-semibold">Serviços</h2>
       </div>
-      <div class="barbers reveal">
-        <div class="barber-card">
-          <div class="avatar"><img src="images/team-bruno.jpg" alt="Bruno, barbeiro na The Classic House"></div>
-          <h3>Bruno</h3>
-          <p>Fundador da The Classic House.</p>
+
+      <div class="reveal mb-10">
+        <h3 class="text-[0.76rem] uppercase tracking-wide-luxe text-brass font-semibold mb-4">Corte</h3>
+        <div class="ticket-row-hover flex justify-between items-baseline gap-4 py-3.5 border-b border-border/50">
+          <div><div class="font-display text-[1.15rem]">Corte de cabelo</div><div class="text-muted-foreground text-[0.78rem]">30 min</div></div>
+          <div class="font-medium text-[0.95rem] whitespace-nowrap">€ 13</div>
         </div>
-        <div class="barber-card">
-          <div class="avatar"><img src="images/team-joao.jpg" alt="João, barbeiro na The Classic House"></div>
-          <h3>João</h3>
-          <p>Fundador da The Classic House.</p>
+        <div class="ticket-row-hover flex justify-between items-baseline gap-4 py-3.5 border-b-0">
+          <div><div class="font-display text-[1.15rem]">Corte de cabelo a máquina</div><div class="text-muted-foreground text-[0.78rem]">30 min</div></div>
+          <div class="font-medium text-[0.95rem] whitespace-nowrap">€ 10</div>
+        </div>
+      </div>
+
+      <div class="reveal mb-10">
+        <h3 class="text-[0.76rem] uppercase tracking-wide-luxe text-brass font-semibold mb-4">Barba</h3>
+        <div class="ticket-row-hover flex justify-between items-baseline gap-4 py-3.5 border-b border-border/50">
+          <div><div class="font-display text-[1.15rem]">Barba a máquina</div><div class="text-muted-foreground text-[0.78rem]">30 min</div></div>
+          <div class="font-medium text-[0.95rem] whitespace-nowrap">€ 8</div>
+        </div>
+        <div class="ticket-row-hover flex justify-between items-baseline gap-4 py-3.5">
+          <div><div class="font-display text-[1.15rem]">Barba clássica (toalha quente)</div><div class="text-muted-foreground text-[0.78rem]">30 min</div></div>
+          <div class="font-medium text-[0.95rem] whitespace-nowrap">€ 10</div>
+        </div>
+      </div>
+
+      <div class="reveal mb-10">
+        <h3 class="text-[0.76rem] uppercase tracking-wide-luxe text-brass font-semibold mb-4">Corte + Barba</h3>
+        <div class="ticket-row-hover flex justify-between items-baseline gap-4 py-3.5 border-b border-border/50">
+          <div><div class="font-display text-[1.15rem]">Corte e barba clássica</div><div class="text-muted-foreground text-[0.78rem]">1 h</div></div>
+          <div class="font-medium text-[0.95rem] whitespace-nowrap">€ 18</div>
+        </div>
+        <div class="ticket-row-hover flex justify-between items-baseline gap-4 py-3.5 border-b border-border/50">
+          <div><div class="font-display text-[1.15rem]">Corte e barba a máquina</div><div class="text-muted-foreground text-[0.78rem]">30 min</div></div>
+          <div class="font-medium text-[0.95rem] whitespace-nowrap">€ 15</div>
+        </div>
+        <div class="ticket-row-hover flex justify-between items-baseline gap-4 py-3.5 border-b border-border/50">
+          <div><div class="font-display text-[1.15rem]">Corte a máquina e barba clássica</div><div class="text-muted-foreground text-[0.78rem]">30 min</div></div>
+          <div class="font-medium text-[0.95rem] whitespace-nowrap">€ 15</div>
+        </div>
+        <div class="ticket-row-hover flex justify-between items-baseline gap-4 py-3.5">
+          <div><div class="font-display text-[1.15rem]">Cabelo e barba, tudo à máquina</div><div class="text-muted-foreground text-[0.78rem]">30 min</div></div>
+          <div class="font-medium text-[0.95rem] whitespace-nowrap">€ 13</div>
+        </div>
+      </div>
+
+      <div class="reveal mb-10">
+        <h3 class="text-[0.76rem] uppercase tracking-wide-luxe text-brass font-semibold mb-4">Sobrancelha</h3>
+        <div class="ticket-row-hover flex justify-between items-baseline gap-4 py-3.5 border-b border-border/50">
+          <div><div class="font-display text-[1.15rem]">Sobrancelha</div><div class="text-muted-foreground text-[0.78rem]">30 min</div></div>
+          <div class="font-medium text-[0.95rem] whitespace-nowrap">€ 5</div>
+        </div>
+        <div class="ticket-row-hover flex justify-between items-baseline gap-4 py-3.5 border-b border-border/50">
+          <div><div class="font-display text-[1.15rem]">Barba clássica e sobrancelha</div><div class="text-muted-foreground text-[0.78rem]">30 min</div></div>
+          <div class="font-medium text-[0.95rem] whitespace-nowrap">€ 13</div>
+        </div>
+        <div class="ticket-row-hover flex justify-between items-baseline gap-4 py-3.5 border-b border-border/50">
+          <div><div class="font-display text-[1.15rem]">Corte, barba clássica e sobrancelha</div><div class="text-muted-foreground text-[0.78rem]">1 h</div></div>
+          <div class="font-medium text-[0.95rem] whitespace-nowrap">€ 20</div>
+        </div>
+        <div class="ticket-row-hover flex justify-between items-baseline gap-4 py-3.5">
+          <div><div class="font-display text-[1.15rem]">Corte e sobrancelha</div><div class="text-muted-foreground text-[0.78rem]">30 min</div></div>
+          <div class="font-medium text-[0.95rem] whitespace-nowrap">€ 15</div>
+        </div>
+      </div>
+
+      <div class="reveal mb-10">
+        <h3 class="text-[0.76rem] uppercase tracking-wide-luxe text-brass font-semibold mb-4">Limpeza facial</h3>
+        <div class="ticket-row-hover flex justify-between items-baseline gap-4 py-3.5 border-b border-border/50">
+          <div><div class="font-display text-[1.15rem]">Limpeza facial</div><div class="text-muted-foreground text-[0.78rem]">30 min</div></div>
+          <div class="text-muted-foreground text-[0.78rem] whitespace-nowrap">a confirmar</div>
+        </div>
+        <div class="ticket-row-hover flex justify-between items-baseline gap-4 py-3.5 border-b border-border/50">
+          <div><div class="font-display text-[1.15rem]">Corte, barba clássica e limpeza facial</div><div class="text-muted-foreground text-[0.78rem]">1 h</div></div>
+          <div class="font-medium text-[0.95rem] whitespace-nowrap">€ 23</div>
+        </div>
+        <div class="ticket-row-hover flex justify-between items-baseline gap-4 py-3.5">
+          <div><div class="font-display text-[1.15rem]">Corte e limpeza facial</div><div class="text-muted-foreground text-[0.78rem]">1 h</div></div>
+          <div class="font-medium text-[0.95rem] whitespace-nowrap">€ 18</div>
+        </div>
+      </div>
+
+      <div class="reveal">
+        <h3 class="text-[0.76rem] uppercase tracking-wide-luxe text-brass font-semibold mb-4">Planos de assinatura</h3>
+        <div class="ticket-row-hover flex justify-between items-baseline gap-4 py-3.5 border-b border-border/50">
+          <div><div class="font-display text-[1.15rem]">Corte 2x por mês</div><div class="text-muted-foreground text-[0.78rem]">mensal</div></div>
+          <div class="font-medium text-[0.95rem] whitespace-nowrap">€ 22 <span class="text-muted-foreground text-[0.72rem]">/mês</span></div>
+        </div>
+        <div class="ticket-row-hover flex justify-between items-baseline gap-4 py-3.5 border-b border-border/50">
+          <div><div class="font-display text-[1.15rem]">Barba 2x por mês</div><div class="text-muted-foreground text-[0.78rem]">mensal</div></div>
+          <div class="font-medium text-[0.95rem] whitespace-nowrap">€ 16 <span class="text-muted-foreground text-[0.72rem]">/mês</span></div>
+        </div>
+        <div class="ticket-row-hover flex justify-between items-baseline gap-4 py-3.5 border-b border-border/50">
+          <div><div class="font-display text-[1.15rem]">Cabelo e barba 2x por mês</div><div class="text-muted-foreground text-[0.78rem]">mensal</div></div>
+          <div class="font-medium text-[0.95rem] whitespace-nowrap">€ 28 <span class="text-muted-foreground text-[0.72rem]">/mês</span></div>
+        </div>
+        <div class="ticket-row-hover flex justify-between items-baseline gap-4 py-3.5 border-b border-border/50">
+          <div><div class="font-display text-[1.15rem]">Corte 4x por mês</div><div class="text-muted-foreground text-[0.78rem]">mensal</div></div>
+          <div class="font-medium text-[0.95rem] whitespace-nowrap">€ 44 <span class="text-muted-foreground text-[0.72rem]">/mês</span></div>
+        </div>
+        <div class="ticket-row-hover flex justify-between items-baseline gap-4 py-3.5 border-b border-border/50">
+          <div><div class="font-display text-[1.15rem]">Barba 4x por mês</div><div class="text-muted-foreground text-[0.78rem]">mensal</div></div>
+          <div class="font-medium text-[0.95rem] whitespace-nowrap">€ 32 <span class="text-muted-foreground text-[0.72rem]">/mês</span></div>
+        </div>
+        <div class="ticket-row-hover flex justify-between items-baseline gap-4 py-3.5">
+          <div><div class="font-display text-[1.15rem]">Cabelo e barba 4x por mês</div><div class="text-muted-foreground text-[0.78rem]">mensal</div></div>
+          <div class="font-medium text-[0.95rem] whitespace-nowrap">€ 56 <span class="text-muted-foreground text-[0.72rem]">/mês</span></div>
+        </div>
+        <p class="text-muted-foreground text-[0.82rem] mt-4">Fala connosco pelo WhatsApp para ativares um plano.</p>
+      </div>
+    </div>
+  </section>
+
+  <section id="barbeiros" class="py-16 section-divider">
+    <div class="max-w-[1120px] mx-auto px-6">
+      <div class="reveal mb-11">
+        <span class="text-[0.68rem] font-medium uppercase tracking-luxe text-brass block">A equipa</span>
+        <h2 class="text-[2rem] sm:text-[2.8rem] mt-2.5 font-semibold">Barbeiros</h2>
+      </div>
+      <div class="reveal grid gap-0.5 grid-cols-1 sm:grid-cols-2 bg-brass/30">
+        <div class="barber-card-hover bg-card px-6 py-10 text-center">
+          <div class="avatar-ring w-[150px] h-[150px] rounded-full bg-secondary border border-border overflow-hidden mx-auto mb-5">
+            <img src="images/team-bruno.jpg" alt="Bruno, barbeiro na The Classic House" class="w-full h-full object-cover object-center">
+          </div>
+          <h3 class="text-[1.5rem] font-semibold">Bruno</h3>
+          <p class="text-muted-foreground text-[0.85rem] mt-2 tracking-wide uppercase">Fundador</p>
+        </div>
+        <div class="barber-card-hover bg-card px-6 py-10 text-center">
+          <div class="avatar-ring w-[150px] h-[150px] rounded-full bg-secondary border border-border overflow-hidden mx-auto mb-5">
+            <img src="images/team-joao.jpg" alt="João, barbeiro na The Classic House" class="w-full h-full object-cover object-center">
+          </div>
+          <h3 class="text-[1.5rem] font-semibold">João</h3>
+          <p class="text-muted-foreground text-[0.85rem] mt-2 tracking-wide uppercase">Fundador</p>
         </div>
       </div>
     </div>
   </section>
 
-  <section id="horario">
-    <div class="wrap">
-      <div class="section-head reveal">
-        <span class="eyebrow">Visita-nos</span>
-        <h2>Horário &amp; localização</h2>
+  <section id="horario" class="py-16 section-divider">
+    <div class="max-w-[1120px] mx-auto px-6">
+      <div class="reveal mb-11">
+        <span class="text-[0.68rem] font-medium uppercase tracking-luxe text-brass block">Visita-nos</span>
+        <h2 class="text-[2rem] sm:text-[2.8rem] mt-2.5 font-semibold">Horário &amp; localização</h2>
       </div>
-      <div class="hours-location reveal">
-        <table class="hours-table">
-          <tr><td>Segunda</td><td>09h – 19h</td></tr>
-          <tr><td>Terça</td><td>09h – 19h</td></tr>
-          <tr><td>Quarta</td><td>09h – 19h</td></tr>
-          <tr><td>Quinta</td><td>09h – 19h</td></tr>
-          <tr><td>Sexta</td><td>09h – 19h</td></tr>
-          <tr><td>Sábado</td><td>09h – 18h</td></tr>
-          <tr class="closed"><td>Domingo</td><td>Fechado</td></tr>
+      <div class="reveal grid gap-9 grid-cols-1 md:grid-cols-2">
+        <table class="w-full border-collapse font-display text-[1rem]">
+          <tr class="border-b border-border/50"><td class="py-2.5">Segunda</td><td class="py-2.5 text-right">09h – 19h</td></tr>
+          <tr class="border-b border-border/50"><td class="py-2.5">Terça</td><td class="py-2.5 text-right">09h – 19h</td></tr>
+          <tr class="border-b border-border/50"><td class="py-2.5">Quarta</td><td class="py-2.5 text-right">09h – 19h</td></tr>
+          <tr class="border-b border-border/50"><td class="py-2.5">Quinta</td><td class="py-2.5 text-right">09h – 19h</td></tr>
+          <tr class="border-b border-border/50"><td class="py-2.5">Sexta</td><td class="py-2.5 text-right">09h – 19h</td></tr>
+          <tr class="border-b border-border/50"><td class="py-2.5">Sábado</td><td class="py-2.5 text-right">09h – 18h</td></tr>
+          <tr class="text-muted-foreground"><td class="py-2.5">Domingo</td><td class="py-2.5 text-right">Fechado</td></tr>
         </table>
         <div>
-          <iframe class="map-frame" loading="lazy"
+          <iframe class="border border-border w-full h-[280px] grayscale-[45%] contrast-[1.05]" loading="lazy"
             src="https://www.google.com/maps?q=Rua+Professor+Prado+Coelho+23A,+Lisboa&output=embed">
           </iframe>
         </div>
@@ -402,27 +324,34 @@
   </section>
 </main>
 
-<footer>
-  <div class="wrap footer-row">
-    <p>The Classic House Barbearia · Rua Professor Prado Coelho 23A, Lisboa</p>
-    <p>
-      <a href="https://instagram.com/theclassichousebarbearia" target="_blank" rel="noopener">@theclassichousebarbearia</a>
+<footer class="relative py-12 bg-onyx text-cream">
+  <div class="gold-hairline absolute top-0 left-0 right-0"></div>
+  <div class="max-w-[1120px] mx-auto px-6 flex flex-wrap justify-between items-center gap-4">
+    <p class="text-[hsl(42,10%,65%)] text-[0.85rem] m-0">The Classic House Barbearia · Rua Professor Prado Coelho 23A, Lisboa</p>
+    <p class="text-[hsl(42,10%,65%)] text-[0.85rem] m-0">
+      <a href="https://instagram.com/theclassichousebarbearia" target="_blank" rel="noopener" class="no-underline text-[hsl(42,10%,78%)] hover:text-brass transition-colors">@theclassichousebarbearia</a>
       &nbsp;·&nbsp;
-      <a href="https://wa.me/351926323222" target="_blank" rel="noopener">926 323 222</a>
+      <a href="https://wa.me/351926323222" target="_blank" rel="noopener" class="no-underline text-[hsl(42,10%,78%)] hover:text-brass transition-colors">926 323 222</a>
     </p>
   </div>
 </footer>
 
-<div class="sticky-cta">
-  <a class="btn btn-whats" href="https://wa.me/351926323222?text=Ol%C3%A1%2C%20gostava%20de%20marcar%20um%20hor%C3%A1rio." target="_blank" rel="noopener">WhatsApp</a>
-  <a class="btn btn-primary" href="booking.html">Marcar</a>
+<div class="sticky-cta-in fixed bottom-4 left-1/2 -translate-x-1/2 flex gap-2.5 z-30 md:hidden">
+  <a href="https://wa.me/351926323222?text=Ol%C3%A1%2C%20gostava%20de%20marcar%20um%20hor%C3%A1rio." target="_blank" rel="noopener"
+    class="btn-tap inline-flex items-center gap-2 rounded bg-whats text-white px-6 py-3 text-[0.78rem] font-medium uppercase tracking-wide-luxe no-underline shadow-lg">WhatsApp</a>
+  <a href="booking.html" class="btn-tap inline-flex items-center gap-2 rounded bg-onyx text-cream px-6 py-3 text-[0.78rem] font-medium uppercase tracking-wide-luxe no-underline shadow-lg">Marcar</a>
 </div>
 
 <script>
   const revealEls = document.querySelectorAll('.reveal');
   if ('IntersectionObserver' in window) {
     const io = new IntersectionObserver((entries) => {
-      entries.forEach(e => { if (e.isIntersecting) { e.target.classList.add('in'); io.unobserve(e.target); } });
+      entries.forEach((e, i) => {
+        if (e.isIntersecting) {
+          setTimeout(() => e.target.classList.add('in'), i % 4 * 60);
+          io.unobserve(e.target);
+        }
+      });
     }, { threshold: 0.12 });
     revealEls.forEach(el => io.observe(el));
   } else {
