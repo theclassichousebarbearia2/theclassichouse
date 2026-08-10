@@ -113,6 +113,20 @@
   .service-pick-duration{ font-size:0.85rem; color:var(--ink-muted); }
   .service-pick-price{ font-weight:700; font-size:1.05rem; color:var(--ink); white-space:nowrap; align-self:center; }
 
+  /* Animações */
+  .modal-overlay:not(.hidden){ animation:fadeIn 0.3s cubic-bezier(0.4,0,0.2,1); }
+  .modal-overlay.hidden{ display:none !important; }
+  @keyframes fadeIn{ from{ opacity:0; } to{ opacity:1; } }
+  
+  .modal-sheet:not(.hidden){ animation:slideUp 0.4s cubic-bezier(0.34,1.56,0.64,1); }
+  @keyframes slideUp{ from{ transform:translateY(100%); opacity:0; } to{ transform:translateY(0); opacity:1; } }
+  
+  @media (min-width:760px){
+    .modal-sheet:not(.hidden){ animation:scaleIn 0.4s cubic-bezier(0.34,1.56,0.64,1) !important; }
+  }
+  @keyframes scaleIn{ from{ transform:scale(0.95); opacity:0; } to{ transform:scale(1); opacity:1; } }
+  
+  /* Booking Modal */
   .booking-modal{ animation:slideUp 0.4s cubic-bezier(0.34,1.56,0.64,1); }
   @keyframes slideUp{ from{ transform:translateY(100%); } to{ transform:translateY(0); } }
   .booking-info-row{ padding:14px 16px; background:var(--bg-alt); margin-bottom:14px; border-radius:3px; border-left:3px solid var(--brass); }
@@ -2284,9 +2298,7 @@ function renderSubServicePickerList(query){
 }
 
 function selectSubServiceFromPicker(serviceId, serviceName, price, duration){
-  const bookingModalOpen = !document.getElementById('booking-modal').classList.contains('hidden');
-  
-  if(bookingModalOpen) {
+  if(bookingState.isInBookingContext) {
     selectServiceBooking(serviceId, serviceName, price, duration || 30);
   } else {
     document.getElementById('sub-service').value = serviceId;
@@ -2302,7 +2314,8 @@ let bookingState = {
   clickedMin: null,
   selectedClientId: null,
   selectedClientName: null,
-  selectedServices: []
+  selectedServices: [],
+  isInBookingContext: false
 };
 
 function openBookingFromCalendar(barberId, dateStr, clickedMin) {
@@ -2330,6 +2343,7 @@ function openBookingFromCalendar(barberId, dateStr, clickedMin) {
 
 function closeBookingModal() {
   document.getElementById('booking-modal').classList.add('hidden');
+  bookingState.isInBookingContext = false;
 }
 
 function openClientPickerBooking() {
@@ -2385,11 +2399,16 @@ function selectClientBooking(clientId, name, phone) {
   bookingState.selectedClientName = name;
   document.getElementById('booking-client-label').textContent = name;
   document.getElementById('client-picker-modal').classList.add('hidden');
-  openBookingFromCalendar(bookingState.barberId, bookingState.dateStr, bookingState.clickedMin);
-  updateBookingConfirmBtn();
+  
+  // Delay pequeno para transição suave
+  setTimeout(() => {
+    openBookingFromCalendar(bookingState.barberId, bookingState.dateStr, bookingState.clickedMin);
+    updateBookingConfirmBtn();
+  }, 150);
 }
 
 function openServicePickerBooking() {
+  bookingState.isInBookingContext = true;
   closeBookingModal();
   const modal = document.getElementById('sub-service-picker-modal');
   modal.classList.remove('hidden');
@@ -2410,10 +2429,15 @@ function selectServiceBooking(serviceId, serviceName, price, duration) {
     });
   }
   
+  bookingState.isInBookingContext = false;
   document.getElementById('sub-service-picker-modal').classList.add('hidden');
-  openBookingFromCalendar(bookingState.barberId, bookingState.dateStr, bookingState.clickedMin);
-  renderBookingServices();
-  updateBookingConfirmBtn();
+  
+  // Delay pequeno para transição suave
+  setTimeout(() => {
+    openBookingFromCalendar(bookingState.barberId, bookingState.dateStr, bookingState.clickedMin);
+    renderBookingServices();
+    updateBookingConfirmBtn();
+  }, 150);
 }
 
 function renderBookingServices() {
