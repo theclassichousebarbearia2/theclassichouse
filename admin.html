@@ -113,6 +113,26 @@
   .service-pick-duration{ font-size:0.85rem; color:var(--ink-muted); }
   .service-pick-price{ font-weight:700; font-size:1.05rem; color:var(--ink); white-space:nowrap; align-self:center; }
 
+  .modal-overlay:not(.hidden){ animation:fadeIn 0.3s cubic-bezier(0.4,0,0.2,1); }
+  .modal-overlay.hidden{ display:none !important; }
+  @keyframes fadeIn{ from{ opacity:0; } to{ opacity:1; } }
+  .modal-sheet:not(.hidden){ animation:slideUp 0.4s cubic-bezier(0.34,1.56,0.64,1); }
+  @keyframes slideUp{ from{ transform:translateY(100%); opacity:0; } to{ transform:translateY(0); opacity:1; } }
+  @media (min-width:760px){ .modal-sheet:not(.hidden){ animation:scaleIn 0.4s cubic-bezier(0.34,1.56,0.64,1); } }
+  @keyframes scaleIn{ from{ transform:scale(0.95); opacity:0; } to{ transform:scale(1); opacity:1; } }
+  
+  .booking-section{ margin-bottom:28px; }
+  .booking-section-title{ font-family:'Fraunces',serif; font-weight:700; font-size:0.95rem; text-transform:uppercase; letter-spacing:0.1em; color:var(--brass); margin-bottom:12px; }
+  .booking-client-card, .booking-service-card{ display:flex; justify-content:space-between; align-items:center; padding:14px 16px; background:var(--bg-alt); border:2px solid var(--brass-dim); border-radius:4px; margin-bottom:10px; cursor:pointer; transition:all 0.25s cubic-bezier(0.4,0,0.2,1); }
+  .booking-client-card:hover, .booking-service-card:hover{ border-color:var(--brass); transform:translateX(2px); box-shadow:0 2px 6px rgba(0,0,0,0.08); }
+  .booking-client-card.selected, .booking-service-card.selected{ background:var(--brass-dim); border-color:var(--brass); }
+  .booking-client-info, .booking-service-info{ display:flex; flex-direction:column; flex:1; }
+  .booking-client-name, .booking-service-name{ font-weight:600; font-size:0.95rem; color:var(--ink); }
+  .booking-client-phone, .booking-service-time{ font-size:0.8rem; color:var(--ink-muted); margin-top:2px; }
+  .booking-service-price{ font-weight:700; font-size:0.95rem; color:var(--primary); }
+  .booking-action-btn{ display:flex; gap:8px; margin-top:20px; }
+  .booking-action-btn .btn{ flex:1; }
+
   .cal-grid{ display:grid; width:100%; }
   .cal-header-row{ display:grid; grid-template-columns:44px repeat(var(--n-barbers,2), 1fr); border-bottom:2px solid var(--brass-dim); position:sticky; top:0; background:var(--bg-alt); z-index:2; }
   .cal-corner{ border-right:2px solid var(--brass-dim); background:rgba(184,134,11,0.08); }
@@ -631,6 +651,39 @@
         <button class="btn btn-primary" style="width:100%; margin-top:20px;" onclick="submitQuickPayment()">Registar pagamento</button>
       </div>
     </div>
+
+    <div class="modal-overlay hidden" id="booking-modal">
+      <div class="modal-sheet">
+        <div class="modal-header">
+          <h3>Nova Marcação</h3>
+          <button class="modal-close" onclick="closeBookingModal()">×</button>
+        </div>
+        
+        <div class="booking-section">
+          <div class="booking-section-title">Data e Hora</div>
+          <div style="padding:12px 16px; background:var(--bg-alt); border-radius:4px; font-size:0.95rem;">
+            <span id="booking-datetime-display" style="color:var(--ink);"></span>
+          </div>
+        </div>
+
+        <div class="booking-section">
+          <div class="booking-section-title">Cliente</div>
+          <div id="booking-clients-list"></div>
+          <button class="btn btn-ghost" style="width:100%;" onclick="openClientPickerForBooking()">+ Novo cliente</button>
+        </div>
+
+        <div class="booking-section">
+          <div class="booking-section-title">Serviços</div>
+          <div id="booking-services-list"></div>
+          <button class="btn btn-ghost" style="width:100%;" onclick="openServicePickerForBooking()">+ Adicionar serviço</button>
+        </div>
+
+        <div class="booking-action-btn">
+          <button class="btn btn-ghost" onclick="closeBookingModal()">Cancelar</button>
+          <button class="btn btn-primary" id="booking-confirm-btn" onclick="confirmBooking()" disabled>Confirmar</button>
+        </div>
+      </div>
+    </div>
   </div>
 </div>
 
@@ -934,7 +987,7 @@ async function renderManualSlots(preferredMinutes){
   const now = new Date();
   const slots = [];
 
-  for (let start = openMin; start + duration <= closeMin; start += 15) {
+  for (let start = openMin; start + duration <= closeMin; start += 30) {
     const slotStart = new Date(dateStr + 'T' + minutesToTimeStr(start) + ':00');
     const slotEnd = new Date(slotStart.getTime() + duration*60000);
     if (isToday && slotStart < now) continue;
@@ -1151,8 +1204,8 @@ async function loadAgenda(dateStr){
       const rect = col.getBoundingClientRect();
       const clickY = e.clientY - rect.top;
       const minutesFromStart = clickY / pxPerMin;
-      let clickedMin = Math.round(minutesFromStart / 15) * 15 + CAL_START_HOUR*60;
-      openManualFormAt(barberId, dateStr, clickedMin);
+      let clickedMin = Math.round(minutesFromStart / 30) * 30 + CAL_START_HOUR*60;
+      openBookingModalFromCalendar(barberId, dateStr, clickedMin);
     });
   });
 
@@ -1310,7 +1363,7 @@ async function renderEditSlots(preferredMinutes){
   const now = new Date();
   const slots = [];
 
-  for (let start = openMin; start + duration <= closeMin; start += 15) {
+  for (let start = openMin; start + duration <= closeMin; start += 30) {
     const slotStart = new Date(dateStr + 'T' + minutesToTimeStr(start) + ':00');
     const slotEnd = new Date(slotStart.getTime() + duration*60000);
     if (isToday && slotStart < now) continue;
@@ -2252,6 +2305,207 @@ function selectSubServiceFromPicker(serviceId, serviceName, price){
   const btnLabel = `${serviceName} (€${Number(price).toFixed(0)})`;
   document.getElementById('sub-service-btn-label').textContent = btnLabel;
   closeSubServicePicker();
+}
+
+let currentBookingState = {
+  barberId: null,
+  dateStr: null,
+  clickedMin: null,
+  selectedClientId: null,
+  selectedClientName: null,
+  selectedServices: []
+};
+
+function openBookingModalFromCalendar(barberId, dateStr, clickedMin){
+  currentBookingState.barberId = barberId;
+  currentBookingState.dateStr = dateStr;
+  currentBookingState.clickedMin = clickedMin;
+  currentBookingState.selectedClientId = null;
+  currentBookingState.selectedClientName = null;
+  currentBookingState.selectedServices = [];
+  
+  const modal = document.getElementById('booking-modal');
+  modal.classList.remove('hidden');
+  
+  const hours = Math.floor(clickedMin / 60);
+  const mins = clickedMin % 60;
+  const timeStr = `${String(hours).padStart(2, '0')}:${String(mins).padStart(2, '0')}`;
+  
+  const dateObj = new Date(dateStr + 'T' + timeStr + ':00');
+  const displayDate = dateObj.toLocaleDateString('pt-PT', { weekday:'long', year:'numeric', month:'long', day:'numeric' });
+  const displayTime = dateObj.toLocaleTimeString('pt-PT', { hour:'2-digit', minute:'2-digit' });
+  
+  document.getElementById('booking-datetime-display').textContent = `${displayDate} às ${displayTime}`;
+  
+  renderBookingClientsList();
+  renderBookingServicesList();
+  updateBookingConfirmButton();
+  
+  modal.addEventListener('click', (e) => {
+    if(e.target === modal) closeBookingModal();
+  });
+}
+
+function closeBookingModal(){
+  const modal = document.getElementById('booking-modal');
+  modal.classList.add('hidden');
+}
+
+function renderBookingClientsList(){
+  const listEl = document.getElementById('booking-clients-list');
+  
+  if(!clients || clients.length === 0){
+    listEl.innerHTML = '<p style="color:var(--ink-muted); text-align:center; padding:10px;">Nenhum cliente disponível</p>';
+    return;
+  }
+  
+  listEl.innerHTML = clients.map(c => `
+    <div class="booking-client-card ${currentBookingState.selectedClientId === c.id ? 'selected' : ''}" 
+         onclick="selectClientForBooking('${c.id}', '${(c.name || '').replace(/'/g, "\\'")}', '${c.phone || ''}')">
+      <div class="booking-client-info">
+        <div class="booking-client-name">${c.name || 'Cliente'}</div>
+        <div class="booking-client-phone">${c.phone || 'Sem contacto'}</div>
+      </div>
+    </div>
+  `).join('');
+}
+
+function renderBookingServicesList(){
+  const listEl = document.getElementById('booking-services-list');
+  
+  if(currentBookingState.selectedServices.length === 0){
+    listEl.innerHTML = '';
+    return;
+  }
+  
+  listEl.innerHTML = currentBookingState.selectedServices.map(s => `
+    <div class="booking-service-card selected">
+      <div class="booking-service-info">
+        <div class="booking-service-name">${s.name || 'Serviço'}</div>
+        <div class="booking-service-time">${s.duration_minutes}min</div>
+      </div>
+      <div class="booking-service-price">${euro(s.price_eur)}</div>
+      <button class="btn btn-sm btn-ghost" style="margin-left:8px;" onclick="removeServiceFromBooking('${s.id}')">Remover</button>
+    </div>
+  `).join('');
+}
+
+function selectClientForBooking(clientId, clientName, phone){
+  currentBookingState.selectedClientId = clientId;
+  currentBookingState.selectedClientName = clientName;
+  renderBookingClientsList();
+  updateBookingConfirmButton();
+}
+
+function selectServiceForBooking(serviceId, serviceName, durationMin, priceEur){
+  const existing = currentBookingState.selectedServices.find(s => s.id === serviceId);
+  if(!existing){
+    currentBookingState.selectedServices.push({
+      id: serviceId,
+      name: serviceName,
+      duration_minutes: durationMin,
+      price_eur: priceEur
+    });
+  }
+  renderBookingServicesList();
+  updateBookingConfirmButton();
+}
+
+function removeServiceFromBooking(serviceId){
+  currentBookingState.selectedServices = currentBookingState.selectedServices.filter(s => s.id !== serviceId);
+  renderBookingServicesList();
+  updateBookingConfirmButton();
+}
+
+function updateBookingConfirmButton(){
+  const btn = document.getElementById('booking-confirm-btn');
+  const hasClient = currentBookingState.selectedClientId !== null;
+  const hasService = currentBookingState.selectedServices.length > 0;
+  btn.disabled = !(hasClient && hasService);
+}
+
+function openClientPickerForBooking(){
+  closeBookingModal();
+  const modal = document.getElementById('client-picker-modal');
+  modal.classList.remove('hidden');
+  renderClientPickerList('');
+  
+  const searchEl = document.getElementById('client-picker-search');
+  searchEl.onkeyup = (e) => renderClientPickerList(e.target.value);
+}
+
+function openServicePickerForBooking(){
+  const services = document.getElementById('sub-service-picker-modal');
+  if(!services){
+    console.warn('Service picker modal not found');
+    return;
+  }
+  
+  services.classList.remove('hidden');
+  renderSubServicePickerList('');
+  
+  const searchEl = document.getElementById('sub-service-picker-search');
+  if(searchEl){
+    searchEl.onkeyup = (e) => renderSubServicePickerList(e.target.value);
+  }
+}
+
+function selectClientFromPicker(clientId, name, phone){
+  selectClientForBooking(clientId, name, phone);
+  closeClientPicker();
+  openBookingModalFromCalendar(currentBookingState.barberId, currentBookingState.dateStr, currentBookingState.clickedMin);
+}
+
+function selectSubServiceFromPickerForBooking(serviceId, serviceName, price, durationMin){
+  selectServiceForBooking(serviceId, serviceName, durationMin, price);
+  closeSubServicePicker();
+  setTimeout(() => {
+    openBookingModalFromCalendar(currentBookingState.barberId, currentBookingState.dateStr, currentBookingState.clickedMin);
+  }, 100);
+}
+
+async function confirmBooking(){
+  const barberId = currentBookingState.barberId;
+  const dateStr = currentBookingState.dateStr;
+  const clickedMin = currentBookingState.clickedMin;
+  const clientId = currentBookingState.selectedClientId;
+  const services = currentBookingState.selectedServices;
+  
+  if(!clientId || services.length === 0){
+    alert('Seleciona cliente e serviços');
+    return;
+  }
+  
+  try {
+    const hours = Math.floor(clickedMin / 60);
+    const mins = clickedMin % 60;
+    const timeStr = `${String(hours).padStart(2, '0')}:${String(mins).padStart(2, '0')}`;
+    const startDateTime = new Date(dateStr + 'T' + timeStr + ':00');
+    
+    const totalDurationMin = services.reduce((sum, s) => sum + s.duration_minutes, 0);
+    const endDateTime = new Date(startDateTime.getTime() + totalDurationMin * 60000);
+    
+    for(const service of services){
+      const { error } = await sb.from('appointments').insert({
+        client_id: clientId,
+        barber_id: barberId,
+        service_id: service.id,
+        start_time: startDateTime.toISOString(),
+        end_time: new Date(startDateTime.getTime() + service.duration_minutes * 60000).toISOString(),
+        status: 'confirmado'
+      });
+      
+      if(error) throw error;
+    }
+    
+    closeBookingModal();
+    alert('Marcação criada com sucesso!');
+    if(currentAgendaDateStr) loadAgenda(currentAgendaDateStr);
+    
+  } catch(err){
+    console.error(err);
+    alert('Erro ao criar marcação: ' + err.message);
+  }
 }
 
 </script>
