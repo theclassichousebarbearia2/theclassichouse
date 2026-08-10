@@ -549,7 +549,7 @@
           <h3>Selecionar Serviço</h3>
           <button class="modal-close" onclick="closeSubServicePicker()">×</button>
         </div>
-        <input type="text" id="sub-service-picker-search" class="service-search-input" placeholder="Pesquisar serviço..." oninput="renderSubServicePickerList(this.value)">
+        <input type="text" id="sub-service-picker-search" class="service-search-input" placeholder="Pesquisar serviço..." oninput="renderSubServicePickerByContext(this.value)">
         <div id="sub-service-picker-list"></div>
       </div>
     </div>
@@ -2255,11 +2255,61 @@ function openSubServicePicker(){
   if(!modal) return;
   
   modal.classList.remove('hidden');
-  renderSubServicePickerList('');
+  renderSubServicePickerByContext('');
 }
 
 function closeSubServicePicker(){
   document.getElementById('sub-service-picker-modal').classList.add('hidden');
+  
+  if(currentBookingState.fromBookingModal){
+    currentBookingState.fromBookingModal = false;
+    openBookingModalFromCalendar(currentBookingState.barberId, currentBookingState.dateStr, currentBookingState.clickedMin);
+  }
+}
+
+function renderSubServicePickerByContext(query){
+  if(currentBookingState.fromBookingModal){
+    renderSubServicePickerListForBooking(query);
+  } else {
+    renderSubServicePickerList(query);
+  }
+}
+
+function renderSubServicePickerListForBooking(query){
+  const listEl = document.getElementById('sub-service-picker-list');
+  const q = query.trim().toLowerCase();
+  
+  let filtered = services;
+  if(q.length > 0){
+    filtered = services.filter(s => s.name.toLowerCase().includes(q) || (s.category && s.category.toLowerCase().includes(q)));
+  }
+
+  const byCat = {};
+  filtered.forEach(s => {
+    if(!byCat[s.category]) byCat[s.category] = [];
+    byCat[s.category].push(s);
+  });
+
+  if(Object.keys(byCat).length === 0) {
+    listEl.innerHTML = '<p style="color:var(--ink-muted); text-align:center; padding:20px;">Nenhum serviço encontrado.</p>';
+    return;
+  }
+
+  listEl.innerHTML = Object.entries(byCat).map(([cat, items]) => {
+    const color = servicePickerCategoryColor(cat);
+    return `
+      <div class="service-cat-title">${cat} <span class="count">${items.length}</span></div>
+      ${items.map(s => `
+        <div class="service-pick-card" style="border-left-color:${color};" onclick="selectServiceFromPickerForBooking('${s.id}', '${(s.name || '').replace(/'/g, "\'")}', ${s.price_eur || 0}, ${s.duration_minutes || 30})">
+          <div class="service-pick-info">
+            <div class="service-pick-name">${s.name?.split('|')[0].trim() || ''}</div>
+            <div class="service-pick-duration">${s.duration_minutes}min</div>
+          </div>
+          <div class="service-pick-price">${euro(s.price_eur)}</div>
+        </div>
+      `).join('')}
+    `;
+  }).join('');
 }
 
 function renderSubServicePickerList(query){
@@ -2313,7 +2363,8 @@ let currentBookingState = {
   clickedMin: null,
   selectedClientId: null,
   selectedClientName: null,
-  selectedServices: []
+  selectedServices: [],
+  fromBookingModal: false
 };
 
 function openBookingModalFromCalendar(barberId, dateStr, clickedMin){
@@ -2435,19 +2486,16 @@ function openClientPickerForBooking(){
 }
 
 function openServicePickerForBooking(){
-  const services = document.getElementById('sub-service-picker-modal');
-  if(!services){
-    console.warn('Service picker modal not found');
-    return;
-  }
+  currentBookingState.fromBookingModal = true;
   
-  services.classList.remove('hidden');
-  renderSubServicePickerList('');
+  const bookingModal = document.getElementById('booking-modal');
+  if(bookingModal) bookingModal.classList.add('hidden');
   
-  const searchEl = document.getElementById('sub-service-picker-search');
-  if(searchEl){
-    searchEl.onkeyup = (e) => renderSubServicePickerList(e.target.value);
-  }
+  const modal = document.getElementById('sub-service-picker-modal');
+  if(!modal) return;
+  
+  modal.classList.remove('hidden');
+  renderSubServicePickerByContext('');
 }
 
 function selectClientFromPicker(clientId, name, phone){
@@ -2456,12 +2504,9 @@ function selectClientFromPicker(clientId, name, phone){
   openBookingModalFromCalendar(currentBookingState.barberId, currentBookingState.dateStr, currentBookingState.clickedMin);
 }
 
-function selectSubServiceFromPickerForBooking(serviceId, serviceName, price, durationMin){
+function selectServiceFromPickerForBooking(serviceId, serviceName, price, durationMin){
   selectServiceForBooking(serviceId, serviceName, durationMin, price);
   closeSubServicePicker();
-  setTimeout(() => {
-    openBookingModalFromCalendar(currentBookingState.barberId, currentBookingState.dateStr, currentBookingState.clickedMin);
-  }, 100);
 }
 
 async function confirmBooking(){
