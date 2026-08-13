@@ -241,6 +241,14 @@ function normalizePhoneForLookup(value){
   return digits.slice(-9);
 }
 
+function toLocalDateStr(date){
+  const d = new Date(date);
+  const y = d.getFullYear();
+  const m = String(d.getMonth()+1).padStart(2,'0');
+  const day = String(d.getDate()).padStart(2,'0');
+  return `${y}-${m}-${day}`;
+}
+
 async function lookupMySubscription(){
   const phone = normalizePhoneForLookup(document.getElementById('sub-phone-input').value);
   const code = document.getElementById('sub-code-input').value.trim();
@@ -544,7 +552,7 @@ async function lookupMyBookings(){
   } catch (err) {
     console.error('lookupMyBookings:', err);
     resultsEl.innerHTML =
-      '<div class="msg err">Ocorreu um erro ao consultar as marcações. Tenta novamente.</div>';
+      `<div class="msg err">Ocorreu um erro ao consultar as marcações.<br><small>${escapeHtml(err?.message || String(err))}</small></div>`;
   }
 }
 
