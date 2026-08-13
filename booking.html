@@ -200,6 +200,7 @@ const SUPABASE_ANON_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBh
 const sb = window.supabase ? window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY) : null;
 
 const WHATSAPP_NUMBER = "351926323222";
+const NTFY_TOPIC = "theclassichouse-marcacoes-2026";
 
 const state = {
   services: [], barbers: [], hours: [], barberShifts: [],
@@ -525,6 +526,32 @@ function renderSummary(){
   `;
 }
 
+async function sendNtfyNotification({clientName, clientPhone, serviceName, barberName, dateFmt, time}) {
+  const message = `👤 Cliente: ${clientName}\n✂️ Serviço: ${serviceName}\n👨‍🦱 Barbeiro: ${barberName || 'Qualquer barbeiro'}\n📅 Data: ${dateFmt}\n⏰ Hora: ${time}\n📱 Telemóvel: ${clientPhone}`;
+
+  try {
+    const response = await fetch(`https://ntfy.sh/${encodeURIComponent(NTFY_TOPIC)}`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'text/plain; charset=utf-8',
+        'Title': '🔔 NOVA MARCAÇÃO — The Classic House',
+        'Priority': 'high',
+        'Tags': 'bell,scissors'
+      },
+      body: message
+    });
+
+    if (!response.ok) {
+      throw new Error(`ntfy respondeu com HTTP ${response.status}`);
+    }
+
+    console.log('Notificação ntfy enviada com sucesso.');
+  } catch (err) {
+    // A notificação nunca deve impedir a marcação de ser concluída.
+    console.error('Não foi possível enviar a notificação ntfy:', err);
+  }
+}
+
 async function submitBooking(){
   const name = document.getElementById('name-input').value.trim();
   const phone = document.getElementById('phone-input').value.trim();
@@ -554,6 +581,22 @@ async function submitBooking(){
       p_barber_preference: state.selectedBarber ? 'specific' : 'any',
     });
     if (error) throw error;
+
+    const serviceName = state.selectedService.name.split('|')[0].trim();
+    const barberName = slot.barberId ? (state.barbers.find(b => b.id === slot.barberId)?.name || '') : '';
+    const dateFmt = new Date(state.selectedDate+'T00:00:00').toLocaleDateString('pt-PT', { weekday:'long', day:'numeric', month:'long' });
+
+    // Envia a notificação depois de a marcação ter sido confirmada.
+    // Se o ntfy estiver indisponível, a marcação continua válida.
+    await sendNtfyNotification({
+      clientName: name,
+      clientPhone: phone,
+      serviceName,
+      barberName,
+      dateFmt,
+      time: slot.time
+    });
+
     showSuccess(name);
   } catch (err) {
     console.error(err);
