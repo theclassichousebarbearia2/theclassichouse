@@ -695,6 +695,17 @@
       </div>
     </div>
 
+    <div class="modal-overlay hidden" id="booking-service-picker-modal">
+      <div class="modal-sheet booking-service-picker-modal">
+        <div class="modal-header">
+          <h3>Selecionar serviço</h3>
+          <button class="modal-close" type="button" onclick="closeBookingServicePicker()">×</button>
+        </div>
+        <input type="text" id="booking-service-picker-search" class="service-search-input" placeholder="Pesquisar serviço...">
+        <div id="booking-service-picker-list"></div>
+      </div>
+    </div>
+
     <div class="modal-overlay hidden" id="scroll-calendar-modal">
       <div class="modal-sheet" style="max-width:100%; height:auto; display:flex; flex-direction:column;">
         <div class="modal-header">
@@ -1496,20 +1507,18 @@ async function sendNtfyNotification({clientName, clientPhone, serviceName, barbe
   const message = `👤 Cliente: ${clientName}\n✂️ Serviço: ${serviceName}\n👨‍🦱 Barbeiro: ${barberName || 'Qualquer barbeiro'}\n📅 Data: ${dateFmt}\n⏰ Hora: ${time}${clientPhone ? `\n📱 Telemóvel: ${clientPhone}` : ''}`;
 
   try {
-    const response = await fetch(`https://ntfy.sh/${encodeURIComponent(NTFY_TOPIC)}`, {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'text/plain; charset=utf-8',
-        'Title': '🔔 NOVA MARCAÇÃO — The Classic House',
-        'Priority': 'high',
-        'Tags': 'bell,scissors'
-      },
-      body: message
-    });
+    // GET /publish evita o preflight CORS causado pelos headers personalizados do ntfy.
+    // O ntfy documenta este endpoint como webhook de publicação via GET.
+    const url = new URL(`https://ntfy.sh/${encodeURIComponent(NTFY_TOPIC)}/publish`);
+    url.searchParams.set('message', message);
+    url.searchParams.set('title', '🔔 NOVA MARCAÇÃO — The Classic House');
+    url.searchParams.set('priority', 'high');
+    url.searchParams.set('tags', 'bell,scissors');
+
+    const response = await fetch(url.toString(), { method: 'GET', cache: 'no-store' });
     if (!response.ok) throw new Error(`ntfy respondeu com HTTP ${response.status}`);
     console.log('Notificação ntfy enviada com sucesso.');
   } catch (err) {
-    // Nunca impedir a criação da marcação por causa da notificação.
     console.error('Não foi possível enviar a notificação ntfy:', err);
   }
 }
@@ -2232,12 +2241,48 @@ function selectClientFromPicker(clientId, name, phone){
   closeClientPicker();
 }
 
-function addNewClientFromPicker(){
-  // Modal para criar novo cliente rápido
+async function addNewClientFromPicker(){
   const name = prompt('Nome do cliente:');
-  if(!name) return;
-  const phone = prompt('Telemóvel (opcional):');
-  selectClientFromPicker(null, name, phone || '');
+  if(!name || !name.trim()) return;
+  const phone = prompt('Telemóvel (opcional):') || '';
+
+  // Se estamos a criar uma marcação a partir do calendário,
+  // o cliente precisa existir na tabela clients para poder ser associado.
+  if (bookingState && bookingState.isInBookingContext) {
+    try {
+      const normalizedPhone = phone ? normalizePhone(phone) : null;
+      let client = null;
+
+      // Evita criar duplicados quando o telemóvel já existe.
+      if (normalizedPhone) {
+        const { data: existing } = await sb
+          .from('clients')
+          .select('id,name,phone')
+          .eq('phone', normalizedPhone)
+          .limit(1);
+        if (existing && existing.length) client = existing[0];
+      }
+
+      if (!client) {
+        const { data, error } = await sb
+          .from('clients')
+          .insert({ name: name.trim(), phone: normalizedPhone })
+          .select('id,name,phone')
+          .single();
+        if (error) throw error;
+        client = data;
+      }
+
+      selectClientBooking(client.id, client.name, client.phone || '');
+    } catch (err) {
+      console.error('Erro ao criar cliente:', err);
+      alert('Não foi possível criar o cliente. ' + (err.message || 'Tenta novamente.'));
+    }
+    return;
+  }
+
+  // Fluxo da marcação manual antiga.
+  selectClientFromPicker(null, name.trim(), phone.trim());
 }
 
 function toggleActionMenu(){
@@ -2425,6 +2470,7 @@ function showBookingModal() {
 
   document.getElementById('booking-datetime').textContent = `${displayDate} às ${displayTime}`;
   document.getElementById('booking-client-label').textContent = bookingState.selectedClientName || 'Selecionar cliente';
+  closeBookingServicePicker();
   renderBookingServices();
   updateBookingConfirmBtn();
   document.getElementById('booking-modal').classList.remove('hidden');
@@ -2495,35 +2541,86 @@ function selectClientBooking(clientId, name, phone) {
 
 function openServicePickerBooking() {
   bookingState.isInBookingContext = true;
-  closeBookingModal();
-  
-  const modal = document.getElementById('sub-service-picker-modal');
-  if(!modal) {
-    console.error('sub-service-picker-modal not found');
+  const modal = document.getElementById('booking-service-picker-modal');
+  if (!modal) {
+    console.error('booking-service-picker-modal not found');
     return;
   }
-  
-  const listEl = document.getElementById('sub-service-picker-list');
-  if(!listEl) {
-    console.error('sub-service-picker-list not found');
-    return;
-  }
-  
+
+  // O seletor de serviços da marcação fica fora das tabs para nunca ser
+  // escondido pela section "assinantes".
   modal.classList.remove('hidden');
-  
-  // Garantir que renderiza mesmo que services não esteja carregado
-  if(!services || services.length === 0) {
-    listEl.innerHTML = '<p style="color:var(--ink-muted); text-align:center; padding:20px;">Carregando serviços...</p>';
+
+  const searchEl = document.getElementById('booking-service-picker-search');
+  if (searchEl) {
+    searchEl.value = '';
+    searchEl.oninput = (e) => renderBookingServicePickerList(e.target.value);
+  }
+
+  renderBookingServicePickerList('');
+  setTimeout(() => searchEl?.focus(), 50);
+}
+
+function closeBookingServicePicker() {
+  const modal = document.getElementById('booking-service-picker-modal');
+  if (modal) modal.classList.add('hidden');
+}
+
+function renderBookingServicePickerList(query) {
+  const listEl = document.getElementById('booking-service-picker-list');
+  if (!listEl) return;
+
+  if (!services || services.length === 0) {
+    listEl.innerHTML = '<p style="color:var(--ink-muted); text-align:center; padding:20px;">Nenhum serviço disponível.</p>';
     return;
   }
-  
-  renderSubServicePickerList('');
-  
-  const searchEl = document.getElementById('sub-service-picker-search');
-  if(searchEl) {
-    searchEl.value = '';
-    searchEl.focus();
+
+  const q = String(query || '').trim().toLowerCase();
+  const filtered = services.filter(s =>
+    !q ||
+    (s.name || '').toLowerCase().includes(q) ||
+    (s.category || '').toLowerCase().includes(q)
+  );
+
+  if (!filtered.length) {
+    listEl.innerHTML = '<p style="color:var(--ink-muted); text-align:center; padding:20px;">Nenhum serviço encontrado.</p>';
+    return;
   }
+
+  const byCategory = {};
+  filtered.forEach(s => {
+    const cat = s.category || 'Outros';
+    if (!byCategory[cat]) byCategory[cat] = [];
+    byCategory[cat].push(s);
+  });
+
+  listEl.innerHTML = Object.entries(byCategory).map(([cat, items]) => {
+    const color = servicePickerCategoryColor(cat);
+    return `
+      <div class="service-cat-title">${cat} <span class="count">${items.length}</span></div>
+      ${items.map(s => `
+        <button type="button" class="service-pick-card" style="width:100%; text-align:left; border-left-color:${color};" onclick="selectBookingServiceFromPicker('${s.id}')">
+          <div class="service-pick-info">
+            <div class="service-pick-name">${(s.name || '').split('|')[0].trim()}</div>
+            <div class="service-pick-duration">${s.duration_minutes || 30}min</div>
+          </div>
+          <div class="service-pick-price">${euro(s.price_eur)}</div>
+        </button>
+      `).join('')}
+    `;
+  }).join('');
+}
+
+function selectBookingServiceFromPicker(serviceId) {
+  const s = services.find(x => x.id === serviceId);
+  if (!s) return;
+
+  selectServiceBooking(
+    s.id,
+    (s.name || '').split('|')[0].trim(),
+    s.price_eur,
+    s.duration_minutes || 30
+  );
 }
 
 function selectServiceBooking(serviceId, serviceName, price, duration) {
@@ -2538,7 +2635,7 @@ function selectServiceBooking(serviceId, serviceName, price, duration) {
   }
 
   bookingState.isInBookingContext = true;
-  document.getElementById('sub-service-picker-modal').classList.add('hidden');
+  closeBookingServicePicker();
 
   // Reabrir a janela sem apagar horário, cliente ou serviços já escolhidos.
   showBookingModal();
