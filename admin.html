@@ -90,6 +90,39 @@
   .legend-swatch{ display:inline-block; width:12px; height:12px; border-radius:2px; margin-right:5px; vertical-align:middle; }
 
   .cal-scroll{ overflow-x:hidden; overflow-y:auto; max-height:70vh; border:2px solid var(--brass-dim); background:var(--bg-alt); touch-action:pan-y; border-radius:3px; }
+/* Navegação do calendário: gesto horizontal fluido + carregamento rápido */
+#calendar-area{
+  position:relative;
+  overflow:hidden;
+  -webkit-user-select:none;
+  user-select:none;
+}
+.calendar-page{
+  width:100%;
+  transform:translate3d(0,0,0);
+  will-change:transform,opacity;
+  backface-visibility:hidden;
+  -webkit-backface-visibility:hidden;
+}
+.calendar-page.is-dragging{ transition:none !important; }
+.calendar-page.is-entering{
+  transition:transform 240ms cubic-bezier(.22,.61,.36,1), opacity 240ms ease !important;
+}
+.calendar-page.is-leaving{
+  transition:transform 210ms cubic-bezier(.22,.61,.36,1), opacity 210ms ease !important;
+}
+.calendar-page.is-snapback{
+  transition:transform 220ms cubic-bezier(.22,.61,.36,1), opacity 180ms ease !important;
+}
+.calendar-loading{
+  min-height:120px;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  color:var(--ink-muted);
+  font-size:.9rem;
+}
+
 
   .service-picker-btn{ width:100%; text-align:left; padding:11px 13px; background:var(--bg-alt); border:1px solid var(--brass-dim); color:var(--ink); font-size:0.95rem; cursor:pointer; display:flex; justify-content:space-between; align-items:center; border-radius:3px; transition:all 0.2s; }
   .service-picker-btn:hover{ border-color:var(--brass); background:rgba(184,134,11,0.05); }
@@ -768,6 +801,10 @@ let services = [], barbers = [], currentAppointments = [], businessHours = [], b
 let manualSelectedSlot = null; // { start: Date, end: Date }
 let editSelectedSlot = null;   // { start: Date, end: Date } — usado ao editar uma marcação existente
 let currentAgendaDateStr = null;
+const agendaCache = new Map();
+let agendaSwipeBusy = false;
+let swipeState = null;
+
 let touchStartX = null;
 
 function openSidebar(){
@@ -1199,8 +1236,9 @@ function buildCalendarSkeleton(dateStr){
   }).join('');
 
   return `
-    <div class="cal-scroll">
-      <div class="cal-grid">
+    <div class="calendar-page">
+      <div class="cal-scroll">
+        <div class="cal-grid">
         <div class="cal-header-row">
           <div class="cal-corner"></div>
           ${barbers.map(b => `<div class="cal-barber-header ${barberColorClass(b.name)}">${b.name}</div>`).join('')}
@@ -1208,17 +1246,15 @@ function buildCalendarSkeleton(dateStr){
         <div class="cal-body-row">
           ${gutterHtml}
           ${columnsHtml}
+          </div>
         </div>
       </div>
-    </div>
-  `;
+    `;
 }
 
-async function loadAgenda(dateStr){
-  currentAgendaDateStr = dateStr;
-  const areaEl = document.getElementById('calendar-area');
-  areaEl.innerHTML = buildCalendarSkeleton(dateStr);
-  document.getElementById('appt-detail-area').innerHTML = '';
+async function fetchAgendaAppointments(dateStr){
+  const cached = agendaCache.get(dateStr);
+  if (cached) return cached;
 
   const dayStart = new Date(dateStr+'T00:00:00');
   const dayEnd = new Date(dateStr+'T23:59:59');
@@ -1231,13 +1267,65 @@ async function loadAgenda(dateStr){
     .lte('start_time', dayEnd.toISOString())
     .order('start_time');
 
-  if (error) { areaEl.innerHTML = `<div class="msg err">Erro a carregar a agenda.</div>`; console.error(error); return; }
+  if (error) throw error;
+  const result = data || [];
+  agendaCache.set(dateStr, result);
+  return result;
+}
 
-  currentAppointments = data || [];
+function invalidateAgendaCache(dateStr){
+  if (dateStr) agendaCache.delete(dateStr);
+}
+
+async function prefetchAgendaDate(dateStr){
+  if (!dateStr || agendaCache.has(dateStr)) return;
+  try { await fetchAgendaAppointments(dateStr); } catch (_) {}
+}
+
+function adjacentDate(dateStr, delta){
+  const d = new Date(dateStr + 'T00:00:00');
+  d.setDate(d.getDate() + delta);
+  return toLocalDateStr(d);
+}
+
+async function loadAgenda(dateStr, transitionDir = 0){
+  currentAgendaDateStr = dateStr;
+  const areaEl = document.getElementById('calendar-area');
+
+  // Mantém a interface estável durante a troca de dia.
+  areaEl.dataset.loadingDate = dateStr;
+
+  let data;
+  try {
+    data = await fetchAgendaAppointments(dateStr);
+  } catch (error) {
+    areaEl.innerHTML = `<div class="msg err">Erro a carregar a agenda.</div>`;
+    console.error(error);
+    return;
+  }
+
+  // Se entretanto o utilizador mudou novamente de dia, ignora esta resposta antiga.
+  if (areaEl.dataset.loadingDate !== dateStr) return;
+
+  areaEl.innerHTML = buildCalendarSkeleton(dateStr);
+  document.getElementById('appt-detail-area').innerHTML = '';
+  currentAppointments = data;
+
+  const page = areaEl.querySelector('.calendar-page');
+  if (page && transitionDir) {
+    page.style.transform = `translate3d(${transitionDir > 0 ? 100 : -100}%,0,0)`;
+    page.style.opacity = '0.85';
+    requestAnimationFrame(() => {
+      requestAnimationFrame(() => {
+        page.classList.add('is-entering');
+        page.style.transform = 'translate3d(0,0,0)';
+        page.style.opacity = '1';
+      });
+    });
+  }
+
   const pxPerMin = calZoom;
 
-  // Clique num espaço vazio da coluna -> abre a marcação manual já com
-  // o barbeiro e a hora aproximada preenchidos.
   areaEl.querySelectorAll('.cal-column').forEach(col => {
     col.addEventListener('click', (e) => {
       const barberId = col.dataset.barberId;
@@ -1245,7 +1333,6 @@ async function loadAgenda(dateStr){
       const clickY = e.clientY - rect.top;
       const minutesFromStart = clickY / pxPerMin;
       let clickedMin = Math.round(minutesFromStart / 15) * 15 + CAL_START_HOUR*60;
-      // Mantém o horário dentro do dia/calendário.
       clickedMin = Math.max(CAL_START_HOUR*60, Math.min(clickedMin, CAL_END_HOUR*60 - 15));
       openBookingFromCalendar(barberId, dateStr, clickedMin);
     });
@@ -1279,29 +1366,105 @@ async function loadAgenda(dateStr){
     note.textContent = 'Sem marcações neste dia.';
     areaEl.appendChild(note);
   }
+
+  // Prepara os dois dias adjacentes em segundo plano.
+  prefetchAgendaDate(adjacentDate(dateStr, -1));
+  prefetchAgendaDate(adjacentDate(dateStr, 1));
 }
 
 function setupCalendarSwipe(){
   const areaEl = document.getElementById('calendar-area');
   if (areaEl.dataset.swipeAttached) return;
   areaEl.dataset.swipeAttached = '1';
-  areaEl.addEventListener('touchstart', (e) => { touchStartX = e.touches[0].clientX; }, { passive: true });
-  areaEl.addEventListener('touchcancel', () => { touchStartX = null; }, { passive: true });
+
+  areaEl.addEventListener('touchstart', (e) => {
+    if (agendaSwipeBusy || !e.touches.length) return;
+    const t = e.touches[0];
+    const page = areaEl.querySelector('.calendar-page');
+    swipeState = {
+      startX: t.clientX,
+      startY: t.clientY,
+      lastX: t.clientX,
+      horizontal: false,
+      page
+    };
+    if (page) page.classList.add('is-dragging');
+  }, { passive: true });
+
+  areaEl.addEventListener('touchmove', (e) => {
+    if (!swipeState || !e.touches.length || agendaSwipeBusy) return;
+    const t = e.touches[0];
+    const dx = t.clientX - swipeState.startX;
+    const dy = t.clientY - swipeState.startY;
+
+    if (!swipeState.horizontal) {
+      if (Math.abs(dx) < 8 && Math.abs(dy) < 8) return;
+      if (Math.abs(dx) <= Math.abs(dy)) {
+        swipeState = null;
+        return;
+      }
+      swipeState.horizontal = true;
+    }
+
+    // Dá a sensação de "puxar" o dia seguinte/anterior com o dedo.
+    if (swipeState.horizontal && swipeState.page) {
+      const resisted = dx * 0.62;
+      swipeState.lastX = t.clientX;
+      swipeState.page.style.transform = `translate3d(${resisted}px,0,0)`;
+      swipeState.page.style.opacity = String(Math.max(0.72, 1 - Math.abs(dx)/700));
+    }
+  }, { passive: true });
+
+  areaEl.addEventListener('touchcancel', () => {
+    if (swipeState?.page) {
+      swipeState.page.classList.remove('is-dragging');
+      swipeState.page.classList.add('is-snapback');
+      swipeState.page.style.transform = 'translate3d(0,0,0)';
+      swipeState.page.style.opacity = '1';
+    }
+    swipeState = null;
+  }, { passive: true });
+
   areaEl.addEventListener('touchend', (e) => {
-    if (touchStartX === null) return;
-    const dx = e.changedTouches[0].clientX - touchStartX;
-    touchStartX = null;
-    if (Math.abs(dx) < 60) return;
-    changeAgendaDay(dx < 0 ? 1 : -1);
+    if (!swipeState || agendaSwipeBusy) return;
+    const state = swipeState;
+    swipeState = null;
+
+    const dx = e.changedTouches[0].clientX - state.startX;
+    if (!state.horizontal || Math.abs(dx) < 55) {
+      if (state.page) {
+        state.page.classList.remove('is-dragging');
+        state.page.classList.add('is-snapback');
+        state.page.style.transform = 'translate3d(0,0,0)';
+        state.page.style.opacity = '1';
+      }
+      return;
+    }
+
+    agendaSwipeBusy = true;
+    const direction = dx < 0 ? 1 : -1; // 1 = próximo dia, -1 = dia anterior
+    const page = state.page;
+
+    if (page) {
+      page.classList.remove('is-dragging');
+      page.classList.add('is-leaving');
+      page.style.transform = `translate3d(${direction > 0 ? -105 : 105}%,0,0)`;
+      page.style.opacity = '0.15';
+    }
+
+    setTimeout(() => {
+      changeAgendaDay(direction, direction);
+      agendaSwipeBusy = false;
+    }, 185);
   }, { passive: true });
 }
 
-function changeAgendaDay(deltaDays){
+function changeAgendaDay(deltaDays, transitionDir = 0){
   const dateInput = document.getElementById('agenda-date');
   const current = new Date(dateInput.value + 'T00:00:00');
   current.setDate(current.getDate() + deltaDays);
   dateInput.value = toLocalDateStr(current);
-  loadAgenda(dateInput.value);
+  loadAgenda(dateInput.value, transitionDir);
 }
 
 function showApptDetail(appt, dateStr){
@@ -1461,18 +1624,21 @@ async function saveApptEdit(){
   if (error) { msgEl.innerHTML = '<div class="msg err">Erro ao guardar as alterações.</div>'; console.error(error); return; }
 
   document.getElementById('appt-detail-area').innerHTML = '';
+  invalidateAgendaCache(currentAgendaDateStr);
   loadAgenda(currentAgendaDateStr);
 }
 
 async function markPaid(appointmentId, price, dateStr){
   const { error } = await sb.from('payments').insert({ appointment_id: appointmentId, amount_eur: price || 0, method: 'dinheiro' });
   if (error) { console.error(error); alert('Erro ao marcar como pago.'); return; }
+  invalidateAgendaCache(dateStr);
   loadAgenda(dateStr);
 }
 
 async function unmarkPaid(paymentId, dateStr){
   const { error } = await sb.from('payments').delete().eq('id', paymentId);
   if (error) { console.error(error); alert('Erro ao desfazer o pagamento.'); return; }
+  invalidateAgendaCache(dateStr);
   loadAgenda(dateStr);
 }
 
@@ -1497,6 +1663,7 @@ async function cancelAppointment(appointmentId, dateStr){
   const { error } = await sb.from('appointments').update({ status: 'cancelled' }).eq('id', appointmentId);
   if (error) { console.error(error); alert('Erro ao cancelar.'); return; }
   document.getElementById('appt-detail-area').innerHTML = '';
+  invalidateAgendaCache(dateStr);
   loadAgenda(dateStr);
 }
 
@@ -1574,7 +1741,9 @@ async function submitManualAppointment(){
     document.getElementById('manual-slots-area').innerHTML = '';
     manualSelectedSlot = null;
     toggleManualForm();
-    loadAgenda(document.getElementById('agenda-date').value);
+    const manualAgendaDate = document.getElementById('agenda-date').value;
+    invalidateAgendaCache(manualAgendaDate);
+    loadAgenda(manualAgendaDate);
   } catch (err) {
     console.error(err);
     const raw = err.message || '';
