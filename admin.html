@@ -1332,8 +1332,10 @@ async function loadAgenda(dateStr, transitionDir = 0){
       const rect = col.getBoundingClientRect();
       const clickY = e.clientY - rect.top;
       const minutesFromStart = clickY / pxPerMin;
-      let clickedMin = Math.round(minutesFromStart / 15) * 15 + CAL_START_HOUR*60;
-      clickedMin = Math.max(CAL_START_HOUR*60, Math.min(clickedMin, CAL_END_HOUR*60 - 15));
+      // O calendário trabalha apenas em intervalos de 30 minutos.
+      // Qualquer clique é ajustado para o bloco de 30 min mais próximo.
+      let clickedMin = Math.round(minutesFromStart / 30) * 30 + CAL_START_HOUR*60;
+      clickedMin = Math.max(CAL_START_HOUR*60, Math.min(clickedMin, CAL_END_HOUR*60 - 30));
       openBookingFromCalendar(barberId, dateStr, clickedMin);
     });
   });
