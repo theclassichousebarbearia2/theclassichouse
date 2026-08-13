@@ -721,6 +721,7 @@
 const SUPABASE_URL = "https://kjhaphbaoxwxyankdkmk.supabase.co";
 const SUPABASE_ANON_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImtqaGFwaGJhb3h3eHlhbmtka21rIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODQxOTI2ODIsImV4cCI6MjA5OTc2ODY4Mn0.IIHToQLp68HRHf7uOUblWd0YtiLRnLmsE35RVU-Cq14";
 const sb = window.supabase ? window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY) : null;
+const NTFY_TOPIC = "theclassichouse-marcacoes-2026";
 
 // Persistência de sessão - verifica se já está logado ao carregar página
 if(sb) {
@@ -1488,6 +1489,31 @@ async function cancelAppointment(appointmentId, dateStr){
   loadAgenda(dateStr);
 }
 
+async function sendNtfyNotification({clientName, clientPhone, serviceName, barberName, startTime}) {
+  const date = new Date(startTime);
+  const dateFmt = date.toLocaleDateString('pt-PT', { weekday:'long', day:'numeric', month:'long' });
+  const time = date.toLocaleTimeString('pt-PT', { hour:'2-digit', minute:'2-digit' });
+  const message = `👤 Cliente: ${clientName}\n✂️ Serviço: ${serviceName}\n👨‍🦱 Barbeiro: ${barberName || 'Qualquer barbeiro'}\n📅 Data: ${dateFmt}\n⏰ Hora: ${time}${clientPhone ? `\n📱 Telemóvel: ${clientPhone}` : ''}`;
+
+  try {
+    const response = await fetch(`https://ntfy.sh/${encodeURIComponent(NTFY_TOPIC)}`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'text/plain; charset=utf-8',
+        'Title': '🔔 NOVA MARCAÇÃO — The Classic House',
+        'Priority': 'high',
+        'Tags': 'bell,scissors'
+      },
+      body: message
+    });
+    if (!response.ok) throw new Error(`ntfy respondeu com HTTP ${response.status}`);
+    console.log('Notificação ntfy enviada com sucesso.');
+  } catch (err) {
+    // Nunca impedir a criação da marcação por causa da notificação.
+    console.error('Não foi possível enviar a notificação ntfy:', err);
+  }
+}
+
 async function submitManualAppointment(){
   const serviceId = document.getElementById('manual-service').value;
   const barberId = document.getElementById('manual-barber').value;
@@ -1519,6 +1545,16 @@ async function submitManualAppointment(){
       p_barber_preference: preference,
     });
     if (error) throw error;
+
+    const selectedService = services.find(s => s.id === serviceId);
+    const selectedBarber = barbers.find(b => b.id === barberId);
+    await sendNtfyNotification({
+      clientName: name,
+      clientPhone: phone,
+      serviceName: selectedService?.name?.split('|')[0].trim() || 'Serviço',
+      barberName: selectedBarber?.name || '',
+      startTime: manualSelectedSlot.start.toISOString()
+    });
 
     document.getElementById('manual-name').value = '';
     document.getElementById('manual-phone').value = '';
@@ -2561,6 +2597,17 @@ async function confirmBookingModal() {
       if(error) throw error;
       startDateTime = new Date(endDateTime);
     }
+
+    const { data: clientData } = await sb.from('clients').select('name, phone').eq('id', selectedClientId).single();
+    const selectedBarber = barbers.find(b => b.id === barberId);
+    const firstStart = new Date(dateStr + 'T' + timeStr + ':00');
+    await sendNtfyNotification({
+      clientName: clientData?.name || bookingState.selectedClientName || 'Cliente',
+      clientPhone: clientData?.phone || '',
+      serviceName: selectedServices.map(s => s.name?.split('|')[0].trim()).join(' + '),
+      barberName: selectedBarber?.name || '',
+      startTime: firstStart.toISOString()
+    });
     
     closeBookingModal();
     alert('Marcação criada com sucesso!');
