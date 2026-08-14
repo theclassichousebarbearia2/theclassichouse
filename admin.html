@@ -358,6 +358,197 @@
 .service-pick-duration { font-size: 0.8rem; color: var(--ink-muted); }
 .service-pick-price { font-weight: 600; color: var(--primary); font-family: 'IBM Plex Mono', monospace; }
 
+
+/* ==========================================================
+   THE CLASSIC HOUSE — ADMIN APP UI
+   Camada visual: mantém a lógica existente intacta.
+   ========================================================== */
+:root{
+  --bg:#f4eee4;
+  --bg-alt:#fffdf9;
+  --bg-card:#ffffff;
+  --ink:#241a12;
+  --ink-muted:#7b6c5b;
+  --brass:#b58a45;
+  --brass-strong:#c59a51;
+  --brass-dim:rgba(181,138,69,.22);
+  --primary:#16110d;
+  --primary-hover:#2b2017;
+  --line:#ded3c3;
+  --ok:#4f8157;
+  --err:#a84434;
+}
+body{
+  background:
+    radial-gradient(circle at 15% 0%,rgba(181,138,69,.08),transparent 25%),
+    linear-gradient(180deg,#f8f3eb 0%,#f0e8dc 100%);
+  color:var(--ink);
+}
+.wrap{max-width:1440px;padding:22px 28px 80px;margin:0 auto}
+.top-row{
+  min-height:64px;margin-bottom:22px;padding:0 4px;
+  border-bottom:1px solid var(--line);
+}
+.top-left{gap:14px}
+.top-left .back{font-size:.72rem;letter-spacing:.08em}
+.top-left h1{font-family:'IBM Plex Sans',sans-serif;font-size:1.65rem;font-weight:600;letter-spacing:-.03em}
+#logout-btn{border-radius:10px}
+
+/* Desktop app navigation */
+@media(min-width:761px){
+  #dashboard-view{padding-left:238px;position:relative}
+  #dashboard-view .tabs{
+    position:fixed;z-index:30;left:18px;top:18px;bottom:18px;
+    width:210px;margin:0;padding:20px 14px;
+    display:flex;flex-direction:column;align-items:stretch;gap:4px;
+    border:1px solid #3b2b20;border-radius:20px;
+    background:linear-gradient(180deg,#24180f,#17100c);
+    box-shadow:0 16px 42px rgba(36,24,15,.18);
+    overflow:auto;
+  }
+  #dashboard-view .tabs::before{
+    content:"THE CLASSIC HOUSE";
+    display:block;padding:4px 10px 18px;
+    color:#e1bd79;font-size:11px;font-weight:700;
+    letter-spacing:.18em;white-space:nowrap;
+  }
+  #dashboard-view .tabs::after{
+    content:"BARBEARIA";
+    display:block;position:absolute;top:47px;left:24px;
+    color:#bcae9e;font-size:8px;letter-spacing:.25em;
+  }
+  #dashboard-view .tab-btn{
+    width:100%;margin:0;padding:12px 13px;border:0;border-radius:10px;
+    text-align:left;text-transform:none;letter-spacing:0;
+    font-family:'IBM Plex Sans',sans-serif;font-size:.88rem;
+    color:#cdbfaf;display:flex;align-items:center;gap:10px;
+  }
+  #dashboard-view .tab-btn::before{
+    content:"";
+    width:7px;height:7px;border:1px solid rgba(225,189,121,.6);
+    border-radius:50%;flex:none;
+  }
+  #dashboard-view .tab-btn:hover{background:rgba(255,255,255,.06);color:#fff}
+  #dashboard-view .tab-btn.active{
+    color:#f1d59d;background:rgba(181,138,69,.17);
+    border:1px solid rgba(225,189,121,.18);
+  }
+  #dashboard-view .tab-btn.active::before{background:#d7b36d;border-color:#d7b36d}
+}
+
+/* Cards / controls */
+input,select,textarea{
+  background:#fffdfa!important;border-color:#d7cdbd!important;
+  border-radius:10px!important;min-height:44px;
+}
+input:focus,select:focus,textarea:focus{
+  outline:3px solid rgba(181,138,69,.12)!important;border-color:var(--brass)!important;
+}
+.btn{border-radius:10px;box-shadow:none}
+.btn-primary{box-shadow:0 7px 18px rgba(22,17,13,.12)}
+.btn-ghost{background:#fffdfa}
+.manual-form,.custom-range,.stat-card,.appt-detail{
+  border:1px solid var(--line);background:#fffdfa;border-radius:14px;
+  box-shadow:0 7px 22px rgba(39,28,15,.045);
+}
+.manual-form{padding:20px}
+.stat-grid{gap:12px}
+.stat-card{padding:18px}
+.stat-card .value{font-size:1.9rem}
+
+/* Agenda toolbar */
+.cal-toolbar{background:#fffdfa;border:1px solid var(--line);border-radius:14px;padding:14px 16px;box-shadow:0 7px 22px rgba(39,28,15,.045)}
+.cal-toolbar label{margin:0}
+.zoom-controls{background:#f3ede3;padding:5px;border-radius:10px}
+.zoom-controls .btn{background:#fffdfa}
+
+/* Calendar shell */
+.cal-scroll{
+  border:1px solid var(--line)!important;border-radius:16px!important;
+  background:#fffdfa!important;box-shadow:0 10px 30px rgba(39,28,15,.07);
+}
+.cal-header-row{
+  border-bottom:1px solid var(--line)!important;
+  background:#fbf7f0!important;
+}
+.cal-corner{border-right:1px solid var(--line)!important;background:#f6efe4!important}
+.cal-barber-header{
+  border-right:1px solid var(--line)!important;padding:13px 6px!important;
+}
+.cal-body-row{background:#fff}
+.cal-gutter{border-right:1px solid var(--line)!important;background:#faf6ef!important}
+.cal-column{border-right:1px solid var(--line)!important}
+.cal-appt{
+  border-radius:9px!important;padding:6px 8px!important;
+  box-shadow:0 3px 9px rgba(25,18,10,.08);
+}
+.cal-appt:hover{box-shadow:0 7px 16px rgba(25,18,10,.14)!important}
+
+/* 30-minute grid remains visible, but more subtle */
+.cal-column{
+  background-image:
+    linear-gradient(to bottom,rgba(181,138,69,.18) 1px,transparent 1px),
+    linear-gradient(to bottom,rgba(181,138,69,.07) 1px,transparent 1px)!important;
+}
+
+/* Modal: app-like bottom sheet on mobile / centered dialog on desktop */
+.modal-overlay{background:rgba(20,14,9,.58)!important;backdrop-filter:blur(3px)}
+.modal-sheet{
+  background:#fffdfa!important;border:1px solid #d7cdbd!important;
+  border-radius:18px!important;padding:22px!important;
+  box-shadow:0 22px 60px rgba(0,0,0,.22)!important;
+}
+.modal-header{padding-bottom:8px;border-bottom:1px solid #eee6da}
+.modal-header h3{font-family:'IBM Plex Sans',sans-serif;font-size:1.1rem;font-weight:600}
+.modal-close{width:36px;height:36px;border-radius:10px;background:#f2ece3}
+.booking-info-row{border-radius:12px!important;background:#f4ede2!important;border-left:4px solid var(--brass)!important}
+.booking-section-header{font-family:'IBM Plex Sans',sans-serif;font-size:.72rem;margin-top:22px}
+
+/* Service / client pickers */
+.service-pick-card,.client-pick-item{
+  border-radius:10px!important;margin:4px 0!important;
+  background:#fff!important;border-bottom:1px solid #eee7dd!important;
+}
+.service-pick-card:hover,.client-pick-item:hover{
+  background:#f7f1e7!important;transform:none!important;
+}
+
+/* Floating action */
+.fab-main{
+  width:58px;height:58px;background:var(--primary)!important;color:#d9b875!important;
+  box-shadow:0 10px 26px rgba(0,0,0,.2)!important;
+}
+.fab-menu{border:1px solid var(--line);border-radius:14px!important}
+
+/* Mobile: app navigation + compact header */
+@media(max-width:760px){
+  .wrap{padding:12px 12px 92px}
+  .top-row{
+    position:sticky;top:0;z-index:25;
+    margin:0 -12px 14px;padding:10px 12px;
+    background:rgba(248,243,235,.94);backdrop-filter:blur(12px);
+  }
+  .top-left h1{font-size:1.25rem}
+  .hamburger-btn{
+    display:inline-flex!important;border-radius:10px;background:#fffdfa;
+  }
+  #dashboard-view{padding:0}
+  .cal-toolbar{padding:12px;align-items:center}
+  .cal-scroll{max-height:68vh}
+  .floating-action-menu{right:18px;bottom:78px}
+  .modal-sheet{border-radius:18px 18px 0 0!important}
+}
+
+/* Small visual helpers for rows */
+.client-row,.subscription-row{padding:14px 10px;border-bottom:1px solid #eee7dd}
+.client-row:hover,.subscription-row:hover{background:#faf6ef;margin:0;border-radius:10px}
+.client-avatar{background:#f0e5d5;border-color:#d7c29f}
+.msg{border-radius:10px}
+
+/* Make the agenda the visual focal point */
+#tab-agenda{animation:tchAppFade .18s ease}
+@keyframes tchAppFade{from{opacity:.85;transform:translateY(4px)}to{opacity:1;transform:none}}
+
 </style>
 </head>
 <body>
@@ -379,7 +570,7 @@
       <button class="hamburger-btn" onclick="openSidebar()">☰</button>
       <div>
         <a class="back" href="index.html">&larr; The Classic House Barbearia</a>
-        <h1 style="margin-top:6px;">Gestão</h1>
+        <h1 style="margin-top:6px;">Gestão</h1><div style="font-size:.72rem;color:var(--ink-muted);margin-top:2px;">Agenda · Clientes · Assinaturas · Relatórios</div>
       </div>
     </div>
     <button class="btn btn-ghost hidden" id="logout-btn" onclick="logout()">Sair</button>
@@ -1100,29 +1291,7 @@ async function renderManualSlots(preferredMinutes){
   if (closestBtn) closestBtn.click();
 }
 
-async function openBookingFromCalendar(barberId, dateStr, clickedMin){
-  const formEl = document.getElementById('manual-form');
-  formEl.classList.remove('hidden');
-  document.getElementById('manual-msg').innerHTML = '';
-  document.getElementById('manual-date').value = dateStr;
-  document.getElementById('manual-barber').value = barberId;
-
-  const shift = shiftForBarberOnDate(barberId, dateStr);
-  if (shift && (shift.is_off || !shift.start_time || !shift.end_time)) {
-    if (!confirm('Este barbeiro está de folga neste dia. Queres marcar mesmo assim?')) { formEl.classList.add('hidden'); return; }
-  } else if (shift && shift.start_time && shift.end_time) {
-    const shiftStartMin = timeStrToMinutes(shift.start_time);
-    const shiftEndMin = timeStrToMinutes(shift.end_time);
-    if (clickedMin < shiftStartMin || clickedMin >= shiftEndMin) {
-      if (!confirm('Esta hora está fora do turno normal deste barbeiro. Queres marcar mesmo assim?')) { formEl.classList.add('hidden'); return; }
-    }
-  }
-
-  await renderManualSlots(clickedMin);
-  formEl.scrollIntoView({ behavior: 'smooth', block: 'center' });
-}
-
-function toggleShiftsPanel(){
+async function toggleShiftsPanel(){
   const panelEl = document.getElementById('shifts-panel');
   panelEl.classList.toggle('hidden');
   if (!panelEl.classList.contains('hidden')) renderShiftsPanel();
