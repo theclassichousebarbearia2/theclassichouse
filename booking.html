@@ -155,14 +155,6 @@ input[type=date],input[type=text],input[type=tel],input[type=email]{
 .msg{border-radius:11px}
 .footer{border-top-color:#d8cebf}
 
-/* Corrige imagens de logo inexistentes sem mostrar o ícone quebrado do navegador */
-.logo-fallback{display:none}
-.brand img.logo-missing{display:none}
-.brand img.logo-missing + .logo-fallback{
-  display:flex;width:48px;height:48px;align-items:center;justify-content:center;
-  border:1px solid rgba(217,184,117,.38);color:var(--gold2);
-  font-family:Georgia,serif;font-size:20px;background:#0b0b0b;
-}
 
 /* Área de marcações: cartão mais limpo e consistente */
 #my-bookings-panel .my-booking-card,
@@ -190,7 +182,7 @@ img,video{max-width:100%}
 <body>
 <div class="wrap">
   <div class="topbar">
-    <a class="brand" href="index.html"><img src="images/logo2.PNG" alt="The Classic House Barbearia" onerror="this.classList.add('logo-missing')"><span>The Classic House</span></a>
+    <a class="brand" href="index.html"><img src="images/logo2.PNG" alt="The Classic House Barbearia"><span>The Classic House</span></a>
     <a class="back" href="index.html">← Início</a>
   </div>
 
