@@ -71,6 +71,7 @@ input:focus{outline:2px solid rgba(184,138,67,.18);border-color:var(--gold)}
 .primary{background:var(--black);color:var(--gold2);box-shadow:0 8px 18px rgba(0,0,0,.12)}
 .ghost{background:#fff;border-color:#d6cec2;color:var(--ink)}
 .whats{background:var(--green);color:#fff;width:100%}
+.calendar{background:var(--black);color:var(--gold2);border-color:var(--black);width:100%;margin-bottom:9px}
 .btn:disabled{opacity:.45;cursor:not-allowed;transform:none}
 .msg{font-size:11px;padding:12px 13px;border-radius:8px;margin-top:11px}
 .err{background:#fff1ee;color:var(--red);border:1px solid #e8c4bc}
@@ -155,7 +156,6 @@ input[type=date],input[type=text],input[type=tel],input[type=email]{
 .msg{border-radius:11px}
 .footer{border-top-color:#d8cebf}
 
-
 /* Área de marcações: cartão mais limpo e consistente */
 #my-bookings-panel .my-booking-card,
 #my-bookings-results .my-booking-card{
@@ -167,16 +167,25 @@ input[type=date],input[type=text],input[type=tel],input[type=email]{
 *{max-width:100%}
 img,video{max-width:100%}
 @media(max-width:600px){
-  .wrap{padding-left:14px;padding-right:14px}
-  .topbar{margin-left:-14px;margin-right:-14px;padding-left:14px;padding-right:14px}
-  .head{padding-top:30px}
-  .quick{display:grid;grid-template-columns:1fr}
-  .quick .btn{width:100%}
+  html,body{overflow-x:hidden}
+  .wrap{width:100%;max-width:100%;padding-left:14px;padding-right:14px}
+  .topbar{width:calc(100% + 28px);margin-left:-14px;margin-right:-14px;padding-left:14px;padding-right:14px}
+  .brand{min-width:0;flex:1}
+  .brand span:last-child{white-space:nowrap}
+  .back{flex:0 0 auto}
+  .head{padding-top:30px;overflow:hidden}
+  .head h1{font-size:clamp(37px,11vw,50px);overflow-wrap:anywhere}
+  .subtitle{max-width:100%}
+  .quick{display:grid;grid-template-columns:minmax(0,1fr)}
+  .quick .btn{width:100%;min-width:0;white-space:normal;line-height:1.25}
   .panel{padding:16px}
   .slots,.reslots{grid-template-columns:repeat(3,minmax(0,1fr))}
-  .slot,.reslot{font-size:12px}
+  .slot,.reslot{font-size:12px;min-width:0}
+  .card,.panel,section{min-width:0}
 }
 
+  body{overflow-x:hidden}
+  .wrap{overflow-x:clip}
 </style>
 </head>
 <body>
@@ -261,6 +270,7 @@ img,video{max-width:100%}
       <div class="eyebrow">Marcação confirmada</div>
       <h2>Até já! 🪒</h2>
       <div id="success-summary" style="text-align:left;margin:20px 0"></div>
+      <a class="btn calendar" id="google-calendar-link" target="_blank" rel="noopener">📅 Adicionar ao Google Calendar</a>
       <a class="btn whats" id="whats-confirm-link" target="_blank" rel="noopener">Avisar a barbearia no WhatsApp</a>
       <div style="margin-top:14px"><a class="btn ghost" href="index.html">Voltar ao início</a></div>
     </div>
@@ -451,12 +461,29 @@ async function submitBooking(){
   }catch(e){console.error(e);msg.innerHTML=`<div class="msg err">Não foi possível confirmar a marcação. Tenta novamente.<br><small>${escapeHtml(e.message||"")}</small></div>`;btn.disabled=false;btn.textContent="Confirmar marcação"}
 }
 
+function googleCalendarUrl({serviceName,barberName,start,end,clientName,phone}){
+  const pad=n=>String(n).padStart(2,"0");
+  const gDate=d=>`${d.getUTCFullYear()}${pad(d.getUTCMonth()+1)}${pad(d.getUTCDate())}T${pad(d.getUTCHours())}${pad(d.getUTCMinutes())}${pad(d.getUTCSeconds())}Z`;
+  const title=`The Classic House Barbearia — ${serviceName}`;
+  const details=`Cliente: ${clientName}\nServiço: ${serviceName}\nBarbeiro: ${barberName}\nTelemóvel: ${phone}\n\nMarcação feita online.`;
+  const params=new URLSearchParams({action:"TEMPLATE",text:title,dates:`${gDate(start)}/${gDate(end)}`,details,location:"The Classic House Barbearia, Lisboa"});
+  return `https://calendar.google.com/calendar/render?${params.toString()}`;
+}
+
 function showSuccess(name){
   for(let i=1;i<=4;i++)document.getElementById("step-"+i).classList.add("hidden");
   document.getElementById("step-success").classList.remove("hidden");
   const s=state.selectedService,slot=state.selectedSlot,barber=state.barbers.find(b=>b.id===slot.barberId)?.name||"Qualquer barbeiro",date=new Date(state.selectedDate+"T00:00:00").toLocaleDateString("pt-PT",{weekday:"long",day:"numeric",month:"long"});
   document.getElementById("success-summary").innerHTML=`<div class="summary-row"><span>Serviço</span><span>${escapeHtml(s.name.split("|")[0].trim())}</span></div><div class="summary-row"><span>Barbeiro</span><span>${escapeHtml(barber)}</span></div><div class="summary-row"><span>Quando</span><span>${date}, ${slot.time}</span></div>`;
   document.getElementById("whats-confirm-link").href=`https://wa.me/${WHATSAPP_NUMBER}?text=${encodeURIComponent(`Nova marcação: ${name} — ${s.name.split("|")[0].trim()} — ${date} às ${slot.time} — ${barber}`)}`;
+  document.getElementById("google-calendar-link").href=googleCalendarUrl({
+    serviceName:s.name.split("|")[0].trim(),
+    barberName:barber,
+    start:slot.start,
+    end:slot.end,
+    clientName:name,
+    phone:document.getElementById("phone-input").value.trim()
+  });
   window.scrollTo({top:0,behavior:"smooth"})
 }
 
