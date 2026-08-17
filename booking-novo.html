@@ -1,0 +1,1115 @@
+<!DOCTYPE html>
+<html lang="pt-PT">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+<meta name="theme-color" content="#0e0c0a">
+<meta name="description" content="Marque o seu corte ou barba na The Classic House Barbearia, em Lisboa. Escolha serviço, barbeiro, dia e horário disponível online.">
+<link rel="canonical" href="https://theclassichousebarbearia.com/booking.html">
+<link rel="preload" as="image" href="/images/logo2.PNG?v=20260817">
+<link rel="preload" as="image" href="/images/team-bruno.jpg">
+<title>Marcar horário — The Classic House Barbearia</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:wght@600;700&family=IBM+Plex+Sans:wght@400;500;600&display=swap" rel="stylesheet">
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<style>
+
+:root{
+  --bg:#0e0c0a;
+  --bg-soft:#15120f;
+  --surface:#f6f0e7;
+  --surface-2:#fffdf9;
+  --surface-3:#eee5d8;
+  --ink:#19140f;
+  --muted:#756b60;
+  --muted-dark:#aaa095;
+  --gold:#c7a15a;
+  --gold-soft:#e4c98e;
+  --line:rgba(31,23,16,.13);
+  --line-dark:rgba(255,255,255,.12);
+  --green:#39724d;
+  --red:#a54738;
+  --shadow:0 24px 70px rgba(0,0,0,.22);
+  --shadow-soft:0 12px 34px rgba(32,22,12,.08);
+  --ease:cubic-bezier(.22,.61,.36,1);
+}
+*{box-sizing:border-box}
+html{scroll-behavior:smooth;background:var(--bg)}
+body{
+  margin:0;
+  min-height:100vh;
+  background:
+    radial-gradient(circle at 72% -5%,rgba(199,161,90,.17),transparent 28rem),
+    linear-gradient(180deg,#0e0c0a 0 340px,#ece4d8 340px 100%);
+  color:var(--ink);
+  font-family:"IBM Plex Sans",system-ui,-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;
+  -webkit-font-smoothing:antialiased;
+  text-rendering:optimizeLegibility;
+  overflow-x:hidden;
+}
+button,input{font:inherit}
+button{-webkit-tap-highlight-color:transparent}
+a{color:inherit}
+img{display:block;max-width:100%}
+.hidden{display:none!important}
+
+.app-shell{
+  width:min(1060px,calc(100% - 32px));
+  margin:0 auto;
+  padding:0 0 96px;
+}
+.topbar{
+  height:82px;
+  display:flex;
+  align-items:center;
+  justify-content:space-between;
+  color:#fff;
+  position:relative;
+  z-index:30;
+}
+.brand{
+  display:flex;
+  align-items:center;
+  gap:12px;
+  text-decoration:none;
+  min-width:0;
+}
+.brand img{
+  width:54px;height:54px;object-fit:contain;
+  border-radius:13px;
+  border:1px solid rgba(255,255,255,.15);
+  background:rgba(255,255,255,.06);
+  padding:5px;
+}
+.brand-copy{display:flex;flex-direction:column;min-width:0}
+.brand-name{
+  color:#f8f2e9;
+  font-size:11px;
+  font-weight:700;
+  letter-spacing:.17em;
+  text-transform:uppercase;
+  white-space:nowrap;
+}
+.brand-local{
+  color:#9f9589;
+  font-size:9px;
+  letter-spacing:.13em;
+  text-transform:uppercase;
+  margin-top:3px;
+}
+.back{
+  display:inline-flex;
+  align-items:center;
+  gap:8px;
+  color:#ded6cb;
+  text-decoration:none;
+  font-size:10px;
+  font-weight:700;
+  letter-spacing:.13em;
+  text-transform:uppercase;
+  padding:10px 0;
+  transition:color .14s ease,transform .14s ease;
+}
+.back:hover{color:var(--gold-soft);transform:translateX(-2px)}
+
+.hero-shell{
+  position:relative;
+  color:#f7f0e6;
+  padding:44px 0 88px;
+  overflow:hidden;
+  isolation:isolate;
+}
+.hero-shell:before{
+  content:"";
+  position:absolute;
+  width:420px;height:420px;
+  right:-90px;top:-170px;
+  border:1px solid rgba(199,161,90,.17);
+  border-radius:50%;
+  box-shadow:
+    0 0 0 56px rgba(199,161,90,.025),
+    0 0 0 112px rgba(199,161,90,.018);
+  pointer-events:none;
+  z-index:-1;
+}
+.hero-shell:after{
+  content:"";
+  position:absolute;inset:auto 0 0;height:1px;
+  background:linear-gradient(90deg,transparent,rgba(199,161,90,.35),transparent);
+}
+.hero-grid{
+  display:grid;
+  grid-template-columns:minmax(0,1.2fr) minmax(250px,.8fr);
+  gap:64px;
+  align-items:end;
+}
+.eyebrow{
+  color:var(--gold);
+  font-size:9px;
+  font-weight:700;
+  letter-spacing:.22em;
+  text-transform:uppercase;
+}
+.hero-shell h1{
+  font-family:"Fraunces",Georgia,serif;
+  font-size:clamp(48px,7vw,82px);
+  line-height:.92;
+  font-weight:600;
+  letter-spacing:-.045em;
+  margin:12px 0 18px;
+  max-width:760px;
+}
+.hero-shell h1 em{
+  color:var(--gold);
+  font-style:italic;
+  font-weight:600;
+}
+.subtitle{
+  max-width:590px;
+  color:#b9afa3;
+  font-size:14px;
+  line-height:1.72;
+  margin:0;
+}
+.trust-row{
+  display:grid;
+  gap:12px;
+  border-left:1px solid rgba(255,255,255,.13);
+  padding-left:26px;
+}
+.trust-item{
+  display:grid;
+  grid-template-columns:26px 1fr;
+  gap:11px;
+  align-items:start;
+  color:#b9afa3;
+  font-size:11px;
+  line-height:1.45;
+}
+.trust-icon{
+  width:26px;height:26px;border:1px solid rgba(199,161,90,.32);
+  border-radius:8px;
+  display:grid;place-items:center;
+  color:var(--gold-soft);
+  font-size:12px;
+}
+.trust-item strong{
+  display:block;color:#f2ebe2;font-size:11px;margin-bottom:2px
+}
+
+.booking-shell{
+  position:relative;
+  margin-top:-46px;
+  z-index:10;
+  display:grid;
+  grid-template-columns:minmax(0,1fr) 250px;
+  gap:18px;
+  align-items:start;
+}
+.booking-main,
+.booking-side-card{
+  background:rgba(255,253,249,.985);
+  border:1px solid rgba(255,255,255,.6);
+  box-shadow:var(--shadow);
+}
+.booking-main{
+  border-radius:26px;
+  padding:28px;
+  min-width:0;
+}
+.booking-side{
+  display:grid;
+  gap:12px;
+  position:sticky;
+  top:16px;
+}
+.booking-side-card{
+  border-radius:20px;
+  padding:20px;
+}
+.side-label{
+  display:flex;align-items:center;gap:8px;
+  color:var(--muted);
+  font-size:9px;
+  letter-spacing:.15em;
+  text-transform:uppercase;
+  font-weight:700;
+  margin-bottom:10px;
+}
+.side-label:before{content:"";width:18px;height:1px;background:var(--gold)}
+.side-title{
+  font-family:"Fraunces",Georgia,serif;
+  font-size:25px;line-height:1.05;margin:0 0 8px;
+}
+.side-copy{color:var(--muted);font-size:11px;line-height:1.6;margin:0}
+.side-links{display:grid;gap:7px;margin-top:15px}
+
+.quick{
+  display:grid;
+  grid-template-columns:1fr 1fr;
+  gap:9px;
+  margin-bottom:24px;
+}
+.quick-action{
+  position:relative;
+  min-height:76px;
+  padding:14px 42px 14px 15px;
+  border:1px solid var(--line);
+  border-radius:15px;
+  background:#fbf7f0;
+  color:var(--ink);
+  text-align:left;
+  cursor:pointer;
+  transition:transform .14s ease,border-color .14s ease,background .14s ease,box-shadow .14s ease;
+}
+.quick-action:hover{
+  transform:translateY(-1px);
+  border-color:rgba(199,161,90,.55);
+  background:#fffdf9;
+  box-shadow:0 8px 20px rgba(44,31,18,.06);
+}
+.quick-action:active{transform:scale(.988)}
+.quick-action strong{display:block;font-size:12px;margin-bottom:3px}
+.quick-action span{color:var(--muted);font-size:10px;line-height:1.35}
+.quick-action:after{
+  content:"›";
+  position:absolute;
+  right:15px;top:50%;transform:translateY(-50%);
+  color:var(--gold);
+  font-family:"Fraunces",serif;
+  font-size:27px;
+}
+
+.panel{
+  background:#f8f2e9;
+  border:1px solid var(--line);
+  border-radius:17px;
+  padding:20px;
+  margin:0 0 18px;
+  animation:panelIn .22s var(--ease);
+}
+@keyframes panelIn{from{opacity:0;transform:translateY(-5px)}to{opacity:1;transform:none}}
+
+.progress-wrap{
+  margin:2px 0 30px;
+  padding:0 1px;
+}
+.steps-labels{
+  display:grid;
+  grid-template-columns:repeat(4,1fr);
+  gap:7px;
+  margin-bottom:8px;
+  color:#91877b;
+  font-size:8px;
+  font-weight:700;
+  letter-spacing:.11em;
+  text-transform:uppercase;
+}
+.steps{
+  display:grid;
+  grid-template-columns:repeat(4,1fr);
+  gap:7px;
+}
+.step-dot{
+  height:4px;
+  background:#e1d9ce;
+  border-radius:99px;
+  position:relative;
+  overflow:hidden;
+}
+.step-dot.done{background:var(--gold)}
+.step-dot.done:after{
+  content:"";
+  position:absolute;inset:0;
+  background:linear-gradient(90deg,transparent,rgba(255,255,255,.42),transparent);
+  transform:translateX(-110%);
+  animation:progressShine .6s var(--ease) 1;
+}
+@keyframes progressShine{to{transform:translateX(110%)}}
+
+section.booking-step{animation:stepIn .28s var(--ease)}
+@keyframes stepIn{
+  from{opacity:0;transform:translateY(8px);filter:blur(2px)}
+  to{opacity:1;transform:none;filter:none}
+}
+h2.section-title{
+  font-family:"Fraunces",Georgia,serif;
+  font-size:clamp(32px,5vw,46px);
+  line-height:.98;
+  letter-spacing:-.025em;
+  margin:9px 0 22px;
+  color:var(--ink);
+}
+
+.category-label{
+  display:flex;
+  align-items:center;
+  gap:10px;
+  margin:26px 0 10px;
+  color:#8f6a35;
+  font-size:9px;
+  font-weight:700;
+  letter-spacing:.18em;
+  text-transform:uppercase;
+}
+.category-label:after{content:"";height:1px;background:#e3d8c9;flex:1}
+.category-label:first-child{margin-top:0}
+
+.card{
+  position:relative;
+  background:#fff;
+  border:1px solid #ddd4c8;
+  border-radius:16px;
+  padding:17px 18px;
+  margin-bottom:10px;
+  cursor:pointer;
+  transition:transform .14s ease,border-color .14s ease,box-shadow .14s ease,background .14s ease;
+  overflow:hidden;
+}
+.card:before{
+  content:"";
+  position:absolute;left:0;top:0;bottom:0;width:3px;
+  background:transparent;
+  transition:background .14s ease;
+}
+.card:hover{
+  transform:translateY(-1px);
+  border-color:#c9b184;
+  box-shadow:0 9px 24px rgba(38,27,16,.075);
+}
+.card:active{transform:scale(.992)}
+.card.selected{
+  background:#fbf6ec;
+  border-color:#c7a15a;
+  box-shadow:0 10px 28px rgba(87,61,28,.10);
+}
+.card.selected:before{background:var(--gold)}
+.card-row{display:flex;justify-content:space-between;align-items:center;gap:14px}
+.card-name{font-size:14px;font-weight:650;line-height:1.3}
+.card-meta{font-size:10px;color:var(--muted);margin-top:5px}
+.card-price{
+  font-family:"Fraunces",Georgia,serif;
+  font-size:21px;
+  color:#4c351d;
+  white-space:nowrap;
+}
+.barber-card{padding:12px 16px 12px 12px}
+.barber-inner{display:flex;align-items:center;gap:14px}
+.barber-photo{
+  width:66px;height:66px;flex:0 0 66px;
+  border-radius:14px;object-fit:cover;
+  object-position:center 20%;
+  background:#e9e1d6;
+  border:1px solid #ddd1c0;
+}
+.barber-photo.placeholder{
+  display:grid;place-items:center;
+  color:#8d7656;
+  font-family:"Fraunces",serif;
+  font-size:24px;
+  background:linear-gradient(135deg,#eee5d7,#ddd0bb);
+}
+.barber-copy{min-width:0}
+.barber-kicker{font-size:9px;color:#9a835f;letter-spacing:.13em;text-transform:uppercase;margin-bottom:4px}
+.barber-card .card-name{font-size:16px}
+.card-select-mark{
+  margin-left:auto;
+  width:28px;height:28px;border-radius:50%;
+  border:1px solid #d7cdbf;color:#9a8e80;
+  display:grid;place-items:center;flex:0 0 28px;
+  transition:.14s ease;
+}
+.card.selected .card-select-mark{background:var(--ink);border-color:var(--ink);color:var(--gold-soft)}
+
+label{
+  display:block;
+  margin-bottom:15px;
+  color:var(--muted);
+  font-size:10px;
+  font-weight:650;
+  letter-spacing:.02em;
+}
+input[type=date],input[type=text],input[type=tel],input[type=email]{
+  width:100%;
+  min-height:50px;
+  margin-top:7px;
+  padding:0 14px;
+  background:#fff;
+  border:1px solid #d8cec0;
+  border-radius:12px;
+  color:var(--ink);
+  outline:none;
+  transition:border-color .14s ease,box-shadow .14s ease,background .14s ease;
+}
+input:focus{
+  border-color:var(--gold);
+  box-shadow:0 0 0 4px rgba(199,161,90,.12);
+  background:#fffefa;
+}
+
+.note{
+  display:flex;justify-content:space-between;gap:10px;align-items:center;
+  color:var(--muted);font-size:10px;margin-bottom:10px
+}
+.pill{
+  padding:6px 9px;border:1px solid #ddd3c6;border-radius:99px;
+  background:#fff;font-size:8px;font-weight:700;text-transform:uppercase;
+  letter-spacing:.1em;white-space:nowrap;color:#7c6c58
+}
+.pill.live:before{
+  content:"";display:inline-block;width:6px;height:6px;border-radius:50%;
+  background:#4c8d60;margin-right:6px;box-shadow:0 0 0 3px rgba(76,141,96,.12)
+}
+.day-strip{
+  display:flex;gap:8px;overflow-x:auto;
+  padding:3px 1px 13px;
+  scrollbar-width:none;-webkit-overflow-scrolling:touch;
+  scroll-snap-type:x proximity;
+}
+.day-strip::-webkit-scrollbar{display:none}
+.day{
+  flex:0 0 76px;
+  scroll-snap-align:start;
+  background:#fff;
+  border:1px solid #ddd3c7;
+  border-radius:14px;
+  padding:10px 6px;
+  text-align:center;
+  cursor:pointer;
+  color:var(--ink);
+  transition:transform .13s ease,background .13s ease,border-color .13s ease;
+}
+.day:hover{border-color:#c8ae81;transform:translateY(-1px)}
+.day:active{transform:scale(.98)}
+.day .dow,.day .mon{
+  font-size:8px;color:#867b70;text-transform:uppercase;letter-spacing:.1em;font-weight:700
+}
+.day .num{
+  font-family:"Fraunces",Georgia,serif;
+  font-size:24px;font-weight:600;margin:2px 0
+}
+.day.active{background:var(--ink);border-color:var(--ink);color:#fff;box-shadow:0 8px 20px rgba(0,0,0,.13)}
+.day.active .dow,.day.active .mon{color:var(--gold-soft)}
+
+.time-title{
+  font-family:"Fraunces",Georgia,serif;
+  font-size:25px;
+  margin:23px 0 9px;
+}
+.slots,.reslots{
+  display:grid;
+  grid-template-columns:repeat(4,minmax(0,1fr));
+  gap:8px;
+}
+.slot,.reslot{
+  min-height:48px;
+  border:1px solid #d9d0c4;
+  background:#fff;
+  color:var(--ink);
+  border-radius:12px;
+  cursor:pointer;
+  font-size:12px;
+  font-weight:700;
+  transition:transform .12s ease,background .12s ease,color .12s ease,border-color .12s ease,box-shadow .12s ease;
+}
+.slot:hover,.reslot:hover{border-color:#c4a873;box-shadow:0 7px 16px rgba(39,28,15,.07)}
+.slot:active,.reslot:active{transform:scale(.97)}
+.slot.selected,.reslot.selected{
+  background:var(--ink);color:var(--gold-soft);border-color:var(--ink);
+  box-shadow:0 8px 18px rgba(0,0,0,.14)
+}
+
+.nav{
+  display:grid;
+  grid-template-columns:minmax(120px,.42fr) minmax(0,1fr);
+  gap:9px;
+  margin-top:22px;
+}
+.nav:has(> :only-child){grid-template-columns:minmax(120px,180px)}
+.btn{
+  display:inline-flex;align-items:center;justify-content:center;gap:8px;
+  min-height:48px;
+  padding:11px 16px;
+  border-radius:12px;
+  border:1px solid transparent;
+  cursor:pointer;
+  font-size:9px;
+  font-weight:750;
+  letter-spacing:.105em;
+  text-transform:uppercase;
+  text-decoration:none;
+  transition:transform .13s ease,box-shadow .13s ease,background .13s ease,border-color .13s ease,opacity .13s ease;
+  -webkit-tap-highlight-color:transparent;
+}
+.btn:hover{transform:translateY(-1px)}
+.btn:active{transform:scale(.985)}
+.primary{background:var(--ink);color:var(--gold-soft);box-shadow:0 8px 18px rgba(0,0,0,.12)}
+.primary:hover{box-shadow:0 11px 24px rgba(0,0,0,.17)}
+.ghost{background:#fff;border-color:#d8cfc3;color:var(--ink)}
+.whats{background:var(--green);color:#fff;width:100%;margin-top:8px}
+.calendar{background:#17130f;color:var(--gold-soft);width:100%}
+.btn:disabled{opacity:.42;cursor:not-allowed;transform:none!important;box-shadow:none}
+
+.msg{font-size:11px;padding:12px 13px;border-radius:11px;margin-top:11px;line-height:1.5}
+.err{background:#fff1ee;color:var(--red);border:1px solid #e8c4bc}
+.ok{background:#eff7f0;color:#376d48;border:1px solid #c7dfcc}
+.center{text-align:center;padding:32px 0;color:var(--muted);font-size:11px}
+
+.summary-card{
+  background:#f8f2e9;
+  border:1px solid #e0d6ca;
+  border-radius:16px;
+  padding:5px 16px;
+}
+.summary-row{
+  display:flex;justify-content:space-between;gap:22px;
+  padding:13px 0;border-bottom:1px solid #e6ddd2;
+  font-size:11px;line-height:1.4
+}
+.summary-row:last-child{border-bottom:0;font-weight:700}
+.summary-row span:last-child{text-align:right;color:#392b1d}
+
+.my-actions{display:flex;gap:7px;flex-wrap:wrap;margin-top:12px}
+.reschedule{
+  margin-top:11px;padding:15px;background:#f4eee5;
+  border:1px solid #ddd3c6;border-radius:13px
+}
+
+.success-card{
+  text-align:center;
+  padding:20px 0 6px;
+}
+.success-mark{
+  width:62px;height:62px;margin:0 auto 16px;
+  border-radius:50%;
+  background:#182018;
+  color:#d8c78c;
+  display:grid;place-items:center;
+  font-size:25px;
+  box-shadow:0 0 0 8px rgba(63,122,82,.08);
+  animation:successPop .45s var(--ease);
+}
+@keyframes successPop{
+  0%{transform:scale(.65);opacity:0}
+  70%{transform:scale(1.07)}
+  100%{transform:scale(1);opacity:1}
+}
+.success-card h2{
+  font-family:"Fraunces",serif;
+  font-size:38px;margin:0 0 8px
+}
+.success-card p{font-size:11px;color:var(--muted);margin:0 0 20px}
+
+.footer{
+  margin-top:36px;
+  padding:20px 2px 0;
+  border-top:1px solid #d8cec0;
+  display:flex;
+  justify-content:space-between;
+  gap:20px;
+  color:#7e7469;
+  font-size:9px;
+  letter-spacing:.06em;
+}
+.footer a{text-decoration:none}
+
+@media(max-width:860px){
+  body{background:linear-gradient(180deg,#0e0c0a 0 320px,#ece4d8 320px 100%)}
+  .app-shell{width:min(760px,calc(100% - 24px))}
+  .hero-grid{grid-template-columns:1fr;gap:28px}
+  .trust-row{
+    grid-template-columns:repeat(3,1fr);
+    border-left:0;border-top:1px solid rgba(255,255,255,.12);
+    padding:18px 0 0;
+  }
+  .booking-shell{grid-template-columns:1fr}
+  .booking-side{position:static;grid-template-columns:1fr 1fr}
+}
+@media(max-width:620px){
+  .app-shell{width:calc(100% - 20px);padding-bottom:78px}
+  .topbar{height:70px}
+  .brand img{width:46px;height:46px;border-radius:11px}
+  .brand-name{font-size:9px;letter-spacing:.14em}
+  .brand-local{display:none}
+  .back{font-size:9px}
+  .hero-shell{padding:30px 0 72px}
+  .hero-shell h1{font-size:clamp(43px,13vw,62px)}
+  .subtitle{font-size:12px}
+  .hero-shell:before{width:300px;height:300px;right:-130px;top:-110px}
+  .trust-row{grid-template-columns:1fr;gap:9px}
+  .trust-item{grid-template-columns:23px 1fr;font-size:10px}
+  .trust-icon{width:23px;height:23px;border-radius:7px}
+  .booking-shell{margin-top:-40px}
+  .booking-main{border-radius:21px;padding:18px 14px}
+  .booking-side{grid-template-columns:1fr}
+  .quick{grid-template-columns:1fr}
+  .quick-action{min-height:68px}
+  .steps-labels{font-size:7px}
+  h2.section-title{font-size:35px}
+  .card{padding:15px 14px;border-radius:14px}
+  .barber-card{padding:10px}
+  .barber-photo{width:60px;height:60px;flex-basis:60px;border-radius:12px}
+  .slots,.reslots{grid-template-columns:repeat(3,minmax(0,1fr));gap:7px}
+  .slot,.reslot{min-height:46px}
+  .nav{grid-template-columns:1fr}
+  .nav:has(> :only-child){grid-template-columns:1fr}
+  .footer{flex-direction:column;text-align:center;gap:7px}
+}
+@media(prefers-reduced-motion:reduce){
+  html{scroll-behavior:auto}
+  *,*:before,*:after{animation-duration:.01ms!important;animation-iteration-count:1!important;transition-duration:.01ms!important}
+}
+
+</style>
+</head>
+
+<body>
+<div class="app-shell">
+  <div class="topbar">
+    <a class="brand" href="index.html" aria-label="The Classic House — início">
+      <img src="/images/logo2.PNG?v=20260817" alt="The Classic House Barbearia">
+      <span class="brand-copy">
+        <span class="brand-name">The Classic House</span>
+        <span class="brand-local">Barbearia · Lisboa</span>
+      </span>
+    </a>
+    <a class="back" href="index.html">← Voltar ao site</a>
+  </div>
+
+  <header class="hero-shell">
+    <div class="hero-grid">
+      <div>
+        <div class="eyebrow">Reserva online · Telheiras</div>
+        <h1>O seu próximo<br><em>momento Classic.</em></h1>
+        <p class="subtitle">Escolha o serviço, o profissional e o horário. Uma reserva simples, rápida e sem aplicações — diretamente com a The Classic House.</p>
+      </div>
+      <div class="trust-row" aria-label="Vantagens da reserva">
+        <div class="trust-item"><span class="trust-icon">✓</span><span><strong>Confirmação imediata</strong>A reserva fica registada no momento.</span></div>
+        <div class="trust-item"><span class="trust-icon">↻</span><span><strong>Flexível</strong>Consulte, altere ou cancele pelo site.</span></div>
+        <div class="trust-item"><span class="trust-icon">○</span><span><strong>Sem pagamento online</strong>Pague apenas na barbearia.</span></div>
+      </div>
+    </div>
+  </header>
+
+  <div class="booking-shell">
+    <main class="booking-main">
+      <div class="quick">
+        <button class="quick-action" type="button" onclick="toggleMyBookings()">
+          <strong>Já tem uma marcação?</strong>
+          <span>Consultar, alterar dia/hora ou cancelar.</span>
+        </button>
+        <button class="quick-action" type="button" onclick="toggleMySubscription()">
+          <strong>É assinante?</strong>
+          <span>Consulte o seu plano e utilizações disponíveis.</span>
+        </button>
+      </div>
+
+      <div id="my-bookings-panel" class="panel hidden">
+        <div class="eyebrow">As suas marcações</div>
+        <h2 class="section-title">Encontrar reserva</h2>
+        <label>Telemóvel<input type="tel" id="my-phone-input" inputmode="tel" autocomplete="tel" placeholder="9xx xxx xxx"></label>
+        <button class="btn primary" type="button" onclick="lookupMyBookings()">Procurar marcação</button>
+        <div id="my-bookings-results"></div>
+      </div>
+
+      <div id="my-sub-panel" class="panel hidden">
+        <div class="eyebrow">Área de assinante</div>
+        <h2 class="section-title">O seu plano</h2>
+        <label>Telemóvel<input type="tel" id="sub-phone-input" inputmode="tel" autocomplete="tel" placeholder="9xx xxx xxx"></label>
+        <label>Código de acesso<input type="text" id="sub-code-input" autocomplete="one-time-code" placeholder="Código recebido da barbearia"></label>
+        <button class="btn primary" type="button" onclick="lookupMySubscription()">Aceder à área</button>
+        <div id="my-sub-results"></div>
+      </div>
+
+      <div class="progress-wrap">
+        <div class="steps-labels"><span>Serviço</span><span>Barbeiro</span><span>Data</span><span>Confirmar</span></div>
+        <div class="steps"><div class="step-dot" data-step="1"></div><div class="step-dot" data-step="2"></div><div class="step-dot" data-step="3"></div><div class="step-dot" data-step="4"></div></div>
+      </div>
+
+      <section id="step-1" class="booking-step">
+        <div class="eyebrow">Passo 1 de 4</div>
+        <h2 class="section-title">Escolha o serviço</h2>
+        <div id="services-list"><div class="center">A carregar serviços…</div></div>
+      </section>
+
+      <section id="step-2" class="booking-step hidden">
+        <div class="eyebrow">Passo 2 de 4</div>
+        <h2 class="section-title">Escolha o barbeiro</h2>
+        <div id="barbers-list"></div>
+        <div class="nav"><button class="btn ghost" type="button" onclick="goToStep(1)">Voltar</button></div>
+      </section>
+
+      <section id="step-3" class="booking-step hidden">
+        <div class="eyebrow">Passo 3 de 4</div>
+        <h2 class="section-title">Escolha o dia</h2>
+        <div class="note"><span id="date-hint">Escolha o dia da sua visita</span><span class="pill live">Disponibilidade atual</span></div>
+        <div id="day-strip" class="day-strip"></div>
+        <label>Outra data<input type="date" id="date-input"></label>
+        <h3 class="time-title">Horários disponíveis</h3>
+        <div id="slots-area"></div>
+        <div class="nav"><button class="btn ghost" type="button" onclick="goToStep(2)">Voltar</button></div>
+      </section>
+
+      <section id="step-4" class="booking-step hidden">
+        <div class="eyebrow">Passo 4 de 4</div>
+        <h2 class="section-title">Os seus dados</h2>
+        <label>Nome<input type="text" id="name-input" autocomplete="name" placeholder="O seu nome"></label>
+        <label>Telemóvel<input type="tel" id="phone-input" inputmode="tel" autocomplete="tel" placeholder="9xx xxx xxx"></label>
+        <label>Email <span style="font-weight:400">(opcional)</span><input type="email" id="email-input" autocomplete="email" placeholder="email@exemplo.com"></label>
+        <div class="category-label">Resumo da marcação</div>
+        <div id="summary-area" class="summary-card"></div>
+        <div id="form-msg"></div>
+        <div class="nav">
+          <button class="btn ghost" type="button" onclick="goToStep(3)">Voltar</button>
+          <button class="btn primary" id="confirm-btn" type="button" onclick="submitBooking()">Confirmar marcação</button>
+        </div>
+      </section>
+
+      <section id="step-success" class="booking-step hidden">
+        <div class="success-card">
+          <div class="success-mark">✓</div>
+          <div class="eyebrow">Marcação confirmada</div>
+          <h2>Está reservado.</h2>
+          <p>Guardámos a sua marcação. Pode adicionar o horário ao calendário ou avisar-nos pelo WhatsApp.</p>
+          <div id="success-summary" class="summary-card" style="text-align:left;margin:20px 0"></div>
+          <a class="btn calendar" id="google-calendar-link" target="_blank" rel="noopener">Adicionar ao Google Calendar</a>
+          <a class="btn whats" id="whats-confirm-link" target="_blank" rel="noopener">Abrir WhatsApp</a>
+          <div style="margin-top:10px"><a class="btn ghost" href="index.html" style="width:100%">Voltar ao início</a></div>
+        </div>
+      </section>
+
+      <div class="footer"><span>The Classic House Barbearia · Lisboa</span><a href="https://wa.me/351926323222" target="_blank" rel="noopener">926 323 222</a></div>
+    </main>
+
+    <aside class="booking-side" aria-label="Informação da barbearia">
+      <div class="booking-side-card">
+        <div class="side-label">The Classic House</div>
+        <h3 class="side-title">Reserva em poucos passos.</h3>
+        <p class="side-copy">Escolha o serviço e veja apenas os horários realmente disponíveis para o profissional selecionado.</p>
+      </div>
+      <div class="booking-side-card">
+        <div class="side-label">Precisa de ajuda?</div>
+        <p class="side-copy">Se tiver alguma dúvida sobre o serviço ou a sua marcação, fale diretamente connosco.</p>
+        <div class="side-links">
+          <a class="btn ghost" href="https://wa.me/351926323222" target="_blank" rel="noopener">WhatsApp</a>
+          <a class="btn ghost" href="index.html">Ver barbearia</a>
+        </div>
+      </div>
+    </aside>
+  </div>
+</div>
+
+<script>
+const SUPABASE_URL="https://kjhaphbaoxwxyankdkmk.supabase.co";
+const SUPABASE_ANON_KEY="eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImtqaGFwaGJhb3h3eHlhbmtka21rIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODQxOTI2ODIsImV4cCI6MjA5OTc2ODY4Mn0.IIHToQLp68HRHf7uOUblWd0YtiLRnLmsE35RVU-Cq14";
+const sb=window.supabase?window.supabase.createClient(SUPABASE_URL,SUPABASE_ANON_KEY):null;
+const WHATSAPP_NUMBER="351926323222";
+const NTFY_TOPIC="theclassichouse-marcacoes-2026";
+
+const state={services:[],barbers:[],hours:[],barberShifts:[],selectedService:null,selectedBarber:null,selectedDate:null,selectedSlot:null};
+let slotsRequestId=0;
+const busyCache=new Map();
+const BUSY_CACHE_MS=10000;
+
+function euro(v){if(v==null)return "a confirmar";const n=Number(v);return `€ ${n.toLocaleString("pt-PT",{minimumFractionDigits:Number.isInteger(n)?0:2,maximumFractionDigits:2})}`}
+function fmtDuration(v){v=Number(v)||0;return v>=60?`${(v/60).toFixed(v%60===0?0:1)} h`:`${v} min`}
+function toLocalDateStr(d){d=new Date(d);return `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,"0")}-${String(d.getDate()).padStart(2,"0")}`}
+function timeStrToMinutes(t){const [h,m]=String(t).slice(0,5).split(":").map(Number);return h*60+m}
+function minutesToTimeStr(n){return `${String(Math.floor(n/60)).padStart(2,"0")}:${String(n%60).padStart(2,"0")}`}
+function escapeHtml(v){return String(v??"").replace(/[&<>"']/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#039;"}[c]))}
+function normalizePhone(v){return String(v||"").replace(/\D/g,"").slice(-9)}
+
+function toggleMyBookings(){
+  const bookings=document.getElementById("my-bookings-panel");
+  const subscription=document.getElementById("my-sub-panel");
+  const willOpen=bookings.classList.contains("hidden");
+  subscription.classList.add("hidden");
+  bookings.classList.toggle("hidden",!willOpen);
+}
+function toggleMySubscription(){
+  const subscription=document.getElementById("my-sub-panel");
+  const bookings=document.getElementById("my-bookings-panel");
+  const willOpen=subscription.classList.contains("hidden");
+  bookings.classList.add("hidden");
+  subscription.classList.toggle("hidden",!willOpen);
+}
+
+async function lookupMySubscription(){
+  const phone=normalizePhone(document.getElementById("sub-phone-input").value);
+  const code=document.getElementById("sub-code-input").value.trim();
+  const el=document.getElementById("my-sub-results"); el.innerHTML="A procurar…";
+  if(!sb||phone.length!==9||!code){el.innerHTML='<div class="msg err">Introduza o telemóvel e o código de acesso.</div>';return}
+  try{
+    const {data,error}=await sb.rpc("get_my_subscription",{p_phone:phone,p_access_code:code});
+    if(error)throw error;
+    if(!data?.length){el.innerHTML='<div class="msg err">Não encontrámos nenhuma assinatura com estes dados.</div>';return}
+    const s=data[0],remaining=Math.max(0,(s.total_services||0)-(s.used_services||0));
+    const expiry=new Date(s.end_date+"T00:00:00").toLocaleDateString("pt-PT");
+    el.innerHTML=`<div class="summary-row"><span>Plano</span><span>${escapeHtml(s.service_name?.split("|")[0].trim()||"")}</span></div><div class="summary-row"><span>Serviços usados</span><span>${s.used_services} de ${s.total_services}</span></div><div class="summary-row"><span>Por usar</span><span>${remaining}</span></div><div class="summary-row"><span>Validade</span><span>${expiry}</span></div>`;
+  }catch(e){console.error(e);el.innerHTML='<div class="msg err">Não foi possível consultar a assinatura. Tente novamente.</div>'}
+}
+
+async function lookupMyBookings(){
+  const phone=normalizePhone(document.getElementById("my-phone-input").value);
+  const el=document.getElementById("my-bookings-results"); el.innerHTML="A procurar…";
+  if(!sb||phone.length!==9){el.innerHTML='<div class="msg err">Introduza um telemóvel válido com 9 dígitos.</div>';return}
+  try{
+    const {data,error}=await sb.rpc("list_my_appointments",{p_phone:phone});
+    if(error)throw error;
+    if(!data?.length){el.innerHTML='<div class="msg err">Não encontrámos marcações futuras com este telemóvel.</div>';return}
+    el.innerHTML="";
+    for(const appt of data){
+      const dt=new Date(appt.start_time),end=new Date(appt.end_time);
+      const row=document.createElement("div"); row.className="card";
+      const service=appt.service_name?.split("|")[0].trim()||"Serviço";
+      row.innerHTML=`<div class="card-row"><div><div class="card-name">${escapeHtml(service)}</div><div class="card-meta">${dt.toLocaleDateString("pt-PT",{weekday:"long",day:"numeric",month:"long"})}, ${dt.toLocaleTimeString("pt-PT",{hour:"2-digit",minute:"2-digit"})}–${end.toLocaleTimeString("pt-PT",{hour:"2-digit",minute:"2-digit"})} · ${escapeHtml(appt.barber_name||"Barbeiro")}</div></div></div>
+      <div class="my-actions"><button class="btn primary js-reschedule" type="button">Alterar dia/hora</button><button class="btn ghost js-cancel" type="button">Cancelar marcação</button></div>
+      <div class="reschedule hidden js-panel"><label>Escolhe o novo dia<input type="date" class="js-date" min="${toLocalDateStr(new Date())}" value="${toLocalDateStr(dt)}"></label><div class="reslots js-slots"></div><div class="js-msg"></div><button class="btn primary js-save" type="button" disabled>Guardar novo horário</button></div>`;
+      el.appendChild(row);
+
+      const panel=row.querySelector(".js-panel"),dateInput=row.querySelector(".js-date"),slotsEl=row.querySelector(".js-slots"),msgEl=row.querySelector(".js-msg"),save=row.querySelector(".js-save");
+      let selected=null;
+
+      async function renderReschedule(){
+        selected=null;save.disabled=true;slotsEl.innerHTML='<div class="center">A verificar horários…</div>';msgEl.innerHTML="";
+        const date=dateInput.value;if(!date)return;
+        const dow=new Date(date+"T00:00:00").getDay(),hours=state.hours.find(h=>Number(h.day_of_week)===dow);
+        if(!hours||hours.is_closed){slotsEl.innerHTML='<div class="msg err">Fechado neste dia.</div>';return}
+        const barberId=appt.barber_id||state.barbers.find(b=>String(b.name||"").trim().toLowerCase()===String(appt.barber_name||"").trim().toLowerCase())?.id;
+        if(!barberId){slotsEl.innerHTML='<div class="msg err">Não foi possível identificar o barbeiro desta marcação.</div>';return}
+        const duration=Math.max(30,Math.round((new Date(appt.end_time)-new Date(appt.start_time))/60000));
+        const startDay=new Date(date+"T00:00:00"),endDay=new Date(date+"T23:59:59");
+        const {data:busy,error}=await sb.from("public_busy_slots").select("barber_id,start_time,end_time").eq("barber_id",barberId).gte("start_time",startDay.toISOString()).lte("start_time",endDay.toISOString());
+        if(error){console.error(error);slotsEl.innerHTML='<div class="msg err">Erro ao verificar disponibilidade.</div>';return}
+        const shift=state.barberShifts.find(s=>s.barber_id===barberId&&Number(s.day_of_week)===dow);
+        if(shift?.is_off){slotsEl.innerHTML='<div class="msg err">Este barbeiro não trabalha neste dia.</div>';return}
+        const slots=[];
+        for(let m=timeStrToMinutes(hours.open_time);m+duration<=timeStrToMinutes(hours.close_time);m+=30){
+          if(shift?.start_time&&shift?.end_time&&(m<timeStrToMinutes(shift.start_time)||m+duration>timeStrToMinutes(shift.end_time)))continue;
+          const start=new Date(date+"T"+minutesToTimeStr(m)+":00"),end=new Date(start.getTime()+duration*60000);
+          if(date===toLocalDateStr(new Date())&&start<=new Date())continue;
+          const conflict=(busy||[]).some(b=>new Date(b.start_time)<end&&new Date(b.end_time)>start&&!(new Date(b.start_time).getTime()===new Date(appt.start_time).getTime()&&new Date(b.end_time).getTime()===new Date(appt.end_time).getTime()));
+          if(!conflict)slots.push({time:minutesToTimeStr(m),start,end});
+        }
+        if(!slots.length){slotsEl.innerHTML='<div class="msg err">Não há horários livres neste dia.</div>';return}
+        slotsEl.innerHTML="";
+        slots.forEach(s=>{const b=document.createElement("button");b.type="button";b.className="reslot";b.textContent=s.time;b.onclick=()=>{selected=s;slotsEl.querySelectorAll(".reslot").forEach(x=>x.classList.remove("selected"));b.classList.add("selected");save.disabled=false};slotsEl.appendChild(b)})
+      }
+
+      row.querySelector(".js-reschedule").onclick=async()=>{panel.classList.toggle("hidden");if(!panel.classList.contains("hidden"))await renderReschedule()}
+      dateInput.onchange=renderReschedule;
+      save.onclick=async()=>{
+        if(!selected)return;save.disabled=true;save.textContent="A guardar…";msgEl.innerHTML="";
+        try{
+          const {error}=await sb.rpc("reschedule_my_appointment",{p_appointment_id:appt.id,p_phone:phone,p_start_time:selected.start.toISOString(),p_end_time:selected.end.toISOString()});
+          if(error)throw error;await lookupMyBookings()
+        }catch(e){console.error(e);msgEl.innerHTML='<div class="msg err">Não foi possível alterar. O horário pode já ter sido ocupado.</div>';save.disabled=false;save.textContent="Guardar novo horário"}
+      };
+      row.querySelector(".js-cancel").onclick=async()=>{
+        if(!confirm("Tem a certeza de que pretende cancelar esta marcação?"))return;
+        const {error}=await sb.rpc("cancel_my_appointment",{p_appointment_id:appt.id,p_phone:phone});
+        if(error){console.error(error);alert("Não foi possível cancelar. Contacte a barbearia pelo WhatsApp.");return}
+        await lookupMyBookings()
+      };
+    }
+  }catch(e){console.error(e);el.innerHTML=`<div class="msg err">Não foi possível consultar as marcações.<br><small>${escapeHtml(e.message||"")}</small></div>`}
+}
+
+function goToStep(n){
+  for(let i=1;i<=4;i++){
+    const el=document.getElementById("step-"+i);
+    const active=i===n;
+    el.classList.toggle("hidden",!active);
+    if(active){el.classList.remove("booking-step");void el.offsetWidth;el.classList.add("booking-step")}
+  }
+  document.querySelectorAll(".step-dot").forEach(d=>d.classList.toggle("done",Number(d.dataset.step)<=n));
+  if(n===3)renderSlots();
+  if(n===4)renderSummary();
+  const top=document.querySelector(".booking-main")?.getBoundingClientRect().top+window.scrollY-14;
+  window.scrollTo({top:Math.max(0,top||0),behavior:"smooth"});
+}
+
+function renderServices(){
+  const el=document.getElementById("services-list");el.innerHTML="";
+  const groups={};state.services.forEach(s=>(groups[s.category]??=[]).push(s));
+  Object.keys(groups).forEach(cat=>{
+    const label=document.createElement("div");label.className="category-label";label.textContent=cat;el.appendChild(label);
+    groups[cat].forEach(s=>{
+      const card=document.createElement("div");card.className="card";
+      card.innerHTML=`<div class="card-row"><div><div class="card-name">${escapeHtml(s.name.split("|")[0].trim())}</div><div class="card-meta">${fmtDuration(s.duration_minutes)}</div></div><div class="card-price">${euro(s.price_eur)}</div></div>`;
+      card.onclick=()=>{state.selectedService=s;state.selectedBarber=null;state.selectedSlot=null;document.querySelectorAll("#services-list .card").forEach(x=>x.classList.remove("selected"));card.classList.add("selected");goToStep(2)};
+      el.appendChild(card);
+    });
+  });
+}
+
+function renderBarbers(){
+  const el=document.getElementById("barbers-list");el.innerHTML="";
+
+  const any=document.createElement("div");
+  any.className="card barber-card";
+  any.innerHTML=`<div class="barber-inner">
+    <div class="barber-photo placeholder">✦</div>
+    <div class="barber-copy">
+      <div class="barber-kicker">Mais rápido</div>
+      <div class="card-name">Qualquer barbeiro disponível</div>
+      <div class="card-meta">Mostramos o primeiro profissional livre em cada horário.</div>
+    </div>
+    <div class="card-select-mark">✓</div>
+  </div>`;
+  any.onclick=()=>selectBarber(null,any);
+  el.appendChild(any);
+
+  state.barbers.forEach(b=>{
+    const card=document.createElement("div");
+    card.className="card barber-card";
+    const clean=String(b.name||"").trim();
+    const lower=clean.toLowerCase();
+    let photo="";
+    if(lower==="bruno") photo="/images/team-bruno.jpg";
+    else if(lower==="joão"||lower==="joao") photo="/images/team-joao.jpg";
+    const media=photo
+      ? `<img class="barber-photo" src="${photo}" alt="${escapeHtml(clean)}" loading="eager" decoding="async">`
+      : `<div class="barber-photo placeholder">${escapeHtml(clean.charAt(0).toUpperCase()||"B")}</div>`;
+    card.innerHTML=`<div class="barber-inner">
+      ${media}
+      <div class="barber-copy">
+        <div class="barber-kicker">Barbeiro</div>
+        <div class="card-name">${escapeHtml(clean)}</div>
+        <div class="card-meta">Escolher este profissional</div>
+      </div>
+      <div class="card-select-mark">✓</div>
+    </div>`;
+    card.onclick=()=>selectBarber(b.id,card);
+    el.appendChild(card)
+  })
+}
+function selectBarber(id,card){state.selectedBarber=id;state.selectedSlot=null;document.querySelectorAll("#barbers-list .card").forEach(x=>x.classList.remove("selected"));card.classList.add("selected");goToStep(3)}
+
+async function renderSlots(){
+  const el=document.getElementById("slots-area");el.innerHTML='<div class="center">A verificar disponibilidade…</div>';
+  if(!state.selectedDate||!state.selectedService){el.innerHTML="";return}
+  const dow=new Date(state.selectedDate+"T00:00:00").getDay(),hours=state.hours.find(h=>Number(h.day_of_week)===dow);
+  if(!hours||hours.is_closed){el.innerHTML='<div class="msg err">Estamos fechados neste dia. Escolha outra data.</div>';return}
+  const ids=state.selectedBarber?[state.selectedBarber]:state.barbers.map(b=>b.id).filter(id=>{const sh=state.barberShifts.find(s=>s.barber_id===id&&Number(s.day_of_week)===dow);return !sh||!sh.is_off});
+  if(!ids.length){el.innerHTML='<div class="msg err">Sem barbeiros disponíveis neste dia.</div>';return}
+  const requestId=++slotsRequestId;
+  const ds=new Date(state.selectedDate+"T00:00:00"),de=new Date(state.selectedDate+"T23:59:59");
+  const cacheKey=`${state.selectedDate}|${ids.slice().sort().join(",")}`;
+  let busy=[],error=null;
+  const cached=busyCache.get(cacheKey);
+  if(cached&&Date.now()-cached.at<BUSY_CACHE_MS){
+    busy=cached.data;
+  }else{
+    const res=await sb.from("public_busy_slots").select("barber_id,start_time,end_time").in("barber_id",ids).gte("start_time",ds.toISOString()).lte("start_time",de.toISOString());
+    busy=res.data||[];error=res.error;
+    if(!error)busyCache.set(cacheKey,{at:Date.now(),data:busy});
+  }
+  if(requestId!==slotsRequestId)return;
+  if(error){console.error(error);el.innerHTML='<div class="msg err">Erro a verificar disponibilidade.</div>';return}
+  const slots=[],duration=Number(state.selectedService.duration_minutes)||30;
+  for(let m=timeStrToMinutes(hours.open_time);m+duration<=timeStrToMinutes(hours.close_time);m+=30){
+    const start=new Date(state.selectedDate+"T"+minutesToTimeStr(m)+":00"),end=new Date(start.getTime()+duration*60000);
+    if(state.selectedDate===toLocalDateStr(new Date())&&start<=new Date())continue;
+    for(const id of ids){
+      const sh=state.barberShifts.find(s=>s.barber_id===id&&Number(s.day_of_week)===dow);
+      if(sh&&sh.start_time&&sh.end_time&&(m<timeStrToMinutes(sh.start_time)||m+duration>timeStrToMinutes(sh.end_time)))continue;
+      const conflict=(busy||[]).some(b=>b.barber_id===id&&new Date(b.start_time)<end&&new Date(b.end_time)>start);
+      if(!conflict){slots.push({time:minutesToTimeStr(m),barberId:id,start,end});break}
+    }
+  }
+  if(!slots.length){el.innerHTML='<div class="msg err">Sem horários livres neste dia. Escolha outra data.</div>';return}
+  el.innerHTML='<div class="slots" id="slots-grid"></div>';const grid=document.getElementById("slots-grid");
+  slots.forEach(s=>{const b=document.createElement("button");b.type="button";b.className="slot";b.textContent=s.time;b.onclick=()=>{state.selectedSlot=s;grid.querySelectorAll(".slot").forEach(x=>x.classList.remove("selected"));b.classList.add("selected");setTimeout(()=>goToStep(4),120)};grid.appendChild(b)})
+}
+
+function renderSummary(){
+  const s=state.selectedService,slot=state.selectedSlot;
+  const barber=slot?.barberId?state.barbers.find(b=>b.id===slot.barberId)?.name||"":"Qualquer barbeiro";
+  const date=new Date(state.selectedDate+"T00:00:00").toLocaleDateString("pt-PT",{weekday:"long",day:"numeric",month:"long"});
+  document.getElementById("summary-area").innerHTML=`<div class="summary-row"><span>Serviço</span><span>${escapeHtml(s.name.split("|")[0].trim())}</span></div><div class="summary-row"><span>Barbeiro</span><span>${escapeHtml(barber)}</span></div><div class="summary-row"><span>Quando</span><span>${date}, ${slot.time}</span></div><div class="summary-row"><span>Total</span><span>${euro(s.price_eur)}</span></div>`
+}
+
+async function sendNtfyNotification({clientName,clientPhone,serviceName,barberName,startTime}){
+  try{
+    const d=new Date(startTime),msg=`👤 Cliente: ${clientName}\n✂️ Serviço: ${serviceName}\n👨‍🦱 Barbeiro: ${barberName||"Qualquer barbeiro"}\n📅 Data: ${d.toLocaleDateString("pt-PT",{weekday:"long",day:"numeric",month:"long"})}\n⏰ Hora: ${d.toLocaleTimeString("pt-PT",{hour:"2-digit",minute:"2-digit"})}\n📱 Telemóvel: ${clientPhone}`;
+    const u=new URL(`https://ntfy.sh/${encodeURIComponent(NTFY_TOPIC)}/publish`);u.searchParams.set("message",msg);u.searchParams.set("title","🔔 NOVA MARCAÇÃO — The Classic House");u.searchParams.set("priority","high");u.searchParams.set("tags","bell,scissors");
+    const r=await fetch(u,{cache:"no-store"});if(!r.ok)throw new Error(`ntfy HTTP ${r.status}`)
+  }catch(e){console.error("ntfy:",e)}
+}
+
+async function submitBooking(){
+  const name=document.getElementById("name-input").value.trim(),phone=document.getElementById("phone-input").value.trim(),email=document.getElementById("email-input").value.trim(),msg=document.getElementById("form-msg"),btn=document.getElementById("confirm-btn");
+  msg.innerHTML="";
+  if(!name||!phone){msg.innerHTML='<div class="msg err">Preencha pelo menos o nome e o telemóvel.</div>';return}
+  if(!state.selectedSlot||!state.selectedService){msg.innerHTML='<div class="msg err">Selecione primeiro o serviço e o horário.</div>';return}
+  btn.disabled=true;btn.textContent="A confirmar…";
+  try{
+    const {error}=await sb.rpc("book_appointment",{p_service_id:state.selectedService.id,p_barber_id:state.selectedSlot.barberId,p_start_time:state.selectedSlot.start.toISOString(),p_end_time:state.selectedSlot.end.toISOString(),p_client_name:name,p_client_phone:phone,p_client_email:email||null,p_barber_preference:state.selectedBarber?"specific":"any"});
+    if(error)throw error;
+    await sendNtfyNotification({clientName:name,clientPhone:phone,serviceName:state.selectedService.name.split("|")[0].trim(),barberName:state.barbers.find(b=>b.id===state.selectedSlot.barberId)?.name||"",startTime:state.selectedSlot.start.toISOString()});
+    showSuccess(name)
+  }catch(e){console.error(e);msg.innerHTML=`<div class="msg err">Não foi possível confirmar a marcação. Tente novamente.<br><small>${escapeHtml(e.message||"")}</small></div>`;btn.disabled=false;btn.textContent="Confirmar marcação"}
+}
+
+function googleCalendarUrl({serviceName,barberName,start,end,clientName,phone}){
+  const pad=n=>String(n).padStart(2,"0");
+  const gDate=d=>`${d.getUTCFullYear()}${pad(d.getUTCMonth()+1)}${pad(d.getUTCDate())}T${pad(d.getUTCHours())}${pad(d.getUTCMinutes())}${pad(d.getUTCSeconds())}Z`;
+  const title=`The Classic House Barbearia — ${serviceName}`;
+  const details=`Cliente: ${clientName}\nServiço: ${serviceName}\nBarbeiro: ${barberName}\nTelemóvel: ${phone}\n\nMarcação feita online.`;
+  const params=new URLSearchParams({action:"TEMPLATE",text:title,dates:`${gDate(start)}/${gDate(end)}`,details,location:"The Classic House Barbearia, Lisboa"});
+  return `https://calendar.google.com/calendar/render?${params.toString()}`;
+}
+
+function showSuccess(name){
+  for(let i=1;i<=4;i++)document.getElementById("step-"+i).classList.add("hidden");
+  document.getElementById("step-success").classList.remove("hidden");
+  const s=state.selectedService,slot=state.selectedSlot,barber=state.barbers.find(b=>b.id===slot.barberId)?.name||"Qualquer barbeiro",date=new Date(state.selectedDate+"T00:00:00").toLocaleDateString("pt-PT",{weekday:"long",day:"numeric",month:"long"});
+  document.getElementById("success-summary").innerHTML=`<div class="summary-row"><span>Serviço</span><span>${escapeHtml(s.name.split("|")[0].trim())}</span></div><div class="summary-row"><span>Barbeiro</span><span>${escapeHtml(barber)}</span></div><div class="summary-row"><span>Quando</span><span>${date}, ${slot.time}</span></div>`;
+  document.getElementById("whats-confirm-link").href=`https://wa.me/${WHATSAPP_NUMBER}?text=${encodeURIComponent(`Nova marcação: ${name} — ${s.name.split("|")[0].trim()} — ${date} às ${slot.time} — ${barber}`)}`;
+  document.getElementById("google-calendar-link").href=googleCalendarUrl({
+    serviceName:s.name.split("|")[0].trim(),
+    barberName:barber,
+    start:slot.start,
+    end:slot.end,
+    clientName:name,
+    phone:document.getElementById("phone-input").value.trim()
+  });
+  window.scrollTo({top:0,behavior:"smooth"})
+}
+
+function buildDayStrip(){
+  const strip=document.getElementById("day-strip"),input=document.getElementById("date-input"),hint=document.getElementById("date-hint"),today=new Date();
+  strip.innerHTML="";
+  for(let i=0;i<14;i++){
+    const d=new Date(today);d.setDate(today.getDate()+i);const value=toLocalDateStr(d),b=document.createElement("button");b.type="button";b.className="day";b.dataset.date=value;
+    b.innerHTML=`<div class="dow">${i===0?"Hoje":i===1?"Amanhã":new Intl.DateTimeFormat("pt-PT",{weekday:"short"}).format(d).replace(".","")}</div><div class="num">${d.getDate()}</div><div class="mon">${new Intl.DateTimeFormat("pt-PT",{month:"short"}).format(d).replace(".","")}</div>`;
+    b.onclick=()=>{input.value=value;input.dispatchEvent(new Event("change"));syncDay(value)};strip.appendChild(b)
+  }
+  function syncDay(v){strip.querySelectorAll(".day").forEach(x=>x.classList.toggle("active",x.dataset.date===v));hint.textContent="Dia escolhido: "+new Date(v+"T00:00:00").toLocaleDateString("pt-PT",{weekday:"long",day:"numeric",month:"long"})}
+  input.onchange=()=>{state.selectedDate=input.value;state.selectedSlot=null;syncDay(input.value);renderSlots()};
+  state.selectedDate=toLocalDateStr(today);input.value=state.selectedDate;syncDay(state.selectedDate)
+}
+
+async function init(){
+  const el=document.getElementById("services-list");
+  if(!sb){el.innerHTML='<div class="msg err">Não foi possível carregar o sistema de marcações.</div>';return}
+  try{
+    /* As tabelas essenciais são as mesmas usadas pelo Booking funcional.
+       Categorias e turnos são opcionais: se não responderem, não bloqueiam a página. */
+    const [svc,bar,hrs,shifts]=await Promise.all([
+      sb.from("services").select("*").eq("active",true).order("category").order("sort_order"),
+      sb.from("barbers").select("*").eq("active",true),
+      sb.from("business_hours").select("*"),
+      sb.from("barber_shifts").select("*")
+    ]);
+    if(svc.error)throw svc.error;if(bar.error)throw bar.error;if(hrs.error)throw hrs.error;
+    state.services=svc.data||[];state.barbers=bar.data||[];state.hours=hrs.data||[];state.barberShifts=shifts.error?[]:(shifts.data||[]);
+    if(!state.services.length){el.innerHTML='<div class="msg err">Não existem serviços ativos disponíveis neste momento.</div>';return}
+    renderServices();renderBarbers();buildDayStrip()
+  }catch(e){console.error("init:",e);el.innerHTML=`<div class="msg err">Não consegui ligar à base de dados.<br><small>${escapeHtml(e.message||"Verifica a ligação ao Supabase.")}</small></div>`}
+}
+init();
+</script>
+</body>
+</html>
