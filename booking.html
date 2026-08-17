@@ -47,6 +47,34 @@ h2.section-title{font-size:36px;line-height:1;margin:8px 0 20px}
 .card-name{font-size:14px;font-weight:600}
 .card-meta{font-size:11px;color:var(--muted);margin-top:4px}
 .card-price{font-size:20px;font-weight:600;color:var(--brown);white-space:nowrap}
+
+/* Fotos dos barbeiros — mantém o design original do booking */
+.barber-card-row{
+  display:flex;
+  align-items:center;
+  gap:14px;
+}
+.barber-photo{
+  width:62px;
+  height:62px;
+  flex:0 0 62px;
+  border-radius:12px;
+  object-fit:cover;
+  object-position:center 24%;
+  border:1px solid rgba(184,138,67,.38);
+  background:#f4eee5;
+  box-shadow:0 3px 10px rgba(30,20,10,.06);
+}
+.barber-card-copy{
+  min-width:0;
+  flex:1;
+}
+.barber-card-copy .card-name{
+  font-size:15px;
+}
+.barber-card-copy .card-meta{
+  margin-top:4px;
+}
 .category-label{font-size:9px;color:var(--gold);text-transform:uppercase;letter-spacing:.2em;font-weight:600;margin:22px 0 9px}
 .category-label:first-child{margin-top:0}
 label{display:block;margin-bottom:15px;color:var(--muted);font-size:11px;font-weight:500}
@@ -398,8 +426,40 @@ function renderServices(){
 
 function renderBarbers(){
   const el=document.getElementById("barbers-list");el.innerHTML="";
-  const any=document.createElement("div");any.className="card";any.innerHTML='<div class="card-name">Qualquer barbeiro disponível</div><div class="card-meta">Escolhemos um profissional disponível</div>';any.onclick=()=>selectBarber(null,any);el.appendChild(any);
-  state.barbers.forEach(b=>{const card=document.createElement("div");card.className="card";card.innerHTML=`<div class="card-name">${escapeHtml(b.name)}</div>`;card.onclick=()=>selectBarber(b.id,card);el.appendChild(card)})
+
+  const any=document.createElement("div");
+  any.className="card";
+  any.innerHTML='<div class="card-name">Qualquer barbeiro disponível</div><div class="card-meta">Escolhemos um profissional disponível</div>';
+  any.onclick=()=>selectBarber(null,any);
+  el.appendChild(any);
+
+  state.barbers.forEach(b=>{
+    const card=document.createElement("div");
+    card.className="card";
+
+    const name=String(b.name||"").trim();
+    const nameLower=name.toLocaleLowerCase("pt-PT");
+    let photo="";
+
+    if(nameLower==="bruno"){
+      photo="images/team-bruno.jpg";
+    }else if(nameLower==="joão"||nameLower==="joao"){
+      photo="images/team-joao.jpg";
+    }
+
+    card.innerHTML=photo
+      ? `<div class="barber-card-row">
+           <img class="barber-photo" src="${photo}" alt="${escapeHtml(name)}" loading="lazy">
+           <div class="barber-card-copy">
+             <div class="card-name">${escapeHtml(name)}</div>
+             <div class="card-meta">Selecionar barbeiro</div>
+           </div>
+         </div>`
+      : `<div class="card-name">${escapeHtml(name)}</div>`;
+
+    card.onclick=()=>selectBarber(b.id,card);
+    el.appendChild(card);
+  });
 }
 function selectBarber(id,card){state.selectedBarber=id;state.selectedSlot=null;document.querySelectorAll("#barbers-list .card").forEach(x=>x.classList.remove("selected"));card.classList.add("selected");goToStep(3)}
 
