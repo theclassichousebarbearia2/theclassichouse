@@ -6,6 +6,15 @@
 <title>Marcar horário — The Classic House Barbearia</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Fraunces:wght@600;700&family=IBM+Plex+Sans:wght@400;500;600&display=swap" rel="stylesheet">
+<!-- Google tag (gtag.js) -->
+<script async src="https://www.googletagmanager.com/gtag/js?id=AW-18304988964"></script>
+<script>
+  window.dataLayer = window.dataLayer || [];
+  function gtag(){dataLayer.push(arguments);}
+  gtag('js', new Date());
+
+  gtag('config', 'AW-18304988964');
+</script>
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <style>
 :root{
@@ -513,6 +522,14 @@ async function submitBooking(){
   try{
     const {error}=await sb.rpc("book_appointment",{p_service_id:state.selectedService.id,p_barber_id:state.selectedSlot.barberId,p_start_time:state.selectedSlot.start.toISOString(),p_end_time:state.selectedSlot.end.toISOString(),p_client_name:name,p_client_phone:phone,p_client_email:email||null,p_barber_preference:state.selectedBarber?"specific":"any"});
     if(error)throw error;
+    // Google Ads — Marcação concluída
+    if(typeof gtag==="function"){
+      gtag("event","conversion",{
+        send_to:"AW-18304988964/DkRcCM6S7-QcEKTuv5hE",
+        value:1.0,
+        currency:"EUR"
+      });
+    }
     await sendNtfyNotification({clientName:name,clientPhone:phone,serviceName:state.selectedService.name.split("|")[0].trim(),barberName:state.barbers.find(b=>b.id===state.selectedSlot.barberId)?.name||"",startTime:state.selectedSlot.start.toISOString()});
     showSuccess(name)
   }catch(e){console.error(e);msg.innerHTML=`<div class="msg err">Não foi possível confirmar a marcação. Tenta novamente.<br><small>${escapeHtml(e.message||"")}</small></div>`;btn.disabled=false;btn.textContent="Confirmar marcação"}
