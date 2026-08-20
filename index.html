@@ -6,13 +6,46 @@
 <meta name="description" content="The Classic House Barbearia em Telheiras, Lisboa. Corte, barba clássica e experiência premium. Marque online.">
 <link rel="canonical" href="https://theclassichousebarbearia.com/"><meta name="theme-color" content="#0e0c0a">
 <link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin><link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600&family=Playfair+Display:ital,wght@0,500;1,500&display=swap" rel="stylesheet">
-<!-- Google tag (gtag.js) -->
-<script async src="https://www.googletagmanager.com/gtag/js?id=AW-18304988964"></script>
+<!-- Google Ads + Consent Mode v2 -->
 <script>
   window.dataLayer = window.dataLayer || [];
   function gtag(){dataLayer.push(arguments);}
-  gtag('js', new Date());
 
+  // Privacidade por defeito: sem cookies de anúncios/analytics até decisão do visitante.
+  gtag('consent', 'default', {
+    'ad_storage': 'denied',
+    'ad_user_data': 'denied',
+    'ad_personalization': 'denied',
+    'analytics_storage': 'denied',
+    'wait_for_update': 500
+  });
+
+  // Preserva parâmetros de clique (ex.: gclid) entre páginas do mesmo domínio.
+  gtag('set', 'url_passthrough', true);
+
+  // Reaplica imediatamente a escolha guardada em visitas/páginas seguintes.
+  try {
+    const savedConsent = localStorage.getItem('tch_google_consent');
+    if (savedConsent === 'granted') {
+      gtag('consent', 'update', {
+        'ad_storage': 'granted',
+        'ad_user_data': 'granted',
+        'ad_personalization': 'granted',
+        'analytics_storage': 'granted'
+      });
+    } else if (savedConsent === 'denied') {
+      gtag('consent', 'update', {
+        'ad_storage': 'denied',
+        'ad_user_data': 'denied',
+        'ad_personalization': 'denied',
+        'analytics_storage': 'denied'
+      });
+    }
+  } catch (_) {}
+</script>
+<script async src="https://www.googletagmanager.com/gtag/js?id=AW-18304988964"></script>
+<script>
+  gtag('js', new Date());
   gtag('config', 'AW-18304988964');
 </script>
 <style>
@@ -27,10 +60,137 @@ section{padding:120px 0}.intro{display:grid;grid-template-columns:.6fr 1.4fr;gap
 footer{border-top:1px solid var(--line);padding:32px 0 100px;color:var(--muted);font-size:11px}.footerin{display:flex;justify-content:space-between;gap:20px}.floatbook{display:none}.reveal{opacity:0;transform:translateY(26px);transition:.7s cubic-bezier(.2,.7,.2,1)}.reveal.in{opacity:1;transform:none}
 @media(max-width:860px){.wrap{width:calc(100% - 24px)}.links{display:none}.logo b{display:none}.nav{padding:10px 0}.hero-content{padding-bottom:28px}.hero-bottom{grid-template-columns:1fr}.meta{grid-template-columns:1fr 1fr}.meta div:last-child{grid-column:span 2}.intro{grid-template-columns:1fr}.cards{grid-template-columns:1fr 1fr}.showcase-grid{grid-template-columns:1fr}.bigshot{height:560px}.stack{grid-template-columns:1fr 1fr}.stackshot{height:280px}.teamhead{display:block}.team-grid{grid-template-columns:1fr}.member{height:auto;aspect-ratio:3/4}.reviews-head{grid-template-columns:1fr;gap:20px}.reviews-grid{display:grid;grid-auto-flow:column;grid-template-columns:none;grid-auto-columns:minmax(280px,86vw);overflow-x:auto;overscroll-behavior-inline:contain;scroll-snap-type:inline mandatory;padding:2px 2px 10px;margin-right:-12px;scrollbar-width:none}.reviews-grid::-webkit-scrollbar{display:none}.review-card{scroll-snap-align:start;min-height:270px}.reviews-cta{align-items:flex-start;flex-direction:column}.visitbox{grid-template-columns:1fr}.visitcopy{padding:30px 22px}.visitimg{min-height:420px}.footerin{flex-direction:column}.floatbook{display:block;position:fixed;z-index:70;left:12px;right:12px;bottom:10px;background:var(--gold);color:#17110b;text-decoration:none;text-align:center;padding:15px;border-radius:14px;font-weight:700}}
 @media(max-width:560px){h1{font-size:19vw}.cards{grid-template-columns:1fr}.svc{min-height:220px}.stack{grid-template-columns:1fr}.stackshot{height:330px}.member{height:auto;aspect-ratio:3/4}}@media(prefers-reduced-motion:reduce){html{scroll-behavior:auto}.reveal{opacity:1;transform:none;transition:none}}
+
+/* ===== Consentimento discreto ===== */
+.tch-consent{
+  position:fixed;
+  z-index:10000;
+  left:50%;
+  bottom:14px;
+  transform:translateX(-50%);
+  width:min(920px,calc(100% - 28px));
+  padding:10px 12px;
+  display:flex;
+  align-items:center;
+  justify-content:space-between;
+  gap:14px;
+  background:rgba(18,16,13,.96);
+  color:#e8e1d7;
+  border:1px solid rgba(255,255,255,.10);
+  border-radius:12px;
+  box-shadow:0 10px 34px rgba(0,0,0,.24);
+  font-family:inherit;
+  backdrop-filter:blur(10px);
+  -webkit-backdrop-filter:blur(10px);
+}
+.tch-consent[hidden]{display:none!important}
+.tch-consent-title{display:none}
+.tch-consent-copy{
+  margin:0;
+  font-size:10.5px;
+  line-height:1.45;
+  color:#bdb4a8;
+  max-width:690px;
+}
+.tch-consent-actions{
+  display:flex;
+  gap:7px;
+  flex:0 0 auto;
+  margin:0;
+}
+.tch-consent-btn{
+  min-height:34px;
+  padding:8px 12px;
+  border-radius:8px;
+  cursor:pointer;
+  font:600 9px/1 inherit;
+  letter-spacing:.05em;
+  text-transform:uppercase;
+  transition:.16s ease;
+}
+.tch-consent-accept{
+  background:#c7a15a;
+  color:#17110b;
+  border:1px solid #c7a15a;
+}
+.tch-consent-reject{
+  background:transparent;
+  color:#d8d0c4;
+  border:1px solid rgba(255,255,255,.18);
+}
+.tch-consent-btn:hover{transform:translateY(-1px)}
+.tch-privacy-footer{
+  border:0;
+  background:none;
+  padding:0;
+  color:inherit;
+  opacity:.72;
+  font:inherit;
+  cursor:pointer;
+  text-decoration:underline;
+  text-underline-offset:3px;
+}
+.tch-privacy-footer:hover{opacity:1}
+@media(max-width:720px){
+  .tch-consent{
+    bottom:10px;
+    padding:11px 12px;
+    display:block;
+  }
+  .tch-consent-copy{
+    font-size:10px;
+    padding-right:2px;
+  }
+  .tch-consent-actions{
+    margin-top:9px;
+    display:grid;
+    grid-template-columns:1fr 1fr;
+  }
+  .tch-consent-btn{width:100%}
+}
 </style>
 <script type="application/ld+json">{"@context":"https://schema.org","@type":"Barbershop","name":"The Classic House Barbearia","telephone":"+351926323222","aggregateRating":{"@type":"AggregateRating","ratingValue":"5.0","reviewCount":"51"},"address":{"@type":"PostalAddress","streetAddress":"Rua Professor Prado Coelho 23A","addressLocality":"Lisboa","addressCountry":"PT"}}</script>
 </head>
 <body>
+
+<div id="tch-consent" class="tch-consent" role="dialog" aria-live="polite" aria-label="Preferências de cookies" hidden>
+  <p class="tch-consent-copy">Usamos cookies opcionais do Google para medir marcações e melhorar a publicidade. Pode aceitar ou recusar — o site funciona normalmente em ambos os casos.</p>
+  <div class="tch-consent-actions">
+    <button type="button" class="tch-consent-btn tch-consent-reject" onclick="tchSetConsent('denied')">Recusar</button>
+    <button type="button" class="tch-consent-btn tch-consent-accept" onclick="tchSetConsent('granted')">Aceitar</button>
+  </div>
+</div>
+
+<script>
+(function(){
+  const CONSENT_KEY='tch_google_consent';
+
+  window.tchSetConsent=function(choice){
+    const granted=choice==='granted';
+    gtag('consent','update',{
+      'ad_storage': granted ? 'granted' : 'denied',
+      'ad_user_data': granted ? 'granted' : 'denied',
+      'ad_personalization': granted ? 'granted' : 'denied',
+      'analytics_storage': granted ? 'granted' : 'denied'
+    });
+    try{ localStorage.setItem(CONSENT_KEY, granted ? 'granted' : 'denied'); }catch(_){}
+    const banner=document.getElementById('tch-consent');
+    if(banner) banner.hidden=true;
+  };
+
+  window.tchOpenConsent=function(){
+    const banner=document.getElementById('tch-consent');
+    if(banner) banner.hidden=false;
+  };
+
+  document.addEventListener('DOMContentLoaded',function(){
+    let saved=null;
+    try{ saved=localStorage.getItem(CONSENT_KEY); }catch(_){}
+    const banner=document.getElementById('tch-consent');
+    if(banner) banner.hidden=(saved==='granted' || saved==='denied');
+  });
+})();
+</script>
 <nav class="nav"><div class="wrap navin"><a class="logo" href="#top"><img src="/images/logo2.PNG?v=20260817" alt="The Classic House" width="58" height="58" fetchpriority="high" decoding="async" onerror="this.onerror=null;this.src='https://raw.githubusercontent.com/theclassichousebarbearia2/theclassichouse/main/images/logo2.PNG'"><b>THE CLASSIC HOUSE</b></a><div class="links"><a href="#servicos">Serviços</a><a href="#house">A Barbearia</a><a href="#equipa">Equipa</a><a href="#avaliacoes">Avaliações</a><a href="#visitar">Visitar</a></div><a class="book" href="booking.html">MARCAR AGORA</a></div></nav>
 <header class="hero" id="top"><video id="hero-video" autoplay muted loop playsinline webkit-playsinline preload="auto" poster="images/loja-4.jpg"><source src="images/loja-video.mp4" type="video/mp4"></video><canvas id="scene" aria-hidden="true"></canvas><div class="grain"></div><div class="wrap hero-content"><div class="kicker reveal">Telheiras · Lisboa</div><h1 class="reveal">O ritual do corte.<br><span class="ital">A precisão</span> da casa.</h1><div class="hero-bottom"><div><p class="hero-copy reveal">Cortes clássicos e modernos, barba com toalha quente e atendimento sem pressa — num espaço criado para quem valoriza detalhe.</p><div class="actions reveal"><a class="btn" href="booking.html">Ver disponibilidade →</a><a class="btn" href="https://wa.me/351926323222">WhatsApp</a></div></div><div class="meta reveal"><div><small>Morada</small><b>R. Prof. Prado Coelho 23A</b></div><div><small>Hoje</small><b>09:00 — 19:00</b></div><div><small>Telefone</small><b>926 323 222</b></div></div></div></div></header>
 <main><section id="servicos"><div class="wrap"><div class="intro"><div class="eyebrow reveal">01 · Serviços</div><div><h2 class="reveal">Precisão sem<br><span class="ital">complicação.</span></h2><p class="reveal">Os essenciais da barbearia, com técnica clássica e resultado atual.</p></div></div><p class="statement reveal">Não vendemos apenas um corte. Criamos o momento em que volta a sentir que <em>está no ponto.</em></p><div class="cards"><article class="svc reveal"><span>01 / 04</span><h3>Corte<br>de cabelo</h3><div class="price">30 min · €13</div></article><article class="svc reveal"><span>02 / 04</span><h3>Barba<br>clássica</h3><div class="price">Toalha quente · €10</div></article><article class="svc reveal"><span>03 / 04</span><h3>Cabelo<br>+ barba</h3><div class="price">Experiência completa · €18</div></article><article class="svc reveal"><span>04 / 04</span><h3>Corte<br>à máquina</h3><div class="price">30 min · €10</div></article></div></div></section>

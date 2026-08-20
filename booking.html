@@ -6,13 +6,46 @@
 <title>Marcar horário — The Classic House Barbearia</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Fraunces:wght@600;700&family=IBM+Plex+Sans:wght@400;500;600&display=swap" rel="stylesheet">
-<!-- Google tag (gtag.js) -->
-<script async src="https://www.googletagmanager.com/gtag/js?id=AW-18304988964"></script>
+<!-- Google Ads + Consent Mode v2 -->
 <script>
   window.dataLayer = window.dataLayer || [];
   function gtag(){dataLayer.push(arguments);}
-  gtag('js', new Date());
 
+  // Privacidade por defeito: sem cookies de anúncios/analytics até decisão do visitante.
+  gtag('consent', 'default', {
+    'ad_storage': 'denied',
+    'ad_user_data': 'denied',
+    'ad_personalization': 'denied',
+    'analytics_storage': 'denied',
+    'wait_for_update': 500
+  });
+
+  // Preserva parâmetros de clique (ex.: gclid) entre páginas do mesmo domínio.
+  gtag('set', 'url_passthrough', true);
+
+  // Reaplica imediatamente a escolha guardada em visitas/páginas seguintes.
+  try {
+    const savedConsent = localStorage.getItem('tch_google_consent');
+    if (savedConsent === 'granted') {
+      gtag('consent', 'update', {
+        'ad_storage': 'granted',
+        'ad_user_data': 'granted',
+        'ad_personalization': 'granted',
+        'analytics_storage': 'granted'
+      });
+    } else if (savedConsent === 'denied') {
+      gtag('consent', 'update', {
+        'ad_storage': 'denied',
+        'ad_user_data': 'denied',
+        'ad_personalization': 'denied',
+        'analytics_storage': 'denied'
+      });
+    }
+  } catch (_) {}
+</script>
+<script async src="https://www.googletagmanager.com/gtag/js?id=AW-18304988964"></script>
+<script>
+  gtag('js', new Date());
   gtag('config', 'AW-18304988964');
 </script>
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
@@ -220,9 +253,136 @@ img,video{max-width:100%}
   .slot,.reslot{font-size:12px}
 }
 
+
+/* ===== Consentimento discreto ===== */
+.tch-consent{
+  position:fixed;
+  z-index:10000;
+  left:50%;
+  bottom:14px;
+  transform:translateX(-50%);
+  width:min(920px,calc(100% - 28px));
+  padding:10px 12px;
+  display:flex;
+  align-items:center;
+  justify-content:space-between;
+  gap:14px;
+  background:rgba(18,16,13,.96);
+  color:#e8e1d7;
+  border:1px solid rgba(255,255,255,.10);
+  border-radius:12px;
+  box-shadow:0 10px 34px rgba(0,0,0,.24);
+  font-family:inherit;
+  backdrop-filter:blur(10px);
+  -webkit-backdrop-filter:blur(10px);
+}
+.tch-consent[hidden]{display:none!important}
+.tch-consent-title{display:none}
+.tch-consent-copy{
+  margin:0;
+  font-size:10.5px;
+  line-height:1.45;
+  color:#bdb4a8;
+  max-width:690px;
+}
+.tch-consent-actions{
+  display:flex;
+  gap:7px;
+  flex:0 0 auto;
+  margin:0;
+}
+.tch-consent-btn{
+  min-height:34px;
+  padding:8px 12px;
+  border-radius:8px;
+  cursor:pointer;
+  font:600 9px/1 inherit;
+  letter-spacing:.05em;
+  text-transform:uppercase;
+  transition:.16s ease;
+}
+.tch-consent-accept{
+  background:#c7a15a;
+  color:#17110b;
+  border:1px solid #c7a15a;
+}
+.tch-consent-reject{
+  background:transparent;
+  color:#d8d0c4;
+  border:1px solid rgba(255,255,255,.18);
+}
+.tch-consent-btn:hover{transform:translateY(-1px)}
+.tch-privacy-footer{
+  border:0;
+  background:none;
+  padding:0;
+  color:inherit;
+  opacity:.72;
+  font:inherit;
+  cursor:pointer;
+  text-decoration:underline;
+  text-underline-offset:3px;
+}
+.tch-privacy-footer:hover{opacity:1}
+@media(max-width:720px){
+  .tch-consent{
+    bottom:10px;
+    padding:11px 12px;
+    display:block;
+  }
+  .tch-consent-copy{
+    font-size:10px;
+    padding-right:2px;
+  }
+  .tch-consent-actions{
+    margin-top:9px;
+    display:grid;
+    grid-template-columns:1fr 1fr;
+  }
+  .tch-consent-btn{width:100%}
+}
 </style>
 </head>
 <body>
+
+<div id="tch-consent" class="tch-consent" role="dialog" aria-live="polite" aria-label="Preferências de cookies" hidden>
+  <p class="tch-consent-copy">Usamos cookies opcionais do Google para medir marcações e melhorar a publicidade. Pode aceitar ou recusar — o site funciona normalmente em ambos os casos.</p>
+  <div class="tch-consent-actions">
+    <button type="button" class="tch-consent-btn tch-consent-reject" onclick="tchSetConsent('denied')">Recusar</button>
+    <button type="button" class="tch-consent-btn tch-consent-accept" onclick="tchSetConsent('granted')">Aceitar</button>
+  </div>
+</div>
+
+<script>
+(function(){
+  const CONSENT_KEY='tch_google_consent';
+
+  window.tchSetConsent=function(choice){
+    const granted=choice==='granted';
+    gtag('consent','update',{
+      'ad_storage': granted ? 'granted' : 'denied',
+      'ad_user_data': granted ? 'granted' : 'denied',
+      'ad_personalization': granted ? 'granted' : 'denied',
+      'analytics_storage': granted ? 'granted' : 'denied'
+    });
+    try{ localStorage.setItem(CONSENT_KEY, granted ? 'granted' : 'denied'); }catch(_){}
+    const banner=document.getElementById('tch-consent');
+    if(banner) banner.hidden=true;
+  };
+
+  window.tchOpenConsent=function(){
+    const banner=document.getElementById('tch-consent');
+    if(banner) banner.hidden=false;
+  };
+
+  document.addEventListener('DOMContentLoaded',function(){
+    let saved=null;
+    try{ saved=localStorage.getItem(CONSENT_KEY); }catch(_){}
+    const banner=document.getElementById('tch-consent');
+    if(banner) banner.hidden=(saved==='granted' || saved==='denied');
+  });
+})();
+</script>
 <div class="wrap">
   <div class="topbar">
     <a class="brand" href="index.html"><img src="images/logo2.PNG" alt="The Classic House Barbearia"><span>The Classic House</span></a>
