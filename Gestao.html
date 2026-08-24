@@ -586,11 +586,113 @@ button,.btn,.client-pick-item,.service-pick-card,.manual-slot-btn,.scroll-calend
 }
 
 </style>
+
+<style id="tch-admin-immersive-v2">
+:root{
+  --bg:#0d0b09;--bg-alt:#14110e;--bg-card:#181410;--ink:#f5efe5;--ink-muted:#a99e90;
+  --brass:#c7a15a;--brass-strong:#dfbb73;--brass-dim:rgba(199,161,90,.18);
+  --primary:#f3e8d5;--primary-hover:#fff8ec;--line:rgba(255,255,255,.085);
+  --ok:#7fb486;--err:#d06d5c;--bg-hover:#201a15;
+  --panel:#15120f;--panel-2:#1b1713;--glass:rgba(16,13,10,.82);
+}
+html{background:#0d0b09;color-scheme:dark}
+body{
+  background:
+    radial-gradient(circle at 18% -8%,rgba(199,161,90,.13),transparent 27%),
+    radial-gradient(circle at 84% 12%,rgba(94,125,157,.08),transparent 23%),
+    linear-gradient(180deg,#0d0b09 0%,#100d0b 48%,#0b0908 100%)!important;
+  color:var(--ink);min-height:100vh;
+}
+body:before{content:"";position:fixed;inset:0;pointer-events:none;z-index:-1;opacity:.18;background-image:linear-gradient(rgba(255,255,255,.025) 1px,transparent 1px),linear-gradient(90deg,rgba(255,255,255,.02) 1px,transparent 1px);background-size:42px 42px;mask-image:linear-gradient(to bottom,#000,transparent 70%)}
+.wrap{max-width:1580px;padding:20px 28px 86px}
+.top-row{position:sticky;top:0;z-index:24;min-height:68px;margin-bottom:18px;padding:10px 2px;border:0!important;background:linear-gradient(180deg,rgba(13,11,9,.94),rgba(13,11,9,.72),transparent);backdrop-filter:blur(14px);-webkit-backdrop-filter:blur(14px)}
+.top-left .back{color:#857a6d;font-size:.68rem;letter-spacing:.1em;text-transform:uppercase}.top-left .back:hover{color:var(--brass)}
+.top-left h1{color:#fff8ed;font-size:1.5rem!important;font-weight:600}.top-left h1+div{color:#81776b!important;letter-spacing:.02em}
+.top-actions{display:flex;gap:9px;align-items:center}.command-trigger{height:40px;display:inline-flex;align-items:center;gap:14px;padding:0 10px 0 13px;border:1px solid var(--line);border-radius:11px;background:rgba(255,255,255,.035);color:#a99e90;cursor:pointer;font:500 .78rem 'IBM Plex Sans',sans-serif;transition:.14s ease}.command-trigger:hover{background:rgba(255,255,255,.065);border-color:rgba(199,161,90,.32);color:#efe6d9}.command-trigger kbd,.command-search-row kbd{font:500 .65rem 'IBM Plex Mono',monospace;color:#8f8374;border:1px solid rgba(255,255,255,.1);background:#1b1713;border-radius:6px;padding:3px 6px}
+#logout-btn{height:40px!important;background:rgba(255,255,255,.03)!important;color:#b4aa9e!important;border-color:var(--line)!important}
+#logout-btn:hover{color:#fff!important;border-color:rgba(199,161,90,.3)!important}
+
+/* Login */
+.login-card{background:rgba(21,18,15,.9)!important;border:1px solid rgba(199,161,90,.18)!important;border-radius:22px!important;box-shadow:0 30px 90px rgba(0,0,0,.42)!important;margin-top:9vh;position:relative;overflow:hidden}
+.login-card:before{content:"";position:absolute;width:180px;height:180px;right:-80px;top:-90px;border-radius:50%;background:rgba(199,161,90,.1);filter:blur(2px);pointer-events:none}.login-card h2{color:#f7eee2!important;font-family:'IBM Plex Sans',sans-serif!important;font-weight:600!important}.login-card label{color:#a99e90}
+
+/* Sidebar */
+@media(min-width:761px){
+  #dashboard-view{padding-left:258px}
+  #dashboard-view .tabs{left:16px;top:16px;bottom:16px;width:224px;padding:14px 10px 18px;border:1px solid rgba(255,255,255,.075)!important;border-radius:22px;background:linear-gradient(180deg,rgba(29,23,18,.98),rgba(15,12,10,.98))!important;box-shadow:0 24px 70px rgba(0,0,0,.32)!important;gap:3px;overflow:auto}
+  #dashboard-view .tabs::before,#dashboard-view .tabs::after{display:none!important}
+  .admin-brand{display:flex;align-items:center;gap:10px;padding:5px 8px 17px;margin-bottom:7px;border-bottom:1px solid rgba(255,255,255,.07)}
+  .admin-brand img{width:44px;height:44px;object-fit:contain;border-radius:11px;background:#eee4d2;padding:3px;box-shadow:0 5px 18px rgba(0,0,0,.2)}
+  .admin-brand strong{display:block;color:#f0d29a;font-size:.68rem;letter-spacing:.1em;white-space:nowrap}.admin-brand span{display:block;margin-top:3px;color:#73695d;font-size:.58rem;letter-spacing:.18em}
+  #dashboard-view .tab-btn{position:relative;padding:11px 12px!important;border:1px solid transparent!important;border-radius:10px!important;color:#9c9184!important;font-size:.82rem!important;overflow:hidden;transition:.13s ease!important}
+  #dashboard-view .tab-btn::before{width:6px!important;height:6px!important;border-color:#665a4c!important;transition:.13s ease!important}
+  #dashboard-view .tab-btn:hover{background:rgba(255,255,255,.045)!important;color:#e7ddd0!important;transform:translateX(1px)}
+  #dashboard-view .tab-btn.active{background:linear-gradient(90deg,rgba(199,161,90,.15),rgba(199,161,90,.045))!important;color:#f3d8a5!important;border-color:rgba(199,161,90,.15)!important;box-shadow:inset 3px 0 0 var(--brass)}
+  #dashboard-view .tab-btn.active::before{background:var(--brass)!important;border-color:var(--brass)!important;box-shadow:0 0 12px rgba(199,161,90,.6)}
+}
+
+/* Surfaces */
+input,select,textarea{background:#15120f!important;border:1px solid rgba(255,255,255,.1)!important;color:#eee6da!important;border-radius:11px!important;min-height:44px;box-shadow:inset 0 1px 0 rgba(255,255,255,.018)}
+input::placeholder,textarea::placeholder{color:#71685e}input:focus,select:focus,textarea:focus{outline:3px solid rgba(199,161,90,.09)!important;border-color:rgba(199,161,90,.55)!important;background:#181410!important}
+label{color:#998e81}.btn{border-radius:10px!important;min-height:40px;font-weight:600;letter-spacing:-.01em}.btn-primary{background:linear-gradient(180deg,#d1ae69,#bd944d)!important;color:#19120b!important;border-color:#d2ae68!important;box-shadow:0 8px 22px rgba(199,161,90,.12)!important}.btn-primary:hover{background:linear-gradient(180deg,#e0bd76,#c9a158)!important;transform:translateY(-1px)}.btn-ghost{background:rgba(255,255,255,.028)!important;color:#d8cfc3!important;border-color:rgba(255,255,255,.09)!important}.btn-ghost:hover{background:rgba(255,255,255,.055)!important;border-color:rgba(199,161,90,.3)!important;color:#fff!important}.btn-danger{border-color:rgba(208,109,92,.55)!important;color:#df8373!important}.btn-danger:hover{background:rgba(208,109,92,.09)!important}
+.manual-form,.custom-range,.stat-card,.appt-detail,.cal-toolbar{background:linear-gradient(180deg,rgba(26,22,18,.96),rgba(20,17,14,.96))!important;border:1px solid rgba(255,255,255,.075)!important;border-radius:16px!important;box-shadow:0 12px 34px rgba(0,0,0,.16)!important;position:relative;overflow:hidden}.manual-form:before,.stat-card:before,.cal-toolbar:before{content:"";position:absolute;inset:0;pointer-events:none;background:radial-gradient(500px circle at var(--spot-x,50%) var(--spot-y,0%),rgba(199,161,90,.055),transparent 45%);opacity:0;transition:opacity .18s}.manual-form:hover:before,.stat-card:hover:before,.cal-toolbar:hover:before{opacity:1}.manual-form>*{position:relative}.stat-card .eyebrow{color:#867b6e}.stat-card .value{color:#f6eee2!important;letter-spacing:-.04em}.eyebrow{color:var(--brass)!important}.msg{background:#17130f!important;border-radius:10px!important}.msg.ok{background:rgba(127,180,134,.08)!important;color:#93c49a!important}.msg.err{background:rgba(208,109,92,.08)!important;color:#e08878!important}
+
+/* Agenda */
+.cal-toolbar{padding:13px 15px!important}.zoom-controls{background:#12100e!important;border:1px solid rgba(255,255,255,.06);padding:4px!important}.zoom-controls .btn{background:#191612!important}.legend{color:#8f8478}.cal-scroll{background:#12100d!important;border:1px solid rgba(255,255,255,.085)!important;border-radius:17px!important;box-shadow:0 18px 50px rgba(0,0,0,.22)!important;scrollbar-color:#3a3027 #12100d}.cal-header-row{background:#191510!important;border-bottom:1px solid rgba(255,255,255,.08)!important}.cal-corner{background:#15120f!important;border-right:1px solid rgba(255,255,255,.07)!important}.cal-barber-header{border-right:1px solid rgba(255,255,255,.075)!important;color:#e7ddd0}.cal-barber-header.barber-bruno{background:rgba(67,122,160,.22)!important;color:#acd6f1!important}.cal-barber-header.barber-joao{background:rgba(76,139,92,.22)!important;color:#b9e2c0!important}.cal-body-row{background:#11100e!important}.cal-gutter{background:#15120f!important;border-right:1px solid rgba(255,255,255,.075)!important}.cal-gutter-label{color:#766d62!important}.cal-column{border-right:1px solid rgba(255,255,255,.065)!important;background-color:#11100e!important;background-image:linear-gradient(to bottom,rgba(199,161,90,.11) 1px,transparent 1px),linear-gradient(to bottom,rgba(255,255,255,.035) 1px,transparent 1px)!important}.cal-column.barber-bruno{background-color:#11171b!important}.cal-column.barber-joao{background-color:#111813!important}.cal-appt{border-radius:9px!important;box-shadow:0 5px 16px rgba(0,0,0,.22)!important;transition:transform .12s ease,box-shadow .12s ease!important}.cal-appt:hover{transform:translateY(-1px) scale(1.006)!important;box-shadow:0 9px 22px rgba(0,0,0,.3)!important}.appt-detail .row{border-color:rgba(255,255,255,.075)!important}.appt-detail .row span:first-child{color:#83796e}.appt-detail .row span:last-child{color:#eee5d8}
+
+/* Lists / pickers */
+.client-row,.subscription-row{border-color:rgba(255,255,255,.07)!important}.client-row:hover,.subscription-row:hover{background:rgba(255,255,255,.028)!important}.client-name,.subscription-name{color:#eee5d9!important;font-family:'IBM Plex Sans',sans-serif!important}.client-meta{color:#887e73!important}.client-avatar{background:#211a14!important;color:#e0bb73!important;border-color:rgba(199,161,90,.25)!important}.service-picker-btn{background:#15120f!important;border-color:rgba(255,255,255,.1)!important;color:#e9dfd2!important}.service-picker-btn:hover{background:#1c1713!important;border-color:rgba(199,161,90,.4)!important}.service-pick-card,.client-pick-item{background:#15120f!important;border:1px solid rgba(255,255,255,.055)!important;color:#e9dfd2!important}.service-pick-card:hover,.client-pick-item:hover{background:#1d1814!important;border-color:rgba(199,161,90,.18)!important}.service-pick-name,.client-pick-name{color:#efe6da!important}.service-cat-title{color:#d6c9b9!important;border-color:rgba(255,255,255,.07)!important}.service-cat-title .count{background:#211b16!important;color:#897d6f!important}.service-pick-price{color:#e2bf78!important}.manual-slot-btn{background:#15120f!important;border-color:rgba(255,255,255,.09)!important;color:#d8cfc2!important}.manual-slot-btn:hover{background:#1d1814!important;border-color:rgba(199,161,90,.35)!important}.manual-slot-btn.selected{background:#c7a15a!important;border-color:#c7a15a!important;color:#17110b!important}
+
+/* Modal */
+.modal-overlay{background:rgba(5,4,3,.76)!important;backdrop-filter:blur(8px)!important;-webkit-backdrop-filter:blur(8px)!important}.modal-sheet{background:linear-gradient(180deg,#1a1612,#12100d)!important;border:1px solid rgba(255,255,255,.1)!important;border-radius:18px!important;box-shadow:0 28px 90px rgba(0,0,0,.56)!important}.modal-header{border-color:rgba(255,255,255,.07)!important}.modal-header h3{color:#f2e8db!important}.modal-close{background:#211b16!important;color:#aa9e91!important}.booking-info-row{background:#17130f!important;border-left-color:var(--brass)!important}.booking-info-value{color:#efe5d8!important}.scroll-calendar-month{background:#15120f!important}.scroll-calendar-date{background:#191511!important;border-color:rgba(255,255,255,.08)!important;color:#cfc4b7!important}.scroll-calendar-date:hover{background:#211b16!important;border-color:rgba(199,161,90,.35)!important}.scroll-calendar-date.selected{background:var(--brass)!important;color:#18110b!important;border-color:var(--brass)!important}
+
+/* FAB */
+.fab-main{background:linear-gradient(180deg,#d5b16e,#bd944d)!important;color:#17110b!important;box-shadow:0 14px 35px rgba(0,0,0,.34),0 0 0 1px rgba(255,255,255,.08) inset!important}.fab-main:hover{transform:translateY(-2px) scale(1.03)!important}.fab-menu{background:#181410!important;border:1px solid rgba(255,255,255,.08)!important;box-shadow:0 20px 55px rgba(0,0,0,.4)!important}.fab-item{color:#d9cfc2!important;border-color:rgba(255,255,255,.06)!important}.fab-item:hover{background:#211b16!important}.fab-label{color:#ded4c7!important}.keypad-btn{background:#17130f!important;border-color:rgba(255,255,255,.09)!important;color:#ece3d7!important}.keypad-btn:hover{background:#211b16!important;border-color:rgba(199,161,90,.35)!important}
+
+/* Command palette */
+.command-overlay{position:fixed;inset:0;z-index:900;background:rgba(4,3,3,.62);backdrop-filter:blur(9px);-webkit-backdrop-filter:blur(9px);display:flex;align-items:flex-start;justify-content:center;padding-top:min(16vh,150px)}.command-panel{width:min(620px,calc(100vw - 28px));overflow:hidden;border-radius:17px;background:#15120f;border:1px solid rgba(255,255,255,.11);box-shadow:0 34px 100px rgba(0,0,0,.55)}.command-search-row{height:58px;display:flex;align-items:center;gap:10px;padding:0 15px;border-bottom:1px solid rgba(255,255,255,.075)}.command-search-icon{font-size:1.35rem;color:#8c8174}.command-search-row input{flex:1;height:42px!important;min-height:0!important;border:0!important;outline:0!important;background:transparent!important;padding:0!important;font-size:.92rem;box-shadow:none!important}.command-list{padding:7px;max-height:390px;overflow:auto}.command-item{display:flex;width:100%;align-items:center;justify-content:space-between;gap:14px;padding:11px 12px;border:0;border-radius:9px;background:transparent;color:#bdb2a5;text-align:left;cursor:pointer;font:500 .84rem 'IBM Plex Sans',sans-serif}.command-item:hover,.command-item.active{background:rgba(199,161,90,.1);color:#f0dfbd}.command-item small{color:#70665c;font-size:.7rem}.command-item .command-name{display:flex;align-items:center;gap:10px}.command-dot{width:7px;height:7px;border-radius:50%;border:1px solid #776a5a}.command-item.active .command-dot{background:var(--brass);border-color:var(--brass);box-shadow:0 0 11px rgba(199,161,90,.55)}.command-foot{display:flex;gap:16px;padding:9px 13px;border-top:1px solid rgba(255,255,255,.07);font-size:.65rem;color:#625950}.command-overlay.hidden{display:none!important}
+
+/* Mobile */
+.mobile-sidebar{background:#12100d!important;border-right:1px solid rgba(255,255,255,.08)!important;color:#e7ddd0!important}.mobile-brand{display:flex;align-items:center;gap:10px;padding-bottom:14px;border-bottom:1px solid rgba(255,255,255,.08);margin-bottom:12px}.mobile-brand img{width:42px;height:42px;object-fit:contain;border-radius:10px;background:#eee4d2;padding:3px}.mobile-brand strong{display:block;font-size:.78rem;color:#e9d6ad}.mobile-brand span{font-size:.64rem;color:#6f655a}.mobile-sidebar h3{color:#f0e7dc!important}.mobile-nav-link{color:#a69a8c!important;border-color:rgba(255,255,255,.065)!important}.mobile-nav-link.active{color:#e4c17d!important}.sidebar-overlay{background:rgba(0,0,0,.58)!important}
+@media(max-width:760px){
+  body:before{display:none}.wrap{padding:10px 11px 92px}.top-row{margin:0 -11px 12px;padding:9px 11px;background:#0d0b09!important;backdrop-filter:none!important}.top-left h1{font-size:1.15rem!important}.top-left h1+div{display:none}.top-left .back{font-size:.6rem}.top-actions{gap:5px}.command-trigger{width:39px;padding:0;justify-content:center}.command-trigger span{display:none}.command-trigger kbd{border:0;padding:0;background:transparent;font-size:0}.command-trigger kbd:after{content:"⌕";font-size:1.05rem;color:#b19f89}.hamburger-btn{background:#17130f!important;border-color:rgba(255,255,255,.09)!important;color:#d8ccbd!important}.cal-scroll{max-height:70vh!important;border-radius:13px!important}.cal-toolbar{border-radius:13px!important}.modal-overlay{backdrop-filter:none!important;-webkit-backdrop-filter:none!important}.modal-sheet{border-radius:17px 17px 0 0!important}.floating-action-menu{right:16px;bottom:76px}.command-overlay{padding-top:72px;align-items:flex-start;backdrop-filter:none;-webkit-backdrop-filter:none}.command-panel{border-radius:14px}.command-search-row{height:54px}
+}
+@media(prefers-reduced-motion:reduce){.manual-form:before,.stat-card:before,.cal-toolbar:before{display:none}}
+</style>
+
+<style id="tch-admin-light-override">
+:root{
+  --bg:#f7f3ec;--bg-alt:#fffdf9;--bg-card:#ffffff;--ink:#2b2118;--ink-muted:#786d61;
+  --brass:#b58a45;--brass-strong:#c59a51;--brass-dim:rgba(181,138,69,.22);
+  --primary:#241a12;--primary-hover:#38291d;--line:#ded5c8;--ok:#4f8157;--err:#a84434;
+  --bg-hover:#f5eee4;--panel:#fffdfa;--panel-2:#f8f2e9;--glass:rgba(255,253,249,.9);
+}
+html{background:#f7f3ec!important;color-scheme:light!important}
+body{background:linear-gradient(180deg,#fbf8f3 0%,#f3ede4 100%)!important;color:var(--ink)!important}
+body:before{opacity:.22!important;background-image:linear-gradient(rgba(87,65,42,.035) 1px,transparent 1px),linear-gradient(90deg,rgba(87,65,42,.025) 1px,transparent 1px)!important}
+.top-row{background:linear-gradient(180deg,rgba(251,248,243,.97),rgba(251,248,243,.9),rgba(251,248,243,.72))!important}
+.top-left .back{color:#847665!important}.top-left h1{color:#241a12!important}.top-left h1+div{color:#8b7d6c!important}
+.command-trigger,#logout-btn{background:#fffdfa!important;color:#6f6255!important;border-color:#ddd2c4!important}
+.command-trigger:hover,#logout-btn:hover{background:#f6efe5!important;color:#241a12!important;border-color:#cdb78e!important}
+.login-card{background:#fffdfa!important;border-color:#ddcfb8!important;box-shadow:0 24px 70px rgba(65,45,25,.13)!important}.login-card h2{color:#241a12!important}.login-card label{color:#786d61!important}
+input,select,textarea{background:#fff!important;border-color:#d8cec0!important;color:#2b2118!important;box-shadow:none!important}
+input::placeholder,textarea::placeholder{color:#a49686!important}input:focus,select:focus,textarea:focus{background:#fff!important;outline:3px solid rgba(181,138,69,.13)!important;border-color:#b58a45!important}
+label{color:#75695d!important}.btn-primary{background:linear-gradient(180deg,#c49a52,#ad8037)!important;color:#fffdf8!important;border-color:#ad8037!important}.btn-primary:hover{background:linear-gradient(180deg,#cfaa66,#b98b40)!important}.btn-ghost{background:#fffdfa!important;color:#403329!important;border-color:#d8cec0!important}.btn-ghost:hover{background:#f5eee4!important;color:#241a12!important;border-color:#c8ae7f!important}
+.manual-form,.custom-range,.stat-card,.appt-detail,.cal-toolbar{background:#fffdfa!important;border-color:#ded5c8!important;box-shadow:0 10px 28px rgba(61,43,25,.055)!important}.manual-form:before,.stat-card:before,.cal-toolbar:before{display:none!important}.stat-card .eyebrow{color:#89775f!important}.stat-card .value{color:#241a12!important}.msg{background:#fff!important}.msg.ok{background:#eef7ef!important;color:#46714d!important}.msg.err{background:#fff0ed!important;color:#9b3f31!important}
+.cal-toolbar .zoom-controls{background:#f4eee5!important;border-color:#e5dbce!important}.zoom-controls .btn{background:#fff!important}.legend{color:#7d7063!important}.cal-scroll{background:#fff!important;border-color:#ddd3c5!important;box-shadow:0 14px 36px rgba(61,43,25,.08)!important;scrollbar-color:#c9b99f #f8f3ec!important}.cal-header-row{background:#faf6ef!important;border-color:#ded5c8!important}.cal-corner{background:#f5eee4!important;border-color:#ded5c8!important}.cal-barber-header{border-color:#ded5c8!important;color:#3d3025!important}.cal-barber-header.barber-bruno{background:#dceefb!important;color:#174361!important}.cal-barber-header.barber-joao{background:#e0f3e4!important;color:#1f552d!important}.cal-body-row{background:#fff!important}.cal-gutter{background:#faf6ef!important;border-color:#e1d7ca!important}.cal-gutter-label{color:#9a8060!important}.cal-column{border-color:#e5dccf!important;background-color:#fff!important;background-image:linear-gradient(to bottom,rgba(181,138,69,.16) 1px,transparent 1px),linear-gradient(to bottom,rgba(83,67,49,.055) 1px,transparent 1px)!important}.cal-column.barber-bruno{background-color:#f5fbff!important}.cal-column.barber-joao{background-color:#f6fcf7!important}.appt-detail .row{border-color:#e7ddd0!important}.appt-detail .row span:first-child{color:#817466!important}.appt-detail .row span:last-child{color:#2b2118!important}
+.client-row,.subscription-row{border-color:#e8dfd3!important}.client-row:hover,.subscription-row:hover{background:#faf6ef!important}.client-name,.subscription-name{color:#2b2118!important}.client-meta{color:#85786b!important}.client-avatar{background:#f1e6d5!important;color:#a67935!important;border-color:#d9c49f!important}.service-picker-btn{background:#fff!important;border-color:#d8cec0!important;color:#2b2118!important}.service-picker-btn:hover{background:#faf6ef!important;border-color:#c5a873!important}.service-pick-card,.client-pick-item{background:#fff!important;border-color:#eee5d9!important;color:#2b2118!important}.service-pick-card:hover,.client-pick-item:hover{background:#faf6ef!important;border-color:#ddc8a4!important}.service-pick-name,.client-pick-name{color:#2b2118!important}.service-cat-title{color:#493a2e!important;border-color:#e8dfd3!important}.service-cat-title .count{background:#f3ece2!important;color:#817466!important}.service-pick-price{color:#9b712f!important}.manual-slot-btn{background:#fff!important;border-color:#ddd2c4!important;color:#493a2e!important}.manual-slot-btn:hover{background:#faf6ef!important;border-color:#c7a15a!important}.manual-slot-btn.selected{background:#b58a45!important;border-color:#b58a45!important;color:#fff!important}
+.modal-overlay{background:rgba(45,34,24,.34)!important;backdrop-filter:blur(5px)!important}.modal-sheet{background:#fffdfa!important;border-color:#d8cec0!important;box-shadow:0 26px 70px rgba(52,37,23,.2)!important}.modal-header{border-color:#eee5d9!important}.modal-header h3{color:#2b2118!important}.modal-close{background:#f3ece3!important;color:#76695d!important}.booking-info-row{background:#f5eee4!important}.booking-info-value{color:#2b2118!important}.scroll-calendar-month{background:#f7f1e8!important}.scroll-calendar-date{background:#fff!important;border-color:#ddd2c4!important;color:#493a2e!important}.scroll-calendar-date:hover{background:#f5eee4!important;border-color:#c5a873!important}.scroll-calendar-date.selected{background:#b58a45!important;color:#fff!important;border-color:#b58a45!important}
+.fab-menu{background:#fffdfa!important;border-color:#ddd2c4!important;box-shadow:0 18px 45px rgba(52,37,23,.16)!important}.fab-item{color:#493a2e!important;border-color:#eee5d9!important}.fab-item:hover{background:#f7f1e8!important}.fab-label{color:#3d3025!important}.keypad-btn{background:#fff!important;border-color:#ddd2c4!important;color:#3d3025!important}.keypad-btn:hover{background:#f5eee4!important;border-color:#c5a873!important}
+.command-overlay{background:rgba(45,34,24,.28)!important}.command-panel{background:#fffdfa!important;border-color:#d8cec0!important;box-shadow:0 30px 80px rgba(52,37,23,.2)!important}.command-search-row{border-color:#eee5d9!important}.command-search-icon{color:#8d7d6c!important}.command-search-row input{background:transparent!important}.command-item{color:#625548!important}.command-item:hover,.command-item.active{background:#f3eadc!important;color:#34271d!important}.command-item small{color:#948676!important}.command-dot{border-color:#a9957b!important}.command-foot{border-color:#eee5d9!important;color:#8f8172!important}
+@media(max-width:760px){.top-row{background:#fbf8f3!important}.hamburger-btn{background:#fff!important;border-color:#d8cec0!important;color:#493a2e!important}.sidebar-overlay{background:rgba(45,34,24,.34)!important}}
+</style>
+
 </head>
 <body>
 <div id="toast-stack" aria-live="polite" aria-atomic="true"></div>
 <div class="sidebar-overlay" id="sidebar-overlay" onclick="closeSidebar()"></div>
 <div class="mobile-sidebar" id="mobile-sidebar">
+  <div class="mobile-brand"><img src="/images/logo2.PNG?v=20260817" alt="The Classic House"><div><strong>The Classic House</strong><span>Gestão</span></div></div>
   <h3>Menu</h3>
   <button class="mobile-nav-link active" data-tab="agenda" onclick="switchTab('agenda')">Agenda</button>
   <button class="mobile-nav-link" data-tab="relatorios" onclick="switchTab('relatorios')">Relatórios</button>
@@ -599,6 +701,14 @@ button,.btn,.client-pick-item,.service-pick-card,.manual-slot-btn,.scroll-calend
   <button class="mobile-nav-link" data-tab="catalogo" onclick="switchTab('catalogo')">Catálogo</button>
   <button class="mobile-nav-link" data-tab="marketing" onclick="switchTab('marketing')">Marketing</button>
   <button class="mobile-nav-link" onclick="logout()" style="margin-top:20px; color:var(--err);">Sair</button>
+</div>
+
+<div class="command-overlay hidden" id="command-overlay" onclick="if(event.target===this) closeCommandPalette()">
+  <div class="command-panel" role="dialog" aria-modal="true" aria-label="Navegação rápida">
+    <div class="command-search-row"><span class="command-search-icon">⌕</span><input id="command-search" type="search" autocomplete="off" placeholder="Pesquisar área ou ação…"><kbd>ESC</kbd></div>
+    <div class="command-list" id="command-list"></div>
+    <div class="command-foot"><span>↑↓ navegar</span><span>Enter abrir</span></div>
+  </div>
 </div>
 
 <div class="wrap">
@@ -610,7 +720,12 @@ button,.btn,.client-pick-item,.service-pick-card,.manual-slot-btn,.scroll-calend
         <h1 style="margin-top:6px;">Gestão</h1><div style="font-size:.72rem;color:var(--ink-muted);margin-top:2px;">Agenda · Clientes · Assinaturas · Relatórios</div>
       </div>
     </div>
-    <button class="btn btn-ghost hidden" id="logout-btn" onclick="logout()">Sair</button>
+    <div class="top-actions">
+      <button class="command-trigger hidden" id="command-trigger" type="button" onclick="openCommandPalette()" title="Navegação rápida">
+        <span>Ir para…</span><kbd>⌘ K</kbd>
+      </button>
+      <button class="btn btn-ghost hidden" id="logout-btn" onclick="logout()">Sair</button>
+    </div>
   </div>
 
   <div class="login-card" id="login-view">
@@ -662,6 +777,10 @@ button,.btn,.client-pick-item,.service-pick-card,.manual-slot-btn,.scroll-calend
       </div>
     </div>
     <div class="tabs">
+      <div class="admin-brand" aria-label="The Classic House Gestão">
+        <img src="/images/logo2.PNG?v=20260817" alt="The Classic House" onerror="this.src='https://raw.githubusercontent.com/theclassichousebarbearia2/theclassichouse/main/images/logo2.PNG'">
+        <div><strong>THE CLASSIC HOUSE</strong><span>GESTÃO</span></div>
+      </div>
       <button class="tab-btn active" data-tab="agenda" onclick="switchTab('agenda')">Agenda</button>
       <button class="tab-btn" data-tab="relatorios" onclick="switchTab('relatorios')">Relatórios</button>
       <button class="tab-btn" data-tab="clientes" onclick="switchTab('clientes')">Clientes</button>
@@ -890,8 +1009,8 @@ button,.btn,.client-pick-item,.service-pick-card,.manual-slot-btn,.scroll-calend
             <label>Nome
               <input type="text" id="client-picker-new-name" autocomplete="name">
             </label>
-            <label>Telemóvel
-              <input type="tel" id="client-picker-new-phone" inputmode="tel" autocomplete="tel" placeholder="9XXXXXXXX">
+            <label>Telemóvel (opcional)
+              <input type="tel" id="client-picker-new-phone" inputmode="tel" autocomplete="tel" placeholder="9XXXXXXXX (opcional)">
             </label>
             <label>Email (opcional)
               <input type="email" id="client-picker-new-email" autocomplete="email">
@@ -2361,6 +2480,7 @@ async function submitSubscription(){
     const { error: subErr } = await sb.from('subscriptions').insert({
       client_id: clientId, service_id: serviceId, plan_name: planName || null,
       start_date: startDate, end_date: endDate, total_services: totalServices,
+      cycle_total_services: totalServices, usage_offset: 0,
     });
     if (subErr) throw subErr;
 
@@ -2405,14 +2525,24 @@ async function loadSubscriptions(force=false){
   renderSubscriptionsList();
 }
 
+function getSubscriptionCycleUsage(sub){
+  const rawUsed = Math.max(0, Number(subscriptionUsageCounts[sub.id]) || 0);
+  const offset = Math.min(rawUsed, Math.max(0, Number(sub.usage_offset) || 0));
+  const storedCycleTotal = sub.cycle_total_services;
+  const total = storedCycleTotal === null || storedCycleTotal === undefined
+    ? Math.max(0, (Number(sub.total_services) || 0) - offset)
+    : Math.max(0, Number(storedCycleTotal) || 0);
+  const used = Math.max(0, rawUsed - offset);
+  return { rawUsed, used, total, remaining: Math.max(0, total - used) };
+}
+
 
 function renderSubscriptionsList(){
   const listEl = document.getElementById('subscriptions-list');
   if (!subscriptionsData.length) { listEl.innerHTML = '<p style="color:var(--ink-muted);">Ainda não há assinantes registados.</p>'; return; }
   const today = toLocalDateStr(new Date());
   listEl.innerHTML = subscriptionsData.map(sub => {
-    const used = subscriptionUsageCounts[sub.id] || 0;
-    const remaining = Math.max(0, (Number(sub.total_services)||0) - used);
+    const { used, total, remaining } = getSubscriptionCycleUsage(sub);
     const dateActive = sub.start_date <= today && sub.end_date >= today;
     const isActive = dateActive && remaining > 0;
     const statusLabel = isActive ? '✓ Ativo' : (dateActive ? '• Serviços esgotados' : '✗ Inativo/expirado');
@@ -2427,16 +2557,14 @@ function renderSubscriptionsList(){
       <div class="subscription-name">${escapeHtml(sub.clients?.name || '')}</div>
       <div class="subscription-status" style="color:${isActive?'var(--ok)':'var(--err)'};">${statusLabel}</div>
       <div class="client-meta">${escapeHtml(sub.plan_name || sub.services?.name?.split('|')[0].trim() || '')}</div></div>
-      <div class="subscription-usage">${remaining} restantes · ${used}/${Number(sub.total_services)||0}</div></div>`;
+      <div class="subscription-usage">${remaining} restantes · ${used}/${total}</div></div>`;
   }).join('');
 }
 
 function showSubscriptionDetail(subscriptionId){
   const sub = subscriptionsData.find(s => s.id === subscriptionId);
   if(!sub) return;
-  const used = subscriptionUsageCounts[subscriptionId] || 0;
-  const total = Number(sub.total_services)||0;
-  const remaining = Math.max(0,total-used);
+  const { used, total, remaining } = getSubscriptionCycleUsage(sub);
   const today = toLocalDateStr(new Date());
   const dateActive = sub.start_date <= today && sub.end_date >= today;
   const isActive = dateActive && remaining > 0;
@@ -2495,12 +2623,13 @@ async function saveClientData(subscriptionId){
 function renewSubscription(subscriptionId){
   const sub = subscriptionsData.find(s => s.id === subscriptionId);
   if(!sub) return;
+  const { total } = getSubscriptionCycleUsage(sub);
   document.getElementById('subscription-detail-content').innerHTML = `
     <div style="padding:20px;">
       <div class="booking-section-header" style="margin-top:0;">Renovar assinatura</div>
-      <div class="client-meta" style="margin-bottom:16px;">Os novos serviços serão adicionados ao saldo sem apagar o histórico já utilizado.</div>
+      <div class="client-meta" style="margin-bottom:16px;">A renovação inicia um novo ciclo. Os serviços do ciclo anterior continuam no histórico, mas a contagem volta a zero.</div>
       <label>Dias de renovação<input type="number" min="1" id="sub-renew-days" value="30"></label>
-      <label>Novos serviços incluídos<input type="number" min="1" id="sub-renew-services" value="${Number(sub.total_services)||1}"></label>
+      <label>Serviços do novo ciclo<input type="number" min="1" id="sub-renew-services" value="${total || 1}"></label>
       <div id="sub-renew-msg"></div>
       <div style="display:flex;gap:8px;margin-top:14px;">
         <button type="button" class="btn btn-ghost" onclick="showSubscriptionDetail('${sub.id}')">Cancelar</button>
@@ -2523,13 +2652,23 @@ async function confirmRenewSubscription(subscriptionId){
   const currentEnd = new Date(sub.end_date + 'T00:00:00');
   const base = currentEnd > today ? currentEnd : today;
   const newEnd = new Date(base); newEnd.setDate(newEnd.getDate() + days);
-  const used = subscriptionUsageCounts[subscriptionId] || 0;
-  const { error } = await sb.from('subscriptions').update({ end_date: toLocalDateStr(newEnd), total_services: used + included }).eq('id', subscriptionId);
-  if (error) { console.error(error); msgEl.innerHTML = '<div class="msg err">Erro ao renovar a assinatura.</div>'; return; }
+  const rawUsed = Math.max(0, Number(subscriptionUsageCounts[subscriptionId]) || 0);
+  const { error } = await sb.from('subscriptions').update({
+    start_date: toLocalDateStr(today),
+    end_date: toLocalDateStr(newEnd),
+    total_services: rawUsed + included,
+    usage_offset: rawUsed,
+    cycle_total_services: included
+  }).eq('id', subscriptionId);
+  if (error) {
+    console.error(error);
+    msgEl.innerHTML = '<div class="msg err">Erro ao renovar. Confirma se a migration_17 foi executada no Supabase.</div>';
+    return;
+  }
   subscriptionsLoadedAt = 0;
   await loadSubscriptions(true);
   showSubscriptionDetail(subscriptionId);
-  showToast(`Renovada até ${newEnd.toLocaleDateString('pt-PT')}.`);
+  showToast(`Novo ciclo iniciado: 0/${included} · válido até ${newEnd.toLocaleDateString('pt-PT')}.`);
 }
 
 function startEditSubscriptionService(subscriptionId){
@@ -2909,19 +3048,20 @@ function cancelNewClientFromPicker(clear=true){
 async function submitNewClientFromPicker(){
   if (newClientPickerBusy) return;
   const name = document.getElementById('client-picker-new-name').value.trim();
-  const phone = normalizePhone(document.getElementById('client-picker-new-phone').value);
+  const phoneRaw = document.getElementById('client-picker-new-phone').value.trim();
+  const phone = phoneRaw ? normalizePhone(phoneRaw) : null;
   const email = document.getElementById('client-picker-new-email').value.trim();
   const msgEl = document.getElementById('client-picker-new-msg');
   const btn = document.getElementById('client-picker-new-submit');
   msgEl.innerHTML = '';
-  if (!name || !phone) { msgEl.innerHTML = '<div class="msg err">Preenche nome e telemóvel.</div>'; return; }
-  if (!isValidPhone(phone)) { msgEl.innerHTML = '<div class="msg err">O telemóvel deve ter 9 dígitos.</div>'; return; }
+  if (!name) { msgEl.innerHTML = '<div class="msg err">Preenche o nome do cliente.</div>'; return; }
+  if (phoneRaw && !isValidPhone(phone)) { msgEl.innerHTML = '<div class="msg err">O telemóvel deve ter 9 dígitos.</div>'; return; }
   newClientPickerBusy = true; setButtonBusy(btn, true, 'A guardar…');
   try {
     await ensureClientDirectory();
-    let client = clientDirectoryCache.find(c => normalizePhone(c.phone) === phone);
+    let client = phone ? clientDirectoryCache.find(c => normalizePhone(c.phone) === phone) : null;
     if (!client) {
-      const { data, error } = await sb.from('clients').insert({ name, phone, email: email || null }).select('id,name,phone,email,created_at').single();
+      const { data, error } = await sb.from('clients').insert({ name, phone: phone || null, email: email || null }).select('id,name,phone,email,created_at').single();
       if (error) throw error;
       client = data;
       clientDirectoryCache.push(client);
@@ -3277,8 +3417,9 @@ async function confirmBookingModal() {
     phone:bookingState.selectedClientPhone,
     email:bookingState.selectedClientEmail
   };
-  const normalizedPhone = normalizePhone(client.phone || '');
-  if (!isValidPhone(normalizedPhone)) { showToast('O cliente precisa de um telemóvel válido para esta marcação.', 'err'); return; }
+  const phoneRaw = String(client.phone || '').trim();
+  const normalizedPhone = phoneRaw ? normalizePhone(phoneRaw) : null;
+  if (phoneRaw && !isValidPhone(normalizedPhone)) { showToast('O telemóvel do cliente é inválido.', 'err'); return; }
 
   const hours = Math.floor(clickedMin / 60), mins = clickedMin % 60;
   const timeStr = `${String(hours).padStart(2,'0')}:${String(mins).padStart(2,'0')}`;
@@ -3420,5 +3561,60 @@ function confirmScrollCalendarDate() {
 }
 
 </script>
+
+<script id="tch-admin-v2-enhancements">
+(() => {
+  const commandItems = [
+    {name:'Agenda', hint:'Calendário e marcações', run:()=>switchTab('agenda')},
+    {name:'Relatórios', hint:'Pagamentos e faturação', run:()=>switchTab('relatorios')},
+    {name:'Clientes', hint:'Base de clientes', run:()=>switchTab('clientes')},
+    {name:'Assinantes', hint:'Planos mensais', run:()=>switchTab('assinantes')},
+    {name:'Catálogo', hint:'Serviços e preços', run:()=>switchTab('catalogo')},
+    {name:'Marketing', hint:'Campanhas', run:()=>switchTab('marketing')},
+    {name:'Nova marcação manual', hint:'Agenda', run:()=>{switchTab('agenda'); const f=document.getElementById('manual-form'); if(f?.classList.contains('hidden')) toggleManualForm();}},
+    {name:'Pagamento rápido', hint:'Registar valor', run:()=>openQuickPayment()},
+    {name:'Venda rápida', hint:'Produtos', run:()=>openQuickSale()},
+    {name:'Abrir site', hint:'Página principal', run:()=>location.href='index.html'}
+  ];
+  let commandFiltered=[...commandItems], activeIndex=0;
+
+  window.openCommandPalette = function(){
+    const overlay=document.getElementById('command-overlay'); if(!overlay) return;
+    overlay.classList.remove('hidden');
+    const input=document.getElementById('command-search'); if(input){input.value=''; requestAnimationFrame(()=>input.focus())}
+    commandFiltered=[...commandItems]; activeIndex=0; renderCommands();
+  };
+  window.closeCommandPalette = function(){document.getElementById('command-overlay')?.classList.add('hidden')};
+  function renderCommands(){
+    const list=document.getElementById('command-list'); if(!list) return;
+    if(!commandFiltered.length){list.innerHTML='<div class="client-picker-empty">Nenhum resultado.</div>';return}
+    list.innerHTML=commandFiltered.map((item,i)=>`<button type="button" class="command-item ${i===activeIndex?'active':''}" data-command-index="${i}"><span class="command-name"><span class="command-dot"></span>${escapeHtml(item.name)}</span><small>${escapeHtml(item.hint)}</small></button>`).join('');
+    list.querySelectorAll('.command-item').forEach(btn=>btn.addEventListener('click',()=>executeCommand(Number(btn.dataset.commandIndex))));
+  }
+  function executeCommand(i){const item=commandFiltered[i]; if(!item)return; closeCommandPalette(); item.run()}
+  document.addEventListener('DOMContentLoaded',()=>{
+    const search=document.getElementById('command-search');
+    search?.addEventListener('input',e=>{const q=e.target.value.trim().toLowerCase();commandFiltered=commandItems.filter(i=>(i.name+' '+i.hint).toLowerCase().includes(q));activeIndex=0;renderCommands()});
+    search?.addEventListener('keydown',e=>{
+      if(e.key==='ArrowDown'){e.preventDefault();activeIndex=Math.min(activeIndex+1,commandFiltered.length-1);renderCommands()}
+      else if(e.key==='ArrowUp'){e.preventDefault();activeIndex=Math.max(activeIndex-1,0);renderCommands()}
+      else if(e.key==='Enter'){e.preventDefault();executeCommand(activeIndex)}
+    });
+    document.querySelectorAll('.manual-form,.stat-card,.cal-toolbar').forEach(el=>el.addEventListener('pointermove',e=>{if(innerWidth<800)return;const r=el.getBoundingClientRect();el.style.setProperty('--spot-x',`${e.clientX-r.left}px`);el.style.setProperty('--spot-y',`${e.clientY-r.top}px`)}));
+  });
+  document.addEventListener('keydown',e=>{
+    if((e.metaKey||e.ctrlKey)&&e.key.toLowerCase()==='k'){e.preventDefault();document.getElementById('command-overlay')?.classList.contains('hidden')?openCommandPalette():closeCommandPalette()}
+    if(e.key==='Escape') closeCommandPalette();
+  });
+
+  // Make quick navigation visible only with dashboard/session visible.
+  const observer=new MutationObserver(()=>{
+    const dashboard=document.getElementById('dashboard-view'),trigger=document.getElementById('command-trigger');
+    if(dashboard&&trigger) trigger.classList.toggle('hidden',dashboard.classList.contains('hidden'));
+  });
+  document.addEventListener('DOMContentLoaded',()=>{const d=document.getElementById('dashboard-view');if(d)observer.observe(d,{attributes:true,attributeFilter:['class']})});
+})();
+</script>
+
 </body>
 </html>
