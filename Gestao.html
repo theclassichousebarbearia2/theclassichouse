@@ -687,6 +687,43 @@ label{color:#75695d!important}.btn-primary{background:linear-gradient(180deg,#c4
 @media(max-width:760px){.top-row{background:#fbf8f3!important}.hamburger-btn{background:#fff!important;border-color:#d8cec0!important;color:#493a2e!important}.sidebar-overlay{background:rgba(45,34,24,.34)!important}}
 </style>
 
+<style id="tch-admin-performance">
+/* Interações rápidas: evita efeitos de pintura caros e limita transições. */
+button,.btn,.tab-btn,.mobile-nav-link,.service-picker-btn,.service-pick-card,.client-row,.subscription-row,.manual-slot-btn,.scroll-calendar-date{
+  touch-action:manipulation;
+  -webkit-tap-highlight-color:transparent;
+  transition-property:transform,background-color,border-color,color,opacity!important;
+  transition-duration:.1s!important;
+}
+.modal-overlay,.command-overlay{
+  backdrop-filter:none!important;
+  -webkit-backdrop-filter:none!important;
+}
+.top-row{backdrop-filter:none!important;-webkit-backdrop-filter:none!important}
+.modal-overlay:not(.hidden),.command-overlay:not(.hidden){animation-duration:.1s!important}
+.modal-sheet:not(.hidden),.booking-modal{animation-duration:.13s!important}
+.client-row,.subscription-row,.service-pick-card,.client-pick-item{
+  content-visibility:auto;
+  contain-intrinsic-size:auto 68px;
+}
+.cal-appt{contain:layout paint style}
+#calendar-area.is-loading::after{
+  content:"";
+  position:absolute;
+  top:0;left:0;
+  width:32%;height:2px;
+  z-index:8;
+  background:var(--brass);
+  animation:tchFastLoading .75s ease-in-out infinite alternate;
+  pointer-events:none;
+}
+@keyframes tchFastLoading{from{transform:translateX(-20%)}to{transform:translateX(240%)}}
+@media(prefers-reduced-motion:reduce){
+  #calendar-area.is-loading::after{animation:none;width:100%;opacity:.5}
+  .modal-overlay:not(.hidden),.modal-sheet:not(.hidden),.booking-modal,.command-overlay:not(.hidden){animation:none!important}
+}
+</style>
+
 </head>
 <body>
 <div id="toast-stack" aria-live="polite" aria-atomic="true"></div>
@@ -1133,22 +1170,28 @@ const NTFY_TOPIC = "theclassichouse-marcacoes-2026";
 let currentUserId = null;
 let dashboardCoreLoaded = false;
 let dashboardLoadPromise = null;
+let dashboardCoreRefreshPromise = null;
+const CORE_CACHE_KEY = 'tch-admin-core-v3';
+const CORE_CACHE_TTL_MS = 2 * 60 * 1000;
 
 // Uma única inicialização por sessão. Evita chamadas duplicadas e listeners repetidos.
 if(sb) {
   sb.auth.onAuthStateChange((event, session) => {
     currentUserId = session?.user?.id || null;
     if(session) {
+      const dashboardWasHidden = document.getElementById('dashboard-view')?.classList.contains('hidden');
       document.getElementById('login-view')?.classList.add('hidden');
       document.getElementById('dashboard-view')?.classList.remove('hidden');
       document.getElementById('logout-btn')?.classList.remove('hidden');
-      if (event !== 'PASSWORD_RECOVERY') showDashboard();
+      // SIGNED_IN também pode repetir ao voltar à aba; não recarrega todo o admin nesses eventos.
+      if (event !== 'PASSWORD_RECOVERY' && (!dashboardCoreLoaded || dashboardWasHidden)) showDashboard();
     } else {
       document.getElementById('login-view')?.classList.remove('hidden');
       document.getElementById('dashboard-view')?.classList.add('hidden');
       document.getElementById('logout-btn')?.classList.add('hidden');
       dashboardCoreLoaded = false;
       dashboardLoadPromise = null;
+      try { sessionStorage.removeItem(CORE_CACHE_KEY); } catch (_) {}
     }
   });
 }
@@ -1173,6 +1216,8 @@ let clientDirectoryFetchedAt = 0;
 let clientDirectoryPromise = null;
 let clientVisitCounts = {};
 let clientVisitCountsFetchedAt = 0;
+let clientVisitCountsPromise = null;
+let clientListRenderId = 0;
 const CLIENT_CACHE_TTL_MS = 60000;
 let clientPickerMode = null; // 'manual' | 'booking'
 let manualSlotsRequestId = 0;
@@ -1185,9 +1230,70 @@ let marketingBusy = false;
 let subscriptionsLoadedAt = 0;
 let subscriptionUsageCounts = {};
 let catalogLoadedAt = 0;
+let subscriptionsLoadPromise = null;
+let catalogLoadPromise = null;
 const TAB_CACHE_TTL_MS = 30000;
+let activeTab = 'agenda';
+let tabLoadFrame = 0;
+const clientSearchTextCache = new WeakMap();
 
 let touchStartX = null;
+
+function scheduleIdleWork(callback, timeout=1200){
+  if ('requestIdleCallback' in window) return window.requestIdleCallback(callback, { timeout });
+  return window.setTimeout(callback, Math.min(timeout, 250));
+}
+
+function readDashboardCoreCache(){
+  try {
+    const cached = JSON.parse(sessionStorage.getItem(CORE_CACHE_KEY) || 'null');
+    if (!cached || Date.now() - Number(cached.fetchedAt || 0) > CORE_CACHE_TTL_MS) return null;
+    if (![cached.services,cached.barbers,cached.businessHours,cached.barberShifts].every(Array.isArray)) return null;
+    return cached;
+  } catch (_) { return null; }
+}
+
+function writeDashboardCoreCache(){
+  try {
+    sessionStorage.setItem(CORE_CACHE_KEY, JSON.stringify({
+      fetchedAt:Date.now(), services, barbers, businessHours, barberShifts
+    }));
+  } catch (_) {}
+}
+
+function applyDashboardCore(core){
+  services = core.services || [];
+  barbers = core.barbers || [];
+  businessHours = core.businessHours || [];
+  barberShifts = core.barberShifts || [];
+  dashboardCoreLoaded = true;
+}
+
+async function refreshDashboardCore(){
+  if (dashboardCoreRefreshPromise) return dashboardCoreRefreshPromise;
+  dashboardCoreRefreshPromise = (async () => {
+    const [svcRes, barRes, hrsRes, shiftsRes] = await Promise.all([
+      sb.from('services').select('id,name,category,duration_minutes,price_eur,active,sort_order').order('category').order('sort_order'),
+      sb.from('barbers').select('id,name'),
+      sb.from('business_hours').select('day_of_week,open_time,close_time,is_closed'),
+      sb.from('barber_shifts').select('barber_id,day_of_week,start_time,end_time,is_off'),
+    ]);
+    if (svcRes.error) throw svcRes.error;
+    if (barRes.error) throw barRes.error;
+    if (hrsRes.error) throw hrsRes.error;
+    const core = {
+      services:svcRes.data || [],
+      barbers:barRes.data || [],
+      businessHours:hrsRes.data || [],
+      barberShifts:(!shiftsRes.error && shiftsRes.data) ? shiftsRes.data : []
+    };
+    applyDashboardCore(core);
+    writeDashboardCoreCache();
+    return core;
+  })();
+  try { return await dashboardCoreRefreshPromise; }
+  finally { dashboardCoreRefreshPromise = null; }
+}
 
 function openSidebar(){
   document.getElementById('mobile-sidebar').classList.add('open');
@@ -1221,6 +1327,7 @@ async function logout(){
   agendaCache.clear();
   agendaInflight.clear();
   invalidateClientDirectory();
+  try { sessionStorage.removeItem(CORE_CACHE_KEY); } catch (_) {}
   closeSidebar();
   document.getElementById('login-view').classList.remove('hidden');
   document.getElementById('dashboard-view').classList.add('hidden');
@@ -1273,22 +1380,18 @@ async function showDashboard(){
   if (dashboardLoadPromise) return dashboardLoadPromise;
 
   dashboardLoadPromise = (async () => {
+    let usedCachedCore = false;
+    if (!dashboardCoreLoaded) {
+      const cachedCore = readDashboardCoreCache();
+      if (cachedCore) {
+        applyDashboardCore(cachedCore);
+        usedCachedCore = true;
+      }
+    }
+
     if (!dashboardCoreLoaded) {
       try {
-        const [svcRes, barRes, hrsRes, shiftsRes] = await Promise.all([
-          sb.from('services').select('*').order('category').order('sort_order'),
-          sb.from('barbers').select('*'),
-          sb.from('business_hours').select('*'),
-          sb.from('barber_shifts').select('*'),
-        ]);
-        if (svcRes.error) throw svcRes.error;
-        if (barRes.error) throw barRes.error;
-        if (hrsRes.error) throw hrsRes.error;
-        services = svcRes.data || [];
-        barbers = barRes.data || [];
-        businessHours = hrsRes.data || [];
-        barberShifts = (!shiftsRes.error && shiftsRes.data) ? shiftsRes.data : [];
-        dashboardCoreLoaded = true;
+        await refreshDashboardCore();
       } catch (err) {
         console.error(err);
         document.getElementById('calendar-area').innerHTML =
@@ -1352,9 +1455,30 @@ async function showDashboard(){
 
     await loadAgenda(dateInput.value);
 
-    // Carrega o diretório de clientes fora do caminho crítico da agenda.
-    const idle = window.requestIdleCallback || ((cb) => setTimeout(cb, 40));
-    idle(() => ensureClientDirectory().catch(() => {}));
+    // Mantém a abertura rápida: dados secundários e atualização do cache só entram quando a agenda já pintou.
+    if (usedCachedCore) {
+      scheduleIdleWork(async () => {
+        try {
+          const selectedServiceId = document.getElementById('manual-service')?.value;
+          const selectedBarberId = document.getElementById('manual-barber')?.value;
+          await refreshDashboardCore();
+          document.documentElement.style.setProperty('--n-barbers', Math.max(barbers.length, 1));
+          renderLegend();
+          syncServiceControls();
+          const barberControl = document.getElementById('manual-barber');
+          if (barberControl) {
+            barberControl.innerHTML = barbers.map(b => `<option value="${b.id}">${escapeHtml(b.name)}</option>`).join('');
+            if (barbers.some(b => b.id === selectedBarberId)) barberControl.value = selectedBarberId;
+          }
+          const serviceControl = document.getElementById('manual-service');
+          if (serviceControl && services.some(s => s.id === selectedServiceId)) {
+            serviceControl.value = selectedServiceId;
+            syncServiceControls();
+          }
+        } catch (error) { console.warn('Atualização em segundo plano falhou:', error); }
+      }, 1800);
+    }
+    scheduleIdleWork(() => ensureClientDirectory().catch(() => {}), 2200);
   })();
 
   try {
@@ -1432,6 +1556,21 @@ function escapeHtml(value){
 function normalizeSearchText(value){
   return String(value || '').normalize('NFD').replace(/[\u0300-\u036f]/g, '').toLowerCase().trim();
 }
+function frameDebounce(callback){
+  let frame = 0;
+  return (...args) => {
+    if (frame) cancelAnimationFrame(frame);
+    frame = requestAnimationFrame(() => { frame = 0; callback(...args); });
+  };
+}
+function getClientSearchText(client){
+  let value = clientSearchTextCache.get(client);
+  if (value === undefined) {
+    value = normalizeSearchText(`${client.name || ''} ${client.phone || ''} ${client.email || ''}`);
+    clientSearchTextCache.set(client, value);
+  }
+  return value;
+}
 function showToast(message, type='ok', duration=2400){
   const stack = document.getElementById('toast-stack');
   if (!stack) return;
@@ -1484,13 +1623,18 @@ async function ensureClientDirectory(force=false){
 async function ensureClientVisitCounts(force=false){
   const fresh = clientVisitCountsFetchedAt && (Date.now() - clientVisitCountsFetchedAt < CLIENT_CACHE_TTL_MS);
   if (!force && fresh) return clientVisitCounts;
-  const { data, error } = await sb.from('appointments').select('client_id').neq('status','cancelled');
-  if (error) throw error;
-  const counts = {};
-  (data || []).forEach(a => { if (a.client_id) counts[a.client_id] = (counts[a.client_id] || 0) + 1; });
-  clientVisitCounts = counts;
-  clientVisitCountsFetchedAt = Date.now();
-  return counts;
+  if (clientVisitCountsPromise) return clientVisitCountsPromise;
+  clientVisitCountsPromise = (async () => {
+    const { data, error } = await sb.from('appointments').select('client_id').neq('status','cancelled');
+    if (error) throw error;
+    const counts = {};
+    (data || []).forEach(a => { if (a.client_id) counts[a.client_id] = (counts[a.client_id] || 0) + 1; });
+    clientVisitCounts = counts;
+    clientVisitCountsFetchedAt = Date.now();
+    return counts;
+  })();
+  try { return await clientVisitCountsPromise; }
+  finally { clientVisitCountsPromise = null; }
 }
 function toLocalDateStr(d){
   const y = d.getFullYear();
@@ -1500,18 +1644,28 @@ function toLocalDateStr(d){
 }
 
 function switchTab(tab){
-  ['agenda','relatorios','clientes','assinantes','catalogo','marketing'].forEach(t => {
-    document.getElementById('tab-'+t).classList.toggle('hidden', t !== tab);
+  const tabs = ['agenda','relatorios','clientes','assinantes','catalogo','marketing'];
+  if (!tabs.includes(tab)) return;
+  activeTab = tab;
+  tabs.forEach(t => {
+    document.getElementById('tab-'+t)?.classList.toggle('hidden', t !== tab);
     const topBtn = document.querySelector(`.tab-btn[data-tab="${t}"]`);
     if (topBtn) topBtn.classList.toggle('active', t === tab);
     const sideBtn = document.querySelector(`.mobile-nav-link[data-tab="${t}"]`);
     if (sideBtn) sideBtn.classList.toggle('active', t === tab);
   });
-  if (tab === 'clientes') loadClients();
-  if (tab === 'assinantes') loadSubscriptions();
-  if (tab === 'catalogo') loadCatalog();
-  if (tab === 'marketing') loadMarketingAudienceCount();
   closeSidebar();
+
+  // Deixa o navegador mostrar a nova área antes de iniciar trabalho de rede/DOM.
+  if (tabLoadFrame) cancelAnimationFrame(tabLoadFrame);
+  tabLoadFrame = requestAnimationFrame(() => {
+    tabLoadFrame = 0;
+    if (activeTab !== tab) return;
+    if (tab === 'clientes') loadClients();
+    if (tab === 'assinantes') loadSubscriptions();
+    if (tab === 'catalogo') loadCatalog();
+    if (tab === 'marketing') loadMarketingAudienceCount();
+  });
 }
 
 function toggleManualForm(){
@@ -1566,13 +1720,21 @@ async function renderManualSlots(preferredMinutes){
   areaEl.innerHTML = '<p style="color:var(--ink-muted); font-size:0.85rem; margin-top:12px;">A verificar disponibilidade…</p>';
   const dayStart = new Date(dateStr + 'T00:00:00');
   const dayEnd = new Date(dateStr + 'T23:59:59.999');
-  const { data: busy, error } = await sb
-    .from('appointments')
-    .select('start_time, end_time')
-    .eq('barber_id', barberId)
-    .neq('status', 'cancelled')
-    .gte('start_time', dayStart.toISOString())
-    .lte('start_time', dayEnd.toISOString());
+  const agendaForDate = agendaCache.get(dateStr);
+  let busy, error = null;
+  if (agendaForDate && Date.now() - agendaForDate.fetchedAt < AGENDA_CACHE_TTL_MS) {
+    busy = agendaForDate.data
+      .filter(appt => String(appt.barber_id) === String(barberId))
+      .map(appt => ({ start_time:appt.start_time, end_time:appt.end_time }));
+  } else {
+    ({ data:busy, error } = await sb
+      .from('appointments')
+      .select('start_time,end_time')
+      .eq('barber_id', barberId)
+      .neq('status', 'cancelled')
+      .gte('start_time', dayStart.toISOString())
+      .lte('start_time', dayEnd.toISOString()));
+  }
 
   if (requestId !== manualSlotsRequestId) return;
   if (error) { areaEl.innerHTML = '<div class="msg err">Erro a verificar disponibilidade.</div>'; console.error(error); return; }
@@ -1676,6 +1838,7 @@ async function saveBarberShift(barberId, dow, newStart, newEnd, newIsOff){
     else barberShifts = barberShifts.filter(s => !(s.barber_id===barberId && s.day_of_week===dow));
     renderShiftsPanel(); showToast('Erro ao guardar o turno.', 'err'); return;
   }
+  writeDashboardCoreCache();
   renderShiftsPanel();
   await loadAgenda(document.getElementById('agenda-date').value);
   showToast('Turno atualizado.');
@@ -1806,22 +1969,36 @@ function adjacentDate(dateStr, delta){
 }
 
 async function loadAgenda(dateStr, transitionDir = 0, force=false){
-  currentAgendaDateStr = dateStr;
   const areaEl = document.getElementById('calendar-area');
+  const previousScroll = areaEl.querySelector('.cal-scroll')?.scrollTop || 0;
+  currentAgendaDateStr = dateStr;
   areaEl.dataset.loadingDate = dateStr;
+  areaEl.classList.add('is-loading');
+
+  const cached = agendaCache.get(dateStr);
+  const cacheIsFresh = !force && cached && (Date.now() - cached.fetchedAt < AGENDA_CACHE_TTL_MS);
+  if (!cacheIsFresh && areaEl.dataset.renderedDate !== dateStr) {
+    areaEl.innerHTML = buildCalendarSkeleton(dateStr);
+    const loadingScroll = areaEl.querySelector('.cal-scroll');
+    if (loadingScroll && previousScroll) loadingScroll.scrollTop = previousScroll;
+  }
 
   let data;
   try {
     data = await fetchAgendaAppointments(dateStr, force);
   } catch (error) {
-    areaEl.innerHTML = `<div class="msg err">Erro a carregar a agenda.</div>`;
+    if (areaEl.dataset.loadingDate === dateStr) {
+      areaEl.innerHTML = `<div class="msg err">Erro a carregar a agenda.</div>`;
+      areaEl.classList.remove('is-loading');
+    }
     console.error(error);
     return;
   }
   if (areaEl.dataset.loadingDate !== dateStr) return;
 
-  const previousScroll = areaEl.querySelector('.cal-scroll')?.scrollTop || 0;
   areaEl.innerHTML = buildCalendarSkeleton(dateStr);
+  areaEl.dataset.renderedDate = dateStr;
+  areaEl.classList.remove('is-loading');
   document.getElementById('appt-detail-area').innerHTML = '';
   currentAppointments = data;
 
@@ -1864,9 +2041,11 @@ async function loadAgenda(dateStr, transitionDir = 0, force=false){
     });
   });
 
-  const blocks = document.createDocumentFragment();
+  const columnsByBarber = new Map(
+    [...areaEl.querySelectorAll('.cal-column')].map(col => [String(col.dataset.barberId), col])
+  );
   currentAppointments.forEach(appt => {
-    const col = areaEl.querySelector(`.cal-column[data-barber-id="${appt.barber_id}"]`);
+    const col = columnsByBarber.get(String(appt.barber_id));
     if (!col) return;
     const start = new Date(appt.start_time);
     const end = new Date(appt.end_time);
@@ -1893,8 +2072,10 @@ async function loadAgenda(dateStr, transitionDir = 0, force=false){
     areaEl.appendChild(note);
   }
 
-  prefetchAgendaDate(adjacentDate(dateStr, -1));
-  prefetchAgendaDate(adjacentDate(dateStr, 1));
+  scheduleIdleWork(() => {
+    prefetchAgendaDate(adjacentDate(dateStr, -1));
+    prefetchAgendaDate(adjacentDate(dateStr, 1));
+  }, 900);
 }
 
 function setupCalendarSwipe(){
@@ -2052,14 +2233,22 @@ async function renderEditSlots(preferredMinutes){
   areaEl.innerHTML = '<p style="color:var(--ink-muted); font-size:0.85rem; margin-top:12px;">A verificar disponibilidade…</p>';
   const dayStart = new Date(dateStr + 'T00:00:00');
   const dayEnd = new Date(dateStr + 'T23:59:59.999');
-  const { data: busy, error } = await sb
-    .from('appointments')
-    .select('id,start_time,end_time')
-    .eq('barber_id', barberId)
-    .neq('status', 'cancelled')
-    .neq('id', appt.id)
-    .gte('start_time', dayStart.toISOString())
-    .lte('start_time', dayEnd.toISOString());
+  const agendaForDate = agendaCache.get(dateStr);
+  let busy, error = null;
+  if (agendaForDate && Date.now() - agendaForDate.fetchedAt < AGENDA_CACHE_TTL_MS) {
+    busy = agendaForDate.data
+      .filter(row => String(row.barber_id) === String(barberId) && String(row.id) !== String(appt.id))
+      .map(row => ({ id:row.id, start_time:row.start_time, end_time:row.end_time }));
+  } else {
+    ({ data:busy, error } = await sb
+      .from('appointments')
+      .select('id,start_time,end_time')
+      .eq('barber_id', barberId)
+      .neq('status', 'cancelled')
+      .neq('id', appt.id)
+      .gte('start_time', dayStart.toISOString())
+      .lte('start_time', dayEnd.toISOString()));
+  }
 
   if (requestId !== editSlotsRequestId) return;
   if (error) {
@@ -2421,6 +2610,34 @@ async function removeClient(clientId){
   showToast('Cliente removido.');
 }
 
+function clientRowsHtml(clients, visitCounts){
+  return clients.map(c => `
+    <div class="client-row">
+      <div class="client-avatar">${escapeHtml((c.name||'?').charAt(0).toUpperCase())}</div>
+      <div style="flex:1; min-width:0;">
+        <div class="client-name">${escapeHtml(c.name || 'Cliente')}</div>
+        <div class="client-meta">${escapeHtml(c.phone || '—')}${c.email ? ' · ' + escapeHtml(c.email) : ''}</div>
+      </div>
+      <div class="client-visits">${visitCounts[c.id] || 0} marcações</div>
+      <button class="btn btn-danger btn-sm" onclick="removeClient('${c.id}')">Remover</button>
+    </div>`).join('');
+}
+
+function renderClientsProgressively(clients, visitCounts, listEl){
+  const renderId = ++clientListRenderId;
+  const batchSize = 140;
+  listEl.innerHTML = clientRowsHtml(clients.slice(0, batchSize), visitCounts);
+  let index = batchSize;
+  const appendNext = () => {
+    if (renderId !== clientListRenderId || activeTab !== 'clientes' || index >= clients.length) return;
+    const end = Math.min(index + batchSize, clients.length);
+    listEl.insertAdjacentHTML('beforeend', clientRowsHtml(clients.slice(index, end), visitCounts));
+    index = end;
+    if (index < clients.length) scheduleIdleWork(appendNext, 400);
+  };
+  if (index < clients.length) scheduleIdleWork(appendNext, 400);
+}
+
 async function loadClients(force=false){
   const listEl = document.getElementById('clients-list');
   if (!listEl) return;
@@ -2431,17 +2648,8 @@ async function loadClients(force=false){
       ensureClientVisitCounts(force)
     ]);
     if (!clients.length) { listEl.innerHTML = '<p style="color:var(--ink-muted);">Ainda não há clientes registados.</p>'; return; }
-    listEl.innerHTML = clients.map(c => `
-      <div class="client-row">
-        <div class="client-avatar">${escapeHtml((c.name||'?').charAt(0).toUpperCase())}</div>
-        <div style="flex:1; min-width:0;">
-          <div class="client-name">${escapeHtml(c.name || 'Cliente')}</div>
-          <div class="client-meta">${escapeHtml(c.phone || '—')}${c.email ? ' · ' + escapeHtml(c.email) : ''}</div>
-        </div>
-        <div class="client-visits">${visitCounts[c.id] || 0} marcações</div>
-        <button class="btn btn-danger btn-sm" onclick="removeClient('${c.id}')">Remover</button>
-      </div>
-    `).join('');
+    if (activeTab !== 'clientes') return;
+    renderClientsProgressively(clients, visitCounts, listEl);
   } catch (error) {
     console.error(error);
     listEl.innerHTML = '<div class="msg err">Erro a carregar clientes.</div>';
@@ -2508,21 +2716,28 @@ async function loadSubscriptions(force=false){
   if (!listEl) return;
   const fresh = subscriptionsLoadedAt && (Date.now() - subscriptionsLoadedAt < TAB_CACHE_TTL_MS) && subscriptionsData.length;
   if (!force && fresh) { renderSubscriptionsList(); return; }
-  listEl.innerHTML = 'A carregar…';
-  const [{ data, error }, { data: usageRows, error: usageError }] = await Promise.all([
-    sb.from('subscriptions').select('*, clients(name,phone), services(name)').order('end_date', { ascending: true }),
-    sb.from('appointments').select('subscription_id').neq('status','cancelled').not('subscription_id','is',null)
-  ]);
-  if (error) {
-    listEl.innerHTML = '<div class="msg err">Não consegui carregar assinantes.</div>';
-    console.error(error); return;
-  }
-  if (usageError) console.error(usageError);
-  subscriptionsData = data || [];
-  subscriptionUsageCounts = {};
-  (usageRows || []).forEach(r => { subscriptionUsageCounts[r.subscription_id] = (subscriptionUsageCounts[r.subscription_id] || 0) + 1; });
-  subscriptionsLoadedAt = Date.now();
-  renderSubscriptionsList();
+  if (subscriptionsLoadPromise) return subscriptionsLoadPromise;
+  if (!subscriptionsData.length) listEl.innerHTML = 'A carregar…';
+  subscriptionsLoadPromise = (async () => {
+    const [{ data, error }, { data: usageRows, error: usageError }] = await Promise.all([
+      sb.from('subscriptions')
+        .select('id,client_id,service_id,plan_name,start_date,end_date,total_services,cycle_total_services,usage_offset,clients(name,phone),services(name)')
+        .order('end_date', { ascending: true }),
+      sb.from('appointments').select('subscription_id').neq('status','cancelled').not('subscription_id','is',null)
+    ]);
+    if (error) {
+      listEl.innerHTML = '<div class="msg err">Não consegui carregar assinantes.</div>';
+      console.error(error); return;
+    }
+    if (usageError) console.error(usageError);
+    subscriptionsData = data || [];
+    subscriptionUsageCounts = {};
+    (usageRows || []).forEach(r => { subscriptionUsageCounts[r.subscription_id] = (subscriptionUsageCounts[r.subscription_id] || 0) + 1; });
+    subscriptionsLoadedAt = Date.now();
+    renderSubscriptionsList();
+  })();
+  try { return await subscriptionsLoadPromise; }
+  finally { subscriptionsLoadPromise = null; }
 }
 
 function getSubscriptionCycleUsage(sub){
@@ -2706,7 +2921,7 @@ let categories = [];
 let editingCategoryName = null;
 
 async function loadCategories(){
-  const { data, error } = await sb.from('categories').select('*').order('sort_order');
+  const { data, error } = await sb.from('categories').select('id,name,sort_order,active').order('sort_order');
   if (error) { console.error(error); return; }
   categories = data || [];
 }
@@ -2837,18 +3052,24 @@ async function loadCatalog(force=false){
   const listEl = document.getElementById('catalog-list');
   const fresh = catalogLoadedAt && (Date.now() - catalogLoadedAt < TAB_CACHE_TTL_MS) && services.length;
   if (!force && fresh) { renderCategoriesList(); renderCatalogList(); return; }
-  listEl.innerHTML = 'A carregar…';
-  const [catRes, svcRes] = await Promise.all([
-    sb.from('categories').select('*').order('sort_order'),
-    sb.from('services').select('*').order('category').order('sort_order')
-  ]);
-  if (catRes.error) console.error(catRes.error); else categories = catRes.data || [];
-  if (svcRes.error) { listEl.innerHTML = '<div class="msg err">Erro a carregar o catálogo.</div>'; console.error(svcRes.error); return; }
-  services = svcRes.data || [];
-  syncServiceControls();
-  catalogLoadedAt = Date.now();
-  renderCategoriesList();
-  renderCatalogList();
+  if (catalogLoadPromise) return catalogLoadPromise;
+  if (!services.length) listEl.innerHTML = 'A carregar…';
+  catalogLoadPromise = (async () => {
+    const [catRes, svcRes] = await Promise.all([
+      sb.from('categories').select('id,name,sort_order,active').order('sort_order'),
+      sb.from('services').select('id,name,category,duration_minutes,price_eur,active,sort_order').order('category').order('sort_order')
+    ]);
+    if (catRes.error) console.error(catRes.error); else categories = catRes.data || [];
+    if (svcRes.error) { listEl.innerHTML = '<div class="msg err">Erro a carregar o catálogo.</div>'; console.error(svcRes.error); return; }
+    services = svcRes.data || [];
+    syncServiceControls();
+    writeDashboardCoreCache();
+    catalogLoadedAt = Date.now();
+    renderCategoriesList();
+    renderCatalogList();
+  })();
+  try { return await catalogLoadPromise; }
+  finally { catalogLoadPromise = null; }
 }
 
 
@@ -2898,6 +3119,7 @@ async function updateServicePrice(serviceId, value){
   const { error } = await sb.from('services').update({ price_eur: price }).eq('id', serviceId);
   if (error) { console.error(error); showToast('Erro ao atualizar o preço.', 'err'); return; }
   const service = services.find(s => s.id === serviceId); if (service) service.price_eur = price;
+  writeDashboardCoreCache();
   catalogLoadedAt = Date.now();
 }
 
@@ -2952,7 +3174,7 @@ async function openClientPicker(){
   cancelNewClientFromPicker(true);
   modal.classList.remove('hidden');
   searchEl.value = '';
-  searchEl.oninput = () => renderClientPickerDirectory(searchEl.value);
+  searchEl.oninput = frameDebounce(() => renderClientPickerDirectory(searchEl.value));
   document.getElementById('client-picker-list').innerHTML = '<p style="color:var(--ink-muted);padding:12px;">A carregar clientes…</p>';
   try { await ensureClientDirectory(); renderClientPickerDirectory(''); }
   catch (error) { console.error(error); document.getElementById('client-picker-list').innerHTML = '<div class="msg err">Erro a carregar clientes.</div>'; }
@@ -3000,7 +3222,7 @@ function renderClientPickerDirectory(query=''){
   const phoneQ = normalizePhone(query);
   const filtered = clientDirectoryCache.filter(c => {
     if (!q) return true;
-    const hay = normalizeSearchText(`${c.name || ''} ${c.phone || ''} ${c.email || ''}`);
+    const hay = getClientSearchText(c);
     return hay.includes(q) || (phoneQ && String(c.phone || '').includes(phoneQ));
   }).slice(0, 60);
 
@@ -3287,7 +3509,7 @@ async function openClientPickerBooking() {
   const searchEl = document.getElementById('client-picker-search');
   modal.classList.remove('hidden');
   searchEl.value = '';
-  searchEl.oninput = () => renderClientPickerDirectory(searchEl.value);
+  searchEl.oninput = frameDebounce(() => renderClientPickerDirectory(searchEl.value));
   document.getElementById('client-picker-list').innerHTML = '<p style="color:var(--ink-muted);padding:12px;">A carregar clientes…</p>';
   try { await ensureClientDirectory(); renderClientPickerDirectory(''); }
   catch (error) { console.error(error); document.getElementById('client-picker-list').innerHTML = '<div class="msg err">Erro a carregar clientes.</div>'; }
@@ -3600,7 +3822,6 @@ function confirmScrollCalendarDate() {
       else if(e.key==='ArrowUp'){e.preventDefault();activeIndex=Math.max(activeIndex-1,0);renderCommands()}
       else if(e.key==='Enter'){e.preventDefault();executeCommand(activeIndex)}
     });
-    document.querySelectorAll('.manual-form,.stat-card,.cal-toolbar').forEach(el=>el.addEventListener('pointermove',e=>{if(innerWidth<800)return;const r=el.getBoundingClientRect();el.style.setProperty('--spot-x',`${e.clientX-r.left}px`);el.style.setProperty('--spot-y',`${e.clientY-r.top}px`)}));
   });
   document.addEventListener('keydown',e=>{
     if((e.metaKey||e.ctrlKey)&&e.key.toLowerCase()==='k'){e.preventDefault();document.getElementById('command-overlay')?.classList.contains('hidden')?openCommandPalette():closeCommandPalette()}
