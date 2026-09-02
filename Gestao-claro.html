@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
-<title>Gestão Control Grid — The Classic House Barbearia</title>
+<title>Gestão — The Classic House Barbearia</title>
 <link rel="manifest" href="manifest.json">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="mobile-web-app-capable" content="yes">
@@ -804,7 +804,7 @@ section:not(.hidden){animation:ccEnter .12s ease both}@keyframes ccEnter{from{op
 }
 </style>
 <style id="control-grid-light-final">
-/* Control Grid claro — interface final, responsiva e integrada com a operação. */
+/* Base funcional preservada; a apresentação final é definida pelo Studio OS abaixo. */
 :root{
   --bg:#eef1ef!important;--bg-alt:#f7f9f8!important;--bg-card:#fff!important;
   --ink:#1d2924!important;--ink-muted:#718078!important;--brass:#b27b2a!important;
@@ -845,6 +845,44 @@ section:not(.hidden){animation:cgEnter .14s ease both}@keyframes cgEnter{from{op
   #dashboard-view{padding-left:0!important}.tabs{display:none!important}.cc-page-head{align-items:flex-start!important}.cc-page-head h2{font-size:1.25rem!important}.cc-page-head p{font-size:.72rem!important}.cc-head-actions .btn-ghost{display:none!important}.cc-status-strip{overflow:hidden!important;gap:8px!important}.cc-status-strip span:nth-child(2){display:none!important}.cc-status-strip span:last-child{margin-left:auto!important;white-space:nowrap!important}.cc-kpi-grid{grid-template-columns:1fr 1fr!important}.cc-kpi:last-child{grid-column:1/-1!important}.cc-kpi{padding:13px!important}.cc-kpi strong{font-size:1.22rem!important}.cc-main-grid,.cc-bottom-grid,.cc-automation-grid{grid-template-columns:1fr!important}.cc-next-row{grid-template-columns:48px 4px minmax(0,1fr)!important;padding:9px 10px!important}.cc-next-price{display:none!important}.cal-scroll{max-height:70vh!important;border-radius:10px!important}.cal-toolbar{border-radius:10px!important}.floating-action-menu{right:15px!important;bottom:74px!important}.modal-sheet{border-radius:16px 16px 0 0!important}.command-overlay{padding-top:68px!important}.command-panel{border-radius:12px!important}.form-grid{grid-template-columns:1fr!important}.shift-row{grid-template-columns:72px 1fr 1fr!important}.shift-row label{grid-column:2/4!important}.client-row{align-items:flex-start!important;flex-wrap:wrap!important}.client-row .btn-danger{margin-left:50px!important}.range-buttons{gap:6px!important}.custom-range{grid-template-columns:1fr 1fr!important}.custom-range .btn{grid-column:1/-1!important}
 }
 </style>
+<style id="studio-os-reference-final">
+:root{
+  --studio-bg:#eef3f1;--studio-surface:#ffffff;--studio-soft:#f7f9f8;--studio-line:#d9e0dc;
+  --studio-ink:#1f2d27;--studio-muted:#74817b;--studio-green:#1f5144;--studio-green-2:#337864;
+  --studio-gold:#b77a21;--studio-gold-soft:#fff7e8;--studio-ok:#4a9b69;--studio-danger:#b65343;
+}
+body{background:var(--studio-bg)!important;color:var(--studio-ink)!important;font-family:Inter,-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif!important}
+.wrap{max-width:none!important;margin:0!important;padding:0!important}.floating-action-menu{display:none!important}
+.mobile-app-header,.mobile-dock{display:none}.studio-brandmark{display:none}.studio-brandcopy{display:flex;align-items:center;gap:5px;min-width:300px}.studio-brandcopy span,.studio-brandcopy h1{margin:0!important;font-size:.72rem!important;letter-spacing:.08em!important}.studio-brandcopy span{color:#8b9691}.studio-brandcopy h1{color:#26372f;font-weight:800}.studio-brandcopy small{display:flex;align-items:center;margin-left:8px;color:#4d9167;font-size:.7rem}.studio-brandcopy small i{width:7px;height:7px;border-radius:50%;background:#52ad77;box-shadow:0 0 0 3px #e5f4eb}
+.admin-authenticated .top-row{position:fixed!important;left:74px!important;right:0!important;top:0!important;z-index:40!important;height:65px!important;min-height:65px!important;margin:0!important;padding:0 17px 0 23px!important;border-bottom:1px solid var(--studio-line)!important;background:rgba(255,255,255,.97)!important;box-shadow:none!important;backdrop-filter:blur(14px)!important}.top-left{min-width:0}.top-actions{margin-left:auto!important;gap:9px!important}.top-actions .btn,.command-trigger{height:38px!important;min-height:38px!important;border-radius:9px!important}.top-actions #quick-payment-header-btn{padding:0 15px!important;border:1px solid #ddb872!important;background:#fffaf0!important;color:#8b5c17!important}.top-actions #create-header-btn{padding:0 17px!important;background:var(--studio-green)!important;border-color:var(--studio-green)!important}.top-actions #logout-btn{display:none!important}.command-trigger{position:absolute!important;left:50%!important;transform:translateX(-50%)!important;width:min(440px,34vw)!important;justify-content:space-between!important;padding:0 12px!important;background:#f6f8f7!important;border:1px solid #d9e0dc!important;color:#87918c!important;box-shadow:none!important}.command-trigger:hover{transform:translateX(-50%)!important;background:#fff!important}.command-trigger span{display:block!important;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}.command-trigger kbd{margin-left:auto!important;background:#fff!important}
+#dashboard-view{padding:0 0 0 74px!important}.tabs{position:fixed!important;left:0!important;top:0!important;bottom:0!important;z-index:50!important;width:74px!important;margin:0!important;padding:0 5px 9px!important;display:flex!important;flex-direction:column!important;align-items:stretch!important;gap:2px!important;overflow:hidden!important;background:#fff!important;border:0!important;border-right:1px solid var(--studio-line)!important;box-shadow:none!important}.admin-brand{height:103px!important;display:grid!important;place-items:center!important;margin:0 0 7px!important;padding:0!important;border:0!important}.admin-brand img{width:43px!important;height:43px!important;padding:4px!important;border:0!important;border-radius:11px!important;background:#173b32!important;object-fit:contain!important;box-shadow:0 7px 18px rgba(22,60,49,.15)!important}.admin-brand div{display:none!important}#dashboard-view .tab-btn{width:64px!important;min-height:58px!important;margin:0!important;padding:6px 2px!important;display:flex!important;flex-direction:column!important;justify-content:center!important;align-items:center!important;gap:4px!important;border:0!important;border-left:3px solid transparent!important;border-radius:8px!important;background:transparent!important;color:#7a8781!important;font-size:.62rem!important;font-weight:500!important;line-height:1.05!important;text-align:center!important;box-shadow:none!important}#dashboard-view .tab-btn::before{display:grid!important;place-items:center!important;width:25px!important;height:25px!important;border:0!important;border-radius:7px!important;background:transparent!important;color:#718079!important;font-size:1rem!important}#dashboard-view .tab-btn[data-tab="overview"]::before{content:"⊞"!important}#dashboard-view .tab-btn[data-tab="agenda"]::before{content:"▦"!important}#dashboard-view .tab-btn[data-tab="clientes"]::before{content:"♙"!important}#dashboard-view .tab-btn[data-tab="relatorios"]::before{content:"$"!important}#dashboard-view .tab-btn[data-tab="assinantes"]::before{content:"▭"!important}#dashboard-view .tab-btn[data-tab="catalogo"]::before{content:"◇"!important}#dashboard-view .tab-btn[data-tab="marketing"]::before{content:"◫"!important}#dashboard-view .tab-btn[data-tab="automacoes"]::before{content:"⌘"!important}#dashboard-view .tab-btn:hover{background:#f4f7f5!important;color:#315d4f!important}#dashboard-view .tab-btn.active{background:#eaf2ef!important;color:#225848!important;border-left-color:#c58b32!important}#dashboard-view .tab-btn.active::before{background:transparent!important;color:#225848!important}.studio-profile{margin-top:auto;width:40px;height:40px;align-self:center;border:1px solid #d9be8d;border-radius:9px;background:#fff5e4;color:#8d621f;font-weight:700}
+.studio-global-strip{position:fixed;left:74px;right:0;top:65px;z-index:35;height:91px;padding:17px 22px;display:grid;grid-template-columns:150px 170px 210px minmax(280px,1fr);gap:18px;background:#f9fbfa;border-bottom:1px solid var(--studio-line)}.studio-global-strip>div{display:grid;grid-template-columns:auto auto;align-content:center;justify-content:start;column-gap:6px;padding-right:20px;border-right:1px solid #dce3df}.studio-global-strip>div span{grid-column:1/-1;color:#7c8983;font-size:.65rem;letter-spacing:.12em;text-transform:uppercase}.studio-global-strip>div strong{font-size:1.42rem;line-height:1.25}.studio-global-strip>div small{align-self:end;padding-bottom:3px;color:#7b8781;font-size:.65rem}.studio-global-strip>button{min-width:0;display:grid;grid-template-columns:28px 1fr 20px;align-items:center;gap:8px;padding:0 13px;border:1px solid #e7ca95;border-radius:11px;background:var(--studio-gold-soft);color:#9a681e;text-align:left}.studio-global-strip>button>span{font-size:1.35rem}.studio-global-strip>button div{min-width:0}.studio-global-strip>button strong,.studio-global-strip>button small{display:block;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}.studio-global-strip>button strong{color:#6a4b1e;font-size:.72rem}.studio-global-strip>button small{margin-top:3px;color:#ad8245;font-size:.63rem}.studio-global-strip>button>b{justify-self:end;font-size:1rem}
+#dashboard-view>section{margin:156px 0 0!important;padding:30px 27px 90px!important;min-height:calc(100vh - 156px)!important;animation:studioPageIn .16s ease both!important}@keyframes studioPageIn{from{opacity:.7;transform:translateY(3px)}to{opacity:1;transform:none}}
+.cc-page-head{display:flex!important;align-items:flex-end!important;justify-content:space-between!important;margin:0 0 20px!important}.cc-page-head h2{margin:4px 0 2px!important;color:#213029!important;font-size:1.65rem!important;line-height:1.15!important;letter-spacing:-.04em!important}.cc-page-head p{margin:0!important;color:#74817b!important;font-size:.78rem!important}.cc-kicker{color:#a76d1c!important;font-size:.65rem!important;letter-spacing:.13em!important}.cc-head-actions{display:flex;gap:8px}.cc-status-strip{display:none!important}
+.cc-kpi-grid{display:grid!important;grid-template-columns:repeat(5,minmax(0,1fr))!important;gap:11px!important;margin-bottom:13px!important}.cc-kpi{min-height:125px!important;padding:18px!important;border:1px solid #d8dfdb!important;border-radius:12px!important;background:#fff!important;box-shadow:0 6px 16px rgba(31,59,48,.035)!important}.cc-kpi:before{display:none!important}.cc-kpi span{color:#7b8781!important;font-size:.64rem!important;letter-spacing:.11em!important}.cc-kpi strong{margin-top:13px!important;color:#20302a!important;font-size:1.55rem!important}.cc-kpi small{margin-top:9px!important;color:#75817b!important;font-size:.65rem!important}.cc-main-grid{grid-template-columns:minmax(0,2.2fr) minmax(270px,.65fr)!important;gap:11px!important}.cc-bottom-grid{grid-template-columns:1.3fr .7fr!important;gap:11px!important}.cc-panel{border:1px solid #d8dfdb!important;border-radius:12px!important;background:#fff!important;box-shadow:0 6px 17px rgba(31,59,48,.035)!important}.cc-panel-head{padding:15px 17px!important}.cc-next-row{min-height:61px!important;padding:8px 17px!important}.cc-next-line{height:35px!important;width:3px!important}.cc-alert-row,.cc-team-row{padding:13px 16px!important}
+.manual-form,.custom-range,.cal-toolbar,.appt-detail,.stat-card{border:1px solid #d8dfdb!important;border-radius:12px!important;background:#fff!important;box-shadow:0 5px 16px rgba(31,59,48,.035)!important}.range-buttons{margin-bottom:12px!important}.custom-range{padding:13px!important}.stat-grid{grid-template-columns:repeat(4,minmax(0,1fr))!important;gap:11px!important}.stat-card{min-height:122px!important;padding:18px!important}.client-row,.subscription-row{padding:15px 17px!important;border-bottom:1px solid #e4e9e6!important;background:#fff!important}.client-row:first-child,.subscription-row:first-child{border-radius:12px 12px 0 0}.client-row:last-child,.subscription-row:last-child{border-radius:0 0 12px 12px}.client-row:hover,.subscription-row:hover{background:#f7faf8!important}#clients-list,#subscriptions-list,#catalog-list,#report-area{overflow:hidden;border:1px solid #d8dfdb;border-radius:12px;background:#fff;box-shadow:0 6px 18px rgba(31,59,48,.035)}#report-area>.eyebrow,#report-area>.stat-grid{margin-left:17px!important;margin-right:17px!important}#report-area>.eyebrow:first-child{margin-top:17px!important}
+.cal-toolbar{padding:11px 13px!important}.cal-scroll{border:1px solid #d7ded9!important;border-radius:12px!important;box-shadow:none!important}.cal-header-row{background:#f6f8f7!important}.cal-barber-header{font-size:.72rem!important}.cal-appt{border-radius:7px!important;box-shadow:0 4px 10px rgba(34,57,48,.1)!important}
+.btn{font-size:.78rem!important}.btn-primary{background:var(--studio-green)!important;border-color:var(--studio-green)!important}.btn-primary:hover{background:#173f35!important}.btn-ghost{background:#fff!important}.modal-sheet{border-radius:14px!important}.mobile-sidebar,.sidebar-overlay{display:none}
+.studio-report-stats{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:11px;margin-bottom:14px}.studio-report-stats article{min-height:126px;padding:18px;border:1px solid #d8dfdb;border-radius:12px;background:#fff}.studio-report-stats span{display:block;color:#7c8882;font-size:.64rem;letter-spacing:.1em;text-transform:uppercase}.studio-report-stats strong{display:block;margin-top:16px;font-size:1.48rem}.studio-report-stats small{display:block;margin-top:8px;color:#75817b;font-size:.64rem}.studio-method-card div{display:flex;height:7px;margin:25px 0 28px;overflow:hidden;border-radius:99px;background:#dce3df}.studio-method-card i{flex:1;background:#337864}.studio-method-card i:nth-child(2){background:#c6923e}.studio-method-card i:nth-child(3){background:#afc0b7}.studio-method-card small{white-space:nowrap;overflow:hidden;text-overflow:ellipsis}.studio-payment-panel{overflow:hidden;border:1px solid #d8dfdb;border-radius:12px;background:#fff}.studio-payment-panel>header{min-height:69px;padding:14px 17px;display:flex;align-items:center;justify-content:space-between;border-bottom:1px solid #e0e6e2}.studio-payment-panel>header strong,.studio-payment-panel>header small{display:block}.studio-payment-panel>header strong{font-size:.82rem}.studio-payment-panel>header small{margin-top:4px;color:#7b8781;font-size:.62rem}.studio-payment-panel>header button{height:34px;padding:0 11px;border:1px solid #d8dfdb;border-radius:8px;background:#fff;color:#63716a;font-size:.65rem}.studio-payment-head,.studio-payment-row{display:grid;grid-template-columns:65px minmax(190px,1.35fr) minmax(130px,1fr) minmax(110px,.85fr) 82px 90px 30px;gap:10px;align-items:center}.studio-payment-head{min-height:37px;padding:0 17px;background:#f5f7f6;color:#7c8983;font-size:.58rem;letter-spacing:.07em;text-transform:uppercase}.studio-payment-row{min-height:64px;padding:8px 17px;border-top:1px solid #edf0ee;color:#5d6a64;font-size:.68rem}.studio-payment-row:first-child{border-top:0}.studio-payment-row:hover{background:#f4faf7}.studio-payment-row time{color:#5d6a64}.studio-payment-row div{min-width:0}.studio-payment-row div strong,.studio-payment-row div small{display:block;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}.studio-payment-row div strong{color:#26362f;font-size:.7rem}.studio-payment-row div small{margin-top:3px;color:#84908a;font-size:.59rem}.studio-payment-row b{color:#27372f}.studio-payment-row>button{width:27px;height:27px;border:0;border-radius:7px;background:transparent;color:#a65a4c}.studio-paid{color:#4b9368!important}.studio-payment-empty{padding:35px;text-align:center;color:#7c8983}
+#report-area{border:0!important;background:transparent!important;box-shadow:none!important;overflow:visible!important}
+.mobile-agenda-board{display:none}.appt-detail-close{display:none}
+@media(max-width:1120px){.command-trigger{width:300px!important}.studio-global-strip{grid-template-columns:130px 145px 175px minmax(230px,1fr)}.cc-kpi-grid{grid-template-columns:repeat(3,1fr)!important}.cc-kpi-grid .cc-kpi:nth-child(n+4){display:none}.cc-main-grid{grid-template-columns:1fr!important}}
+@media(max-width:760px){
+  html,body{background:#f1f4f2!important;overscroll-behavior-y:none}.wrap{padding:0!important}.admin-authenticated .top-row{display:none!important}#dashboard-view{padding:0 0 calc(82px + env(safe-area-inset-bottom))!important}.tabs{display:none!important}.floating-action-menu{display:none!important}
+  .mobile-app-header{position:sticky;top:0;z-index:42;height:68px;padding:9px 14px;display:flex;align-items:center;justify-content:space-between;background:rgba(255,255,255,.96);border-bottom:1px solid #dce3df;backdrop-filter:blur(16px)}.mobile-app-brand{display:flex;align-items:center;gap:10px;min-width:0}.mobile-app-brand img{width:42px;height:42px;padding:3px;border-radius:11px;background:#173b32;object-fit:contain}.mobile-app-brand span{display:block;color:#9b702d;font-size:.55rem;letter-spacing:.12em}.mobile-app-brand strong{display:block;margin-top:2px;color:#20332b;font-size:1rem}.mobile-app-actions{display:flex;gap:7px}.mobile-app-actions button{width:39px;height:39px;border:1px solid #d5ddd8;border-radius:11px;background:#fff;color:#315d4f;font-weight:750}.mobile-app-actions button:first-child{border-color:#dfc18d;background:#fff8ea;color:#98671f}
+  .studio-global-strip{position:relative;left:auto;right:auto;top:auto;z-index:1;height:auto;margin:0;padding:10px 12px;display:flex;gap:8px;overflow-x:auto;background:#f7f9f8;border-bottom:1px solid #dde3df;scroll-snap-type:x mandatory;scrollbar-width:none}.studio-global-strip::-webkit-scrollbar{display:none}.studio-global-strip>div{min-width:118px;height:67px;padding:9px 10px;border:1px solid #dfe5e1;border-radius:11px;background:#fff;scroll-snap-align:start}.studio-global-strip>div span{font-size:.54rem}.studio-global-strip>div strong{font-size:1.12rem}.studio-global-strip>div small{font-size:.55rem}.studio-global-strip>button{min-width:190px;height:67px;scroll-snap-align:start}
+  #dashboard-view>section{margin:0!important;padding:17px 13px 26px!important;min-height:auto!important}.cc-page-head{align-items:flex-start!important;margin-bottom:14px!important}.cc-page-head h2{font-size:1.35rem!important}.cc-page-head p{max-width:270px;font-size:.7rem!important}.cc-head-actions{gap:5px}.cc-head-actions .btn{min-height:37px!important;padding:7px 10px!important;font-size:.7rem!important}.cc-head-actions .btn-ghost{display:none!important}
+  .cc-kpi-grid{display:flex!important;gap:9px!important;margin:0 -13px 12px!important;padding:0 13px 4px!important;overflow-x:auto!important;scroll-snap-type:x mandatory;scrollbar-width:none}.cc-kpi-grid::-webkit-scrollbar{display:none}.cc-kpi-grid .cc-kpi:nth-child(n){display:block!important}.cc-kpi{min-width:150px!important;min-height:112px!important;padding:15px!important;scroll-snap-align:start}.cc-kpi strong{font-size:1.4rem!important}.cc-main-grid,.cc-bottom-grid,.cc-automation-grid,.cc-automation-summary{grid-template-columns:1fr!important}.cc-panel{border-radius:13px!important}.cc-next-row{grid-template-columns:47px 3px minmax(0,1fr)!important}.cc-next-price{display:none!important}.cc-capacity-body{grid-template-columns:100px 1fr!important}.cc-ring{width:92px!important;height:92px!important}
+  .mobile-dock{position:fixed;left:9px;right:9px;bottom:calc(8px + env(safe-area-inset-bottom));z-index:55;height:67px;padding:6px;display:grid;grid-template-columns:repeat(5,1fr);gap:2px;border:1px solid rgba(206,216,210,.95);border-radius:18px;background:rgba(255,255,255,.96);box-shadow:0 14px 35px rgba(23,55,44,.17);backdrop-filter:blur(18px)}.mobile-dock-link{min-width:0;border:0;border-radius:12px;background:transparent;color:#819089;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:2px}.mobile-dock-link span{font-size:1.05rem;line-height:1}.mobile-dock-link b{font-size:.56rem;font-weight:650}.mobile-dock-link.active{background:#eaf2ef;color:#225848}.mobile-dock-more{color:#8f6a2d}
+  .sidebar-overlay{display:block!important;position:fixed;inset:0;z-index:69;background:rgba(22,39,32,.36)!important;opacity:0;pointer-events:none;transition:opacity .2s}.sidebar-overlay.open{opacity:1;pointer-events:auto}.mobile-sidebar{display:block!important;position:fixed!important;left:8px!important;right:8px!important;top:auto!important;bottom:calc(8px + env(safe-area-inset-bottom))!important;z-index:70!important;width:auto!important;max-height:78dvh!important;padding:16px!important;border:1px solid #d6ded9!important;border-radius:20px!important;background:#fff!important;box-shadow:0 24px 70px rgba(23,49,40,.25)!important;transform:translateY(calc(100% + 30px))!important;transition:transform .23s ease!important;overflow:auto!important}.mobile-sidebar.open{transform:translateY(0)!important}.mobile-brand{padding-bottom:13px!important;margin-bottom:10px!important}.mobile-sidebar h3{margin:0 0 8px!important;font-size:.7rem!important;color:#89958f!important;text-transform:uppercase;letter-spacing:.12em}.mobile-nav-link{width:100%!important;min-height:47px!important;padding:0 12px!important;border:0!important;border-bottom:1px solid #edf0ee!important;border-radius:9px!important;text-align:left!important}.mobile-nav-link.active{background:#edf4f1!important;color:#225848!important}
+  .manual-form{padding:14px!important}.form-grid{grid-template-columns:1fr!important}.client-row,.subscription-row{align-items:flex-start!important;flex-wrap:wrap!important}.client-visits{margin-left:0!important}.stat-grid{display:flex!important;overflow-x:auto!important;gap:9px!important;padding:0 0 5px!important}.stat-card{min-width:160px!important;min-height:105px!important}.custom-range{grid-template-columns:1fr 1fr!important}.custom-range .btn{grid-column:1/-1!important}.range-buttons{display:flex;overflow-x:auto;gap:6px}.range-buttons .btn{white-space:nowrap}
+  #report-area{border:0!important;background:transparent!important;box-shadow:none!important;overflow:visible!important}.studio-report-stats{display:flex;gap:9px;overflow-x:auto;margin:0 -13px 12px;padding:0 13px 4px;scroll-snap-type:x mandatory;scrollbar-width:none}.studio-report-stats article{min-width:160px;min-height:112px;padding:15px;scroll-snap-align:start}.studio-report-stats strong{font-size:1.3rem}.studio-method-card{min-width:230px!important}.studio-payment-panel{border-radius:13px}.studio-payment-head{display:none}.studio-payment-list{display:grid;gap:0}.studio-payment-row{min-height:92px;padding:12px;grid-template-columns:48px minmax(0,1fr) auto 26px;gap:8px}.studio-payment-row>time{grid-column:1}.studio-payment-row>div{grid-column:2}.studio-payment-row>span:nth-of-type(1){grid-column:2;grid-row:2;color:#75817b}.studio-payment-row>span:nth-of-type(2){display:none}.studio-payment-row>.studio-paid{grid-column:3;grid-row:1}.studio-payment-row>b{grid-column:3;grid-row:2}.studio-payment-row>button{grid-column:4;grid-row:1/3}.studio-payment-panel>header{min-height:62px;padding:12px}
+  .cal-toolbar{position:sticky;top:68px;z-index:18;padding:9px!important}.cal-toolbar .zoom-controls,.legend{display:none!important}.modal-overlay{align-items:flex-end!important}.modal-sheet{width:100%!important;max-height:88dvh!important;border-radius:20px 20px 0 0!important;padding:17px!important}.quick-payment-options{grid-template-columns:1fr!important}.command-overlay{display:none!important}
+  .desktop-calendar{display:none!important}.mobile-agenda-board{display:block}.mobile-agenda-head{display:flex;align-items:center;justify-content:space-between;gap:10px;margin-bottom:10px}.mobile-agenda-head div span{display:block;color:#9d6b22;font-size:.58rem;letter-spacing:.11em;text-transform:uppercase}.mobile-agenda-head div strong{display:block;margin-top:3px;font-size:1rem}.mobile-agenda-head button{min-height:37px;padding:0 12px;border:0;border-radius:10px;background:#214f42;color:#fff;font-size:.68rem;font-weight:700}.mobile-barber-strip{display:flex;gap:7px;overflow-x:auto;margin:0 -13px 12px;padding:0 13px;scrollbar-width:none}.mobile-barber-chip{white-space:nowrap;min-height:34px;padding:0 11px;border:1px solid #d8dfdb;border-radius:999px;background:#fff;color:#68756f;font-size:.65rem}.mobile-barber-chip.active{background:#214f42;border-color:#214f42;color:#fff}.mobile-timeline{display:grid;gap:8px}.mobile-time-card{position:relative;width:100%;min-height:82px;display:grid;grid-template-columns:55px 4px minmax(0,1fr) auto;gap:10px;align-items:center;padding:11px;border:1px solid #dbe2de;border-radius:13px;background:#fff;text-align:left;box-shadow:0 5px 14px rgba(31,59,48,.035)}.mobile-time-card .mt-time{font-size:.72rem;color:#53635c}.mobile-time-card .mt-line{height:44px;border-radius:99px;background:#70b6de}.mobile-time-card.joao .mt-line{background:#70bd80}.mobile-time-card .mt-info{min-width:0}.mobile-time-card .mt-info strong,.mobile-time-card .mt-info small{display:block;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}.mobile-time-card .mt-info strong{color:#23332c;font-size:.76rem}.mobile-time-card .mt-info small{margin-top:4px;color:#738079;font-size:.62rem}.mobile-time-card .mt-state{padding:5px 7px;border-radius:999px;background:#edf4f1;color:#34725a;font-size:.55rem}.mobile-agenda-empty{padding:30px 18px;border:1px dashed #cad5cf;border-radius:14px;background:#f8faf9;text-align:center;color:#75827b}.mobile-agenda-empty b{display:block;color:#31433b;margin-bottom:4px}
+  .mobile-time-card[hidden]{display:none!important}.mobile-time-card.barber-joao .mt-line{background:#70bd80!important}
+  #appt-detail-area:not(:empty){position:fixed;left:8px;right:8px;bottom:calc(82px + env(safe-area-inset-bottom));z-index:65;max-height:72dvh;overflow:auto;border-radius:19px;background:#fff;box-shadow:0 24px 70px rgba(23,49,40,.25)}#appt-detail-area .appt-detail{margin:0!important;border-radius:19px!important}.appt-detail-close{display:block!important;position:sticky;top:0;margin-left:auto;z-index:2}
+}
+</style>
 </head>
 <body>
 <div id="toast-stack" aria-live="polite" aria-atomic="true"></div>
@@ -855,11 +893,11 @@ section:not(.hidden){animation:cgEnter .14s ease both}@keyframes cgEnter{from{op
   <button class="mobile-nav-link active" data-tab="overview" onclick="switchTab('overview')">Comando</button>
   <button class="mobile-nav-link" data-tab="agenda" onclick="switchTab('agenda')">Planeamento</button>
   <button class="mobile-nav-link" data-tab="relatorios" onclick="switchTab('relatorios')">Receita</button>
-  <button class="mobile-nav-link" data-tab="clientes" onclick="switchTab('clientes')">Clientes</button>
-  <button class="mobile-nav-link" data-tab="assinantes" onclick="switchTab('assinantes')">Assinaturas</button>
+  <button class="mobile-nav-link" data-tab="clientes" onclick="switchTab('clientes')">Relações e clientes</button>
+  <button class="mobile-nav-link" data-tab="assinantes" onclick="switchTab('assinantes')">Planos e assinaturas</button>
   <button class="mobile-nav-link" data-tab="catalogo" onclick="switchTab('catalogo')">Catálogo</button>
-  <button class="mobile-nav-link" data-tab="marketing" onclick="switchTab('marketing')">Marketing</button>
-  <button class="mobile-nav-link" data-tab="automacoes" onclick="switchTab('automacoes')">Automações</button>
+  <button class="mobile-nav-link" data-tab="marketing" onclick="switchTab('marketing')">Campanhas</button>
+  <button class="mobile-nav-link" data-tab="automacoes" onclick="switchTab('automacoes')">Regras e automações</button>
   <button class="mobile-nav-link" onclick="logout()" style="margin-top:20px; color:var(--err);">Sair</button>
 </div>
 
@@ -874,18 +912,16 @@ section:not(.hidden){animation:cgEnter .14s ease both}@keyframes cgEnter{from{op
 <div class="wrap">
   <div class="top-row">
     <div class="top-left">
-      <button class="hamburger-btn" onclick="openSidebar()">☰</button>
-      <div>
-        <a class="back" href="index.html">&larr; The Classic House Barbearia</a>
-        <h1 style="margin-top:6px;">Control Grid</h1><div style="font-size:.72rem;color:var(--ink-muted);margin-top:2px;">Operação · Planeamento · Receita · Relações</div>
-      </div>
+      <a class="studio-brandmark" href="index.html" aria-label="Voltar ao site"><img src="/images/logo2.PNG?v=20260817" alt="" onerror="this.src='https://raw.githubusercontent.com/theclassichousebarbearia2/theclassichouse/main/images/logo2.PNG'"></a>
+      <div class="studio-brandcopy"><span>THE CLASSIC HOUSE /</span><h1 id="desktop-page-title">COMANDO</h1><small><i></i> Operação normal</small></div>
     </div>
     <div class="top-actions">
       <button class="btn btn-ghost hidden" id="quick-payment-header-btn" type="button" onclick="openQuickPayment()" title="Registar pagamento rápido">Pagamento rápido</button>
       <button class="command-trigger hidden" id="command-trigger" type="button" onclick="openCommandPalette()" title="Navegação rápida">
-        <span>Ir para…</span><kbd>⌘ K</kbd>
+        <span>Pesquisar cliente, marcação ou área…</span><kbd>⌘ K</kbd>
       </button>
       <button class="btn btn-ghost hidden" id="logout-btn" onclick="logout()">Sair</button>
+      <button class="btn btn-primary hidden" id="create-header-btn" type="button" onclick="openNewAppointmentFromOverview()">＋ Criar</button>
     </div>
   </div>
 
@@ -921,6 +957,16 @@ section:not(.hidden){animation:cgEnter .14s ease both}@keyframes cgEnter{from{op
   </div>
 
   <div id="dashboard-view" class="hidden">
+    <header class="mobile-app-header">
+      <div class="mobile-app-brand">
+        <img src="/images/logo2.PNG?v=20260817" alt="The Classic House" onerror="this.src='https://raw.githubusercontent.com/theclassichousebarbearia2/theclassichouse/main/images/logo2.PNG'">
+        <div><span>THE CLASSIC HOUSE</span><strong id="mobile-page-title">Hoje</strong></div>
+      </div>
+      <div class="mobile-app-actions">
+        <button type="button" onclick="openQuickPayment()" aria-label="Pagamento rápido">€</button>
+        <button type="button" onclick="openSidebar()" aria-label="Abrir mais áreas">•••</button>
+      </div>
+    </header>
     <div class="floating-action-menu" id="floating-action-menu">
       <button class="fab-main" onclick="toggleActionMenu()" title="Adicionar">+</button>
       <div class="fab-menu hidden" id="fab-menu">
@@ -938,11 +984,19 @@ section:not(.hidden){animation:cgEnter .14s ease both}@keyframes cgEnter{from{op
       <button class="tab-btn active" data-tab="overview" onclick="switchTab('overview')">Comando</button>
       <button class="tab-btn" data-tab="agenda" onclick="switchTab('agenda')">Planeamento</button>
       <button class="tab-btn" data-tab="relatorios" onclick="switchTab('relatorios')">Receita</button>
-      <button class="tab-btn" data-tab="clientes" onclick="switchTab('clientes')">Clientes</button>
-      <button class="tab-btn" data-tab="assinantes" onclick="switchTab('assinantes')">Assinaturas</button>
+      <button class="tab-btn" data-tab="clientes" onclick="switchTab('clientes')">Relações</button>
+      <button class="tab-btn" data-tab="assinantes" onclick="switchTab('assinantes')">Planos</button>
       <button class="tab-btn" data-tab="catalogo" onclick="switchTab('catalogo')">Catálogo</button>
-      <button class="tab-btn" data-tab="marketing" onclick="switchTab('marketing')">Marketing</button>
-      <button class="tab-btn" data-tab="automacoes" onclick="switchTab('automacoes')">Automações</button>
+      <button class="tab-btn" data-tab="marketing" onclick="switchTab('marketing')">Campanhas</button>
+      <button class="tab-btn" data-tab="automacoes" onclick="switchTab('automacoes')">Regras</button>
+      <button class="studio-profile" type="button" onclick="logout()" title="Terminar sessão"><span>BL</span></button>
+    </div>
+
+    <div class="studio-global-strip" aria-label="Resumo da operação">
+      <div><span>Hoje</span><strong id="global-bookings">—</strong><small>marcações</small></div>
+      <div><span>Ocupação</span><strong id="global-occupancy">—</strong><small>capacidade</small></div>
+      <div><span>Receita do dia</span><strong id="global-revenue">—</strong><small id="global-payments">pagamentos</small></div>
+      <button type="button" onclick="switchTab('overview')"><span>⌁</span><div><strong id="global-actions">Operação atualizada</strong><small>Ver ações e próximos atendimentos</small></div><b>→</b></button>
     </div>
 
     <section id="tab-overview">
@@ -1000,6 +1054,7 @@ section:not(.hidden){animation:cgEnter .14s ease both}@keyframes cgEnter{from{op
     </section>
 
     <section id="tab-agenda" class="hidden">
+      <div class="cc-page-head"><div><span class="cc-kicker">Operação</span><h2>Planeamento da equipa</h2><p>Agenda diária, disponibilidade e turnos dos barbeiros.</p></div><div class="cc-head-actions"><button class="btn btn-primary" onclick="toggleManualForm()">＋ Nova marcação</button></div></div>
       <div class="cal-toolbar">
         <label style="max-width:220px; margin-bottom:0;">Dia
           <div style="display:flex; gap:8px; align-items:flex-end;">
@@ -1097,7 +1152,7 @@ section:not(.hidden){animation:cgEnter .14s ease both}@keyframes cgEnter{from{op
     </section>
 
     <section id="tab-clientes" class="hidden">
-      <button class="btn btn-ghost btn-sm" id="toggle-client-form-btn" onclick="toggleClientForm()" style="margin-bottom:16px;">+ Adicionar cliente</button>
+      <div class="cc-page-head"><div><span class="cc-kicker">Relações</span><h2>Clientes</h2><p>Histórico, contactos e frequência de cada cliente.</p></div><div class="cc-head-actions"><button class="btn btn-primary" id="toggle-client-form-btn" onclick="toggleClientForm()">＋ Adicionar cliente</button></div></div>
       <div class="manual-form hidden" id="client-form">
         <div class="form-grid">
           <label>Nome
@@ -1117,7 +1172,7 @@ section:not(.hidden){animation:cgEnter .14s ease both}@keyframes cgEnter{from{op
     </section>
 
     <section id="tab-assinantes" class="hidden">
-      <button class="btn btn-ghost btn-sm" id="toggle-sub-form-btn" onclick="toggleSubForm()" style="margin-bottom:16px;">+ Nova assinatura</button>
+      <div class="cc-page-head"><div><span class="cc-kicker">Planos</span><h2>Assinaturas</h2><p>Renovações, utilização e validade dos planos mensais.</p></div><div class="cc-head-actions"><button class="btn btn-primary" id="toggle-sub-form-btn" onclick="toggleSubForm()">＋ Nova assinatura</button></div></div>
       <div class="manual-form hidden" id="sub-form">
         <div class="form-grid">
           <label>Nome do cliente
@@ -1164,6 +1219,7 @@ section:not(.hidden){animation:cgEnter .14s ease both}@keyframes cgEnter{from{op
     </section>
 
     <section id="tab-catalogo" class="hidden">
+      <div class="cc-page-head"><div><span class="cc-kicker">Oferta</span><h2>Catálogo de serviços</h2><p>Categorias, preços, duração e disponibilidade no agendamento.</p></div><div class="cc-head-actions"><button class="btn btn-primary" id="toggle-service-form-btn" onclick="toggleServiceForm()">＋ Novo serviço</button></div></div>
       <div class="eyebrow" style="display:block; margin-bottom:10px;">Categorias</div>
       <div id="categories-list" style="margin-bottom:18px;">A carregar…</div>
       <div style="display:flex; gap:8px; margin-bottom:22px; flex-wrap:wrap;">
@@ -1172,7 +1228,6 @@ section:not(.hidden){animation:cgEnter .14s ease both}@keyframes cgEnter{from{op
       </div>
       <div id="category-msg"></div>
 
-      <button class="btn btn-ghost btn-sm" id="toggle-service-form-btn" onclick="toggleServiceForm()" style="margin-bottom:16px;">+ Novo serviço</button>
       <div class="manual-form hidden" id="service-form">
         <div class="form-grid">
           <label>Nome do serviço
@@ -1195,6 +1250,7 @@ section:not(.hidden){animation:cgEnter .14s ease both}@keyframes cgEnter{from{op
     </section>
 
     <section id="tab-marketing" class="hidden">
+      <div class="cc-page-head"><div><span class="cc-kicker">Campanhas</span><h2>Comunicação com clientes</h2><p>Cria e envia campanhas por email para a base autorizada.</p></div></div>
       <p style="color:var(--ink-muted); font-size:0.88rem; max-width:620px;">
         Envia um email a todos os clientes com endereço registado. O envio utiliza a função configurada no Supabase e o domínio verificado no Resend.
       </p>
@@ -1360,6 +1416,14 @@ section:not(.hidden){animation:cgEnter .14s ease both}@keyframes cgEnter{from{op
         </div>
       </div>
     </div>
+
+    <nav class="mobile-dock" aria-label="Navegação principal">
+      <button class="mobile-dock-link active" data-tab="overview" onclick="switchTab('overview')"><span>⌂</span><b>Hoje</b></button>
+      <button class="mobile-dock-link" data-tab="agenda" onclick="switchTab('agenda')"><span>□</span><b>Agenda</b></button>
+      <button class="mobile-dock-link" data-tab="relatorios" onclick="switchTab('relatorios')"><span>€</span><b>Receita</b></button>
+      <button class="mobile-dock-link" data-tab="clientes" onclick="switchTab('clientes')"><span>◎</span><b>Clientes</b></button>
+      <button class="mobile-dock-link mobile-dock-more" type="button" onclick="openSidebar()"><span>•••</span><b>Mais</b></button>
+    </nav>
   </div>
 </div>
 
@@ -1387,6 +1451,7 @@ if(sb) {
       document.getElementById('dashboard-view')?.classList.remove('hidden');
       document.getElementById('logout-btn')?.classList.remove('hidden');
       document.getElementById('quick-payment-header-btn')?.classList.remove('hidden');
+      document.getElementById('create-header-btn')?.classList.remove('hidden');
       // SIGNED_IN também pode repetir ao voltar à aba; não recarrega todo o admin nesses eventos.
       if (event !== 'PASSWORD_RECOVERY' && (!dashboardCoreLoaded || dashboardWasHidden)) showDashboard();
     } else {
@@ -1395,6 +1460,7 @@ if(sb) {
       document.getElementById('dashboard-view')?.classList.add('hidden');
       document.getElementById('logout-btn')?.classList.add('hidden');
       document.getElementById('quick-payment-header-btn')?.classList.add('hidden');
+      document.getElementById('create-header-btn')?.classList.add('hidden');
       dashboardCoreLoaded = false;
       dashboardLoadPromise = null;
       try { sessionStorage.removeItem(CORE_CACHE_KEY); } catch (_) {}
@@ -1541,6 +1607,7 @@ async function logout(){
   document.getElementById('dashboard-view').classList.add('hidden');
   document.getElementById('logout-btn').classList.add('hidden');
   document.getElementById('quick-payment-header-btn')?.classList.add('hidden');
+  document.getElementById('create-header-btn')?.classList.add('hidden');
 }
 
 function toggleForgotPassword(){
@@ -1588,6 +1655,7 @@ async function showDashboard(){
   document.getElementById('dashboard-view').classList.remove('hidden');
   document.getElementById('logout-btn').classList.remove('hidden');
   document.getElementById('quick-payment-header-btn')?.classList.remove('hidden');
+  document.getElementById('create-header-btn')?.classList.remove('hidden');
 
   if (dashboardLoadPromise) return dashboardLoadPromise;
 
@@ -1783,6 +1851,10 @@ async function loadOverview(force=false){
     document.getElementById('overview-clients-note').textContent = clientsRes?.error ? 'Base de clientes' : `${clientsRes.count || 0} clientes registados`;
     document.getElementById('overview-team-status').textContent = `${barbers.length} barbeiro${barbers.length === 1 ? '' : 's'} na equipa`;
     document.getElementById('overview-updated').textContent = `Atualizado às ${now.toLocaleTimeString('pt-PT',{hour:'2-digit',minute:'2-digit'})}`;
+    document.getElementById('global-bookings').textContent = String(safeAppointments.length);
+    document.getElementById('global-occupancy').textContent = `${occupancy}%`;
+    document.getElementById('global-revenue').textContent = euro(revenue);
+    document.getElementById('global-payments').textContent = `${payments.length} pagamento${payments.length === 1 ? '' : 's'}`;
 
     const ring = document.getElementById('overview-ring');
     ring.style.setProperty('--ring-angle', `${occupancy * 3.6}deg`);
@@ -1818,6 +1890,8 @@ async function loadOverview(force=false){
     if (missingPhones > 0) alerts.push({ type:'warn', title:`${missingPhones} clientes sem telemóvel`, text:'Os registos continuam válidos, mas não permitem contacto por chamada ou mensagem.', action:'Clientes', run:"switchTab('clientes')" });
     alerts.push({ type:'ok', title:'Comunicações automáticas ativas', text:'Confirmações por email, pedidos de avaliação e alertas ntfy estão configurados.', action:'Ver', run:"switchTab('automacoes')" });
     document.getElementById('overview-alert-count').textContent = `${alerts.filter(a=>a.type==='warn').length} ações`;
+    const warningCount = alerts.filter(a=>a.type==='warn').length;
+    document.getElementById('global-actions').textContent = warningCount ? `${warningCount} ${warningCount === 1 ? 'ação necessária' : 'ações necessárias'}` : 'Operação normal';
     document.getElementById('overview-alerts').innerHTML = alerts.map(alert => `<div class="cc-alert-row"><i class="cc-alert-dot ${alert.type==='ok'?'ok':''}"></i><div><b>${escapeHtml(alert.title)}</b><p>${escapeHtml(alert.text)}</p></div><button onclick="${alert.run}">${escapeHtml(alert.action)} →</button></div>`).join('');
     overviewLoadedAt = Date.now();
   })();
@@ -1993,7 +2067,15 @@ function switchTab(tab){
     if (topBtn) topBtn.classList.toggle('active', t === tab);
     const sideBtn = document.querySelector(`.mobile-nav-link[data-tab="${t}"]`);
     if (sideBtn) sideBtn.classList.toggle('active', t === tab);
+    const dockBtn = document.querySelector(`.mobile-dock-link[data-tab="${t}"]`);
+    if (dockBtn) dockBtn.classList.toggle('active', t === tab);
   });
+  const pageNames = {overview:'Comando',agenda:'Planeamento',relatorios:'Receita',clientes:'Relações',assinantes:'Planos',catalogo:'Catálogo',marketing:'Campanhas',automacoes:'Regras'};
+  const mobileNames = {overview:'Hoje',agenda:'Agenda',relatorios:'Receita',clientes:'Clientes',assinantes:'Planos',catalogo:'Catálogo',marketing:'Campanhas',automacoes:'Regras'};
+  const desktopTitle = document.getElementById('desktop-page-title');
+  const mobileTitle = document.getElementById('mobile-page-title');
+  if (desktopTitle) desktopTitle.textContent = String(pageNames[tab] || tab).toUpperCase();
+  if (mobileTitle) mobileTitle.textContent = mobileNames[tab] || tab;
   closeSidebar();
 
   // Deixa o navegador mostrar a nova área antes de iniciar trabalho de rede/DOM.
@@ -2002,6 +2084,7 @@ function switchTab(tab){
     tabLoadFrame = 0;
     if (activeTab !== tab) return;
     if (tab === 'overview') loadOverview().catch(() => {});
+    if (tab === 'relatorios' && !currentReportRange) loadReport('mes');
     if (tab === 'clientes') loadClients();
     if (tab === 'assinantes') loadSubscriptions();
     if (tab === 'catalogo') loadCatalog();
@@ -2271,7 +2354,7 @@ function buildCalendarSkeleton(dateStr){
   }).join('');
 
   return `
-    <div class="calendar-page">
+    <div class="calendar-page desktop-calendar">
       <div class="cal-scroll">
         <div class="cal-grid">
           <div class="cal-header-row">
@@ -2286,6 +2369,61 @@ function buildCalendarSkeleton(dateStr){
       </div>
     </div>`;
 }
+
+function isMobileStudio(){
+  return window.matchMedia('(max-width:760px)').matches;
+}
+
+function buildMobileAgendaSkeleton(dateStr){
+  const label = new Date(dateStr + 'T00:00:00').toLocaleDateString('pt-PT',{weekday:'long',day:'numeric',month:'long'});
+  return `<div class="mobile-agenda-board"><div class="mobile-agenda-head"><div><span>Agenda do dia</span><strong>${escapeHtml(label)}</strong></div></div><div class="mobile-agenda-empty">A carregar marcações…</div></div>`;
+}
+
+function buildMobileAgenda(data, dateStr){
+  const label = new Date(dateStr + 'T00:00:00').toLocaleDateString('pt-PT',{weekday:'long',day:'numeric',month:'long'});
+  const ordered = [...(data || [])].sort((a,b)=>new Date(a.start_time)-new Date(b.start_time));
+  const chips = [`<button class="mobile-barber-chip active" type="button" data-barber-filter="all" onclick="filterMobileAgenda('all',this)">Todos · ${ordered.length}</button>`]
+    .concat(barbers.map(barber => {
+      const count = ordered.filter(appt => String(appt.barber_id) === String(barber.id)).length;
+      const isOff = !workingWindowForBarber(barber.id, dateStr);
+      return `<button class="mobile-barber-chip" type="button" data-barber-filter="${escapeHtml(barber.id)}" onclick="filterMobileAgenda('${escapeHtml(barber.id)}',this)">${escapeHtml(barber.name)} · ${isOff ? 'folga' : count}</button>`;
+    })).join('');
+  const rows = ordered.map(appt => {
+    const start = new Date(appt.start_time);
+    const end = new Date(appt.end_time);
+    const time = `${start.toLocaleTimeString('pt-PT',{hour:'2-digit',minute:'2-digit'})}–${end.toLocaleTimeString('pt-PT',{hour:'2-digit',minute:'2-digit'})}`;
+    const barberName = appt.barbers?.name || 'Equipa';
+    const serviceName = appt.services?.name?.split('|')[0].trim() || 'Serviço';
+    const isPaid = Array.isArray(appt.payments) && appt.payments.length > 0;
+    return `<button class="mobile-time-card ${barberColorClass(barberName)}" type="button" data-mobile-barber="${escapeHtml(appt.barber_id)}" data-appointment-id="${escapeHtml(appt.id)}">
+      <span class="mt-time">${escapeHtml(time)}</span><i class="mt-line"></i><span class="mt-info"><strong>${escapeHtml(appt.clients?.name || 'Cliente')}</strong><small>${escapeHtml(serviceName)} · ${escapeHtml(barberName)}</small></span><span class="mt-state">${isPaid ? 'Pago' : 'Por pagar'}</span>
+    </button>`;
+  }).join('');
+  return `<div class="mobile-agenda-board">
+    <div class="mobile-agenda-head"><div><span>Agenda do dia</span><strong>${escapeHtml(label)}</strong></div><button type="button" onclick="openNewAppointmentFromOverview()">＋ Marcação</button></div>
+    <div class="mobile-barber-strip">${chips}</div>
+    <div class="mobile-timeline">${rows || '<div class="mobile-agenda-empty"><b>Dia livre</b>Ainda não existem marcações para este dia.</div>'}</div>
+  </div>`;
+}
+
+function filterMobileAgenda(barberId, button){
+  document.querySelectorAll('.mobile-barber-chip').forEach(chip => chip.classList.toggle('active', chip === button));
+  document.querySelectorAll('.mobile-time-card').forEach(card => {
+    card.hidden = barberId !== 'all' && String(card.dataset.mobileBarber) !== String(barberId);
+  });
+}
+
+let studioMobileMode = isMobileStudio();
+let studioResizeTimer = 0;
+window.addEventListener('resize', () => {
+  clearTimeout(studioResizeTimer);
+  studioResizeTimer = setTimeout(() => {
+    const nextMode = isMobileStudio();
+    if (nextMode === studioMobileMode) return;
+    studioMobileMode = nextMode;
+    if (currentAgendaDateStr && activeTab === 'agenda') loadAgenda(currentAgendaDateStr, 0, true);
+  }, 180);
+}, { passive:true });
 
 async function fetchAgendaAppointments(dateStr, force=false){
   const cached = agendaCache.get(dateStr);
@@ -2339,7 +2477,7 @@ async function loadAgenda(dateStr, transitionDir = 0, force=false){
   const cached = agendaCache.get(dateStr);
   const cacheIsFresh = !force && cached && (Date.now() - cached.fetchedAt < AGENDA_CACHE_TTL_MS);
   if (!cacheIsFresh && areaEl.dataset.renderedDate !== dateStr) {
-    areaEl.innerHTML = buildCalendarSkeleton(dateStr);
+    areaEl.innerHTML = isMobileStudio() ? buildMobileAgendaSkeleton(dateStr) : buildCalendarSkeleton(dateStr);
     const loadingScroll = areaEl.querySelector('.cal-scroll');
     if (loadingScroll && previousScroll) loadingScroll.scrollTop = previousScroll;
   }
@@ -2357,11 +2495,29 @@ async function loadAgenda(dateStr, transitionDir = 0, force=false){
   }
   if (areaEl.dataset.loadingDate !== dateStr) return;
 
+  currentAppointments = data;
+  if (isMobileStudio()) {
+    areaEl.innerHTML = buildMobileAgenda(data, dateStr);
+    areaEl.dataset.renderedDate = dateStr;
+    areaEl.classList.remove('is-loading');
+    document.getElementById('appt-detail-area').innerHTML = '';
+    areaEl.querySelectorAll('[data-appointment-id]').forEach(card => {
+      card.addEventListener('click', () => {
+        const appt = currentAppointments.find(item => String(item.id) === String(card.dataset.appointmentId));
+        if (appt) showApptDetail(appt, dateStr);
+      });
+    });
+    scheduleIdleWork(() => {
+      prefetchAgendaDate(adjacentDate(dateStr, -1));
+      prefetchAgendaDate(adjacentDate(dateStr, 1));
+    }, 900);
+    return;
+  }
+
   areaEl.innerHTML = buildCalendarSkeleton(dateStr);
   areaEl.dataset.renderedDate = dateStr;
   areaEl.classList.remove('is-loading');
   document.getElementById('appt-detail-area').innerHTML = '';
-  currentAppointments = data;
 
   const newScroll = areaEl.querySelector('.cal-scroll');
   if (newScroll && previousScroll) newScroll.scrollTop = previousScroll;
@@ -2525,6 +2681,7 @@ function showApptDetail(appt, dateStr){
   const safePhone = normalizePhone(appt.clients?.phone || '');
   detailEl.innerHTML = `
     <div class="appt-detail">
+      <button class="appt-detail-close btn btn-ghost btn-sm" type="button" onclick="closeAppointmentDetail()" aria-label="Fechar detalhes">×</button>
       <div class="row"><span>Cliente</span><span>${escapeHtml(appt.clients?.name || '')} · ${escapeHtml(appt.clients?.phone || '')}</span></div>
       <div class="row"><span>Serviço</span><span>${escapeHtml(appt.services?.name?.split('|')[0].trim() || '')}</span></div>
       <div class="row"><span>Barbeiro</span><span>${escapeHtml(appt.barbers?.name || '')}</span></div>
@@ -2557,8 +2714,15 @@ function showApptDetail(appt, dateStr){
   const editDate = document.getElementById('edit-date');
   editDate.min = toLocalDateStr(new Date());
   editDate.value = toLocalDateStr(new Date(appt.start_time)) < editDate.min ? editDate.min : toLocalDateStr(new Date(appt.start_time));
+  if (isMobileStudio()) requestAnimationFrame(() => detailEl.scrollIntoView({behavior:'smooth',block:'end'}));
   barberSelect.addEventListener('change', () => renderEditSlots());
   editDate.addEventListener('change', () => renderEditSlots());
+}
+
+function closeAppointmentDetail(){
+  document.getElementById('appt-detail-area').innerHTML = '';
+  editingAppointment = null;
+  editSelectedSlot = null;
 }
 
 function toggleEditAppt(){
@@ -2931,14 +3095,28 @@ async function runReport(start, end, label){
 function renderReportData(data, label, areaEl){
   const total = (data||[]).reduce((sum, p) => sum + (Number(p.amount_eur)||0), 0);
   const count = (data||[]).length;
+  const average = count ? total / count : 0;
+  const methodTotals = (data||[]).reduce((acc, payment) => {
+    const key = String(payment.method || 'não indicado').toLowerCase();
+    acc[key] = (acc[key] || 0) + (Number(payment.amount_eur) || 0);
+    return acc;
+  }, {});
+  const methodSummary = Object.entries(methodTotals).sort((a,b)=>b[1]-a[1]).map(([method,value]) => {
+    const name = ({mbway:'MB Way',multibanco:'Multibanco',dinheiro:'Dinheiro'})[method] || method;
+    const pct = total ? Math.round(value / total * 100) : 0;
+    return `${name} ${pct}%`;
+  }).join(' · ') || 'Sem movimentos';
   areaEl.innerHTML = `
-    <div class="eyebrow" style="margin-bottom:14px;display:block;">${escapeHtml(label)}</div>
-    <div class="stat-grid">
-      <div class="stat-card"><span class="eyebrow">Faturação total</span><div class="value">${euro(total)}</div></div>
-      <div class="stat-card"><span class="eyebrow">Total de pagamentos</span><div class="value">${count}</div></div>
+    <div class="studio-report-stats">
+      <article><span>Receita</span><strong>${euro(total)}</strong><small>${escapeHtml(label)}</small></article>
+      <article><span>Pagamentos</span><strong>${count}</strong><small>movimentos confirmados</small></article>
+      <article><span>Valor médio</span><strong>${euro(average)}</strong><small>por lançamento</small></article>
+      <article class="studio-method-card"><span>Formas de pagamento</span><div><i></i><i></i><i></i></div><small>${escapeHtml(methodSummary)}</small></article>
     </div>
-    <div class="eyebrow" style="margin:22px 0 10px;display:block;">Pagamentos</div>
-    ${(data||[]).map(p => {
+    <div class="studio-payment-panel">
+      <header><div><strong>Movimentos recentes</strong><small>${escapeHtml(label)}</small></div><button type="button" onclick="loadReport('mes')">Atualizar</button></header>
+      <div class="studio-payment-head"><span>Hora</span><span>Descrição</span><span>Cliente</span><span>Método</span><span>Estado</span><span>Valor</span><span></span></div>
+      <div class="studio-payment-list">${(data||[]).map(p => {
       const apt = Array.isArray(p.appointments) ? p.appointments[0] : p.appointments;
       const isQuickPayment = !p.appointment_id;
       const quickBarber = Array.isArray(p.barbers) ? p.barbers[0] : p.barbers;
@@ -2947,11 +3125,15 @@ function renderReportData(data, label, areaEl){
       const barberName = apt?.barbers?.name || quickBarber?.name || (isQuickPayment ? 'Sem barbeiro associado' : 'Venda rápida');
       const clientName = apt?.clients?.name || (isQuickPayment ? 'Recebimento avulso' : '—');
       const serviceName = apt?.services?.name?.split('|')[0].trim() || (isQuickPayment ? `Pagamento rápido · ${methodName}` : '—');
-      return `<div class="client-row"><div style="flex:1;min-width:0;">
-        <div class="client-name">${escapeHtml(clientName)} · ${escapeHtml(serviceName)}</div>
-        <div class="client-meta">${escapeHtml(barberName)} · ${new Date(p.paid_at).toLocaleDateString('pt-PT')} às ${new Date(p.paid_at).toLocaleTimeString('pt-PT',{hour:'2-digit',minute:'2-digit'})} · <span class="mono">${euro(p.amount_eur)}</span></div>
-      </div><button class="btn btn-ghost btn-sm" onclick="cancelPayment('${p.id}')">Cancelar</button></div>`;
-    }).join('') || '<p style="color:var(--ink-muted);">Sem pagamentos neste período.</p>'}`;
+      const paidAt = new Date(p.paid_at);
+      return `<div class="studio-payment-row">
+        <time>${paidAt.toLocaleTimeString('pt-PT',{hour:'2-digit',minute:'2-digit'})}</time>
+        <div><strong>${escapeHtml(serviceName)}</strong><small>${escapeHtml(barberName)}</small></div>
+        <span>${escapeHtml(clientName)}</span><span>${escapeHtml(methodName)}</span><span class="studio-paid">● Pago</span>
+        <b>${euro(p.amount_eur)}</b><button type="button" onclick="cancelPayment('${p.id}')" aria-label="Cancelar pagamento">×</button>
+      </div>`;
+    }).join('') || '<div class="studio-payment-empty">Sem pagamentos neste período.</div>'}</div>
+    </div>`;
 }
 
 async function cancelPayment(paymentId){
@@ -4237,8 +4419,8 @@ function confirmScrollCalendarDate() {
     {name:'Clientes', hint:'Base de clientes', run:()=>switchTab('clientes')},
     {name:'Assinaturas', hint:'Planos mensais', run:()=>switchTab('assinantes')},
     {name:'Catálogo', hint:'Serviços e preços', run:()=>switchTab('catalogo')},
-    {name:'Marketing', hint:'Campanhas', run:()=>switchTab('marketing')},
-    {name:'Automações', hint:'Email, ntfy e avaliações', run:()=>switchTab('automacoes')},
+    {name:'Campanhas', hint:'Email para clientes', run:()=>switchTab('marketing')},
+    {name:'Regras', hint:'Email, ntfy e avaliações', run:()=>switchTab('automacoes')},
     {name:'Nova marcação manual', hint:'Planeamento', run:()=>{switchTab('agenda'); const f=document.getElementById('manual-form'); if(f?.classList.contains('hidden')) toggleManualForm();}},
     {name:'Pagamento rápido', hint:'Registar valor', run:()=>openQuickPayment()},
     {name:'Abrir site', hint:'Página principal', run:()=>location.href='index.html'}
