@@ -637,7 +637,11 @@ async function renderSlots(){
   if(!state.selectedDate||!state.selectedService){el.innerHTML="";return}
   const dow=new Date(state.selectedDate+"T00:00:00").getDay(),hours=state.hours.find(h=>Number(h.day_of_week)===dow);
   if(!hours||hours.is_closed){el.innerHTML='<div class="msg err">Fechado neste dia. Escolhe outra data.</div>';return}
-  const ids=state.selectedBarber?[state.selectedBarber]:state.barbers.map(b=>b.id).filter(id=>{const sh=state.barberShifts.find(s=>s.barber_id===id&&Number(s.day_of_week)===dow);return !sh||!sh.is_off});
+  const {data:latestShifts,error:shiftsError}=await sb.from("barber_shifts").select("barber_id,day_of_week,start_time,end_time,is_off").eq("day_of_week",dow);
+  if(shiftsError){console.error(shiftsError);el.innerHTML='<div class="msg err">Erro a verificar os turnos dos barbeiros.</div>';return}
+  state.barberShifts=state.barberShifts.filter(s=>Number(s.day_of_week)!==dow).concat(latestShifts||[]);
+  const candidateIds=state.selectedBarber?[state.selectedBarber]:state.barbers.map(b=>b.id);
+  const ids=candidateIds.filter(id=>{const sh=state.barberShifts.find(s=>s.barber_id===id&&Number(s.day_of_week)===dow);return !sh||!sh.is_off});
   if(!ids.length){el.innerHTML='<div class="msg err">Sem barbeiros disponíveis neste dia.</div>';return}
   const ds=new Date(state.selectedDate+"T00:00:00"),de=new Date(state.selectedDate+"T23:59:59");
   const {data:busy,error}=await sb.from("public_busy_slots").select("barber_id,start_time,end_time").in("barber_id",ids).gte("start_time",ds.toISOString()).lte("start_time",de.toISOString());
@@ -738,16 +742,16 @@ async function init(){
   const el=document.getElementById("services-list");
   if(!sb){el.innerHTML='<div class="msg err">Não foi possível carregar o sistema de marcações.</div>';return}
   try{
-    /* As tabelas essenciais são as mesmas usadas pelo Booking funcional.
-       Categorias e turnos são opcionais: se não responderem, não bloqueiam a página. */
+    /* Serviços, barbeiros, horários e turnos são essenciais para calcular
+       a disponibilidade. Se os turnos falharem, o booking fecha com segurança. */
     const [svc,bar,hrs,shifts]=await Promise.all([
       sb.from("services").select("*").eq("active",true).order("category").order("sort_order"),
       sb.from("barbers").select("*").eq("active",true),
       sb.from("business_hours").select("*"),
       sb.from("barber_shifts").select("*")
     ]);
-    if(svc.error)throw svc.error;if(bar.error)throw bar.error;if(hrs.error)throw hrs.error;
-    state.services=svc.data||[];state.barbers=bar.data||[];state.hours=hrs.data||[];state.barberShifts=shifts.error?[]:(shifts.data||[]);
+    if(svc.error)throw svc.error;if(bar.error)throw bar.error;if(hrs.error)throw hrs.error;if(shifts.error)throw shifts.error;
+    state.services=svc.data||[];state.barbers=bar.data||[];state.hours=hrs.data||[];state.barberShifts=shifts.data||[];
     if(!state.services.length){el.innerHTML='<div class="msg err">Não existem serviços ativos disponíveis neste momento.</div>';return}
     renderServices();renderBarbers();buildDayStrip()
   }catch(e){console.error("init:",e);el.innerHTML=`<div class="msg err">Não consegui ligar à base de dados.<br><small>${escapeHtml(e.message||"Verifica a ligação ao Supabase.")}</small></div>`}
