@@ -882,6 +882,32 @@ body{background:var(--studio-bg)!important;color:var(--studio-ink)!important;fon
   .mobile-time-card[hidden]{display:none!important}.mobile-time-card.barber-joao .mt-line{background:#70bd80!important}
   #appt-detail-area:not(:empty){position:fixed;left:8px;right:8px;bottom:calc(82px + env(safe-area-inset-bottom));z-index:65;max-height:72dvh;overflow:auto;border-radius:19px;background:#fff;box-shadow:0 24px 70px rgba(23,49,40,.25)}#appt-detail-area .appt-detail{margin:0!important;border-radius:19px!important}.appt-detail-close{display:block!important;position:sticky;top:0;margin-left:auto;z-index:2}
 }
+
+/* Agenda Control Grid — uma única vista diária para computador e telemóvel. */
+.control-day-toolbar{display:flex!important;align-items:center!important;gap:12px!important;margin-bottom:14px!important}
+.control-day-nav{display:flex;align-items:center;gap:6px}.control-day-nav .btn-icon{font-size:1.25rem!important;line-height:1}.control-today-btn{min-width:64px}
+.control-day-picker{width:min(260px,100%);margin:0!important;color:#7b8781!important;font-size:.62rem!important;letter-spacing:.08em;text-transform:uppercase}
+.control-day-picker>span{display:flex;align-items:center;gap:6px;margin-top:4px}.control-day-picker input{height:38px!important;min-width:0;padding:0 10px!important;border-color:#d7ded9!important;background:#f7f9f8!important;color:#26362f!important;font-size:.76rem!important}.control-day-picker button{height:38px!important;min-width:38px!important;padding:0!important}
+.control-day-mode{display:flex;align-items:center;gap:7px;margin-left:auto;padding:8px 11px;border:1px solid #dce3df;border-radius:999px;background:#f7faf8;color:#52625b;font-size:.65rem;font-weight:700}.control-day-mode>span{width:7px;height:7px;border-radius:50%;background:#51a876;box-shadow:0 0 0 3px #e2f2e8}
+.control-day-shell{overflow:hidden;border:1px solid #d5ddd8;border-radius:14px;background:#fff;box-shadow:0 8px 24px rgba(28,56,45,.055)}
+.control-day-summary{min-height:56px;padding:11px 15px;display:flex;align-items:center;justify-content:space-between;gap:16px;border-bottom:1px solid #e0e6e2;background:#fbfcfb}.control-day-summary>div:first-child span,.control-day-summary>div:first-child strong{display:block}.control-day-summary>div:first-child span{color:#a16d22;font-size:.58rem;font-weight:750;letter-spacing:.12em;text-transform:uppercase}.control-day-summary>div:first-child strong{margin-top:3px;color:#22322b;font-size:.86rem;text-transform:capitalize}.control-day-summary-metrics{display:flex;align-items:center;gap:15px;color:#74817b;font-size:.62rem}.control-day-summary-metrics b{color:#2a3a33;font-size:.72rem}
+.control-day-scroll{position:relative;max-height:calc(100vh - 345px);min-height:360px;overflow:auto;overscroll-behavior:contain;scrollbar-color:#bdc9c2 #f2f5f3;scrollbar-width:thin}
+.control-day-grid{display:grid;position:relative;isolation:isolate;min-width:100%;background:#fff}
+.control-day-corner,.control-day-barber{position:sticky;top:0;z-index:12;min-height:70px;border-bottom:1px solid #d5ddd8;background:#f2f5f3}
+.control-day-corner{left:0;z-index:15;display:grid;place-items:center;border-right:1px solid #d5ddd8;color:#84908a;font-size:.56rem;font-weight:750;letter-spacing:.1em;text-transform:uppercase}
+.control-day-barber{display:flex;align-items:center;justify-content:center;gap:10px;padding:10px 12px;border-right:1px solid #dce3df}.control-day-barber:last-of-type{border-right:0}.control-day-barber-avatar{width:34px;height:34px;display:grid;place-items:center;flex:0 0 auto;border-radius:10px;background:#e3efeb;color:#245445;font-weight:800}.control-day-barber.barber-bruno .control-day-barber-avatar{background:#e4f2fa;color:#2c627e}.control-day-barber.barber-joao .control-day-barber-avatar{background:#e6f4e8;color:#357041}.control-day-barber div{min-width:0}.control-day-barber strong,.control-day-barber small{display:block;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}.control-day-barber strong{color:#27372f;font-size:.78rem}.control-day-barber small{margin-top:3px;color:#7b8781;font-size:.58rem}
+.control-day-time{position:sticky;left:0;z-index:8;display:flex;align-items:flex-start;justify-content:center;padding-top:7px;border-right:1px solid #d8e0db;border-bottom:1px solid #e7ece9;background:#f7f9f8;color:#74817b;font-size:.62rem;font-variant-numeric:tabular-nums}
+.control-day-cell{position:relative;min-height:58px;padding:4px;border-right:1px solid #e2e8e4;border-bottom:1px solid #e7ece9;background:#fff;font:inherit;cursor:pointer}.control-day-cell:nth-last-child(-n+1){border-right:0}.control-day-cell:hover{background:#f2f8f5}.control-day-cell::after{content:'＋';position:absolute;right:7px;top:6px;width:22px;height:22px;display:grid;place-items:center;border-radius:7px;background:#e8f1ed;color:#326b59;font-size:.76rem;opacity:0;transform:translateY(2px);transition:.14s ease}.control-day-cell:hover::after,.control-day-cell:focus-visible::after{opacity:1;transform:none}.control-day-cell.is-past{cursor:not-allowed;background:#fafbfa}.control-day-cell.is-past::after,.control-day-cell.is-off::after{display:none}.control-day-cell.is-off{cursor:not-allowed;background:repeating-linear-gradient(135deg,#f5f7f6,#f5f7f6 7px,#edf1ef 7px,#edf1ef 14px)}
+.control-day-event{position:relative;z-index:6;min-width:0;margin:4px 5px;padding:8px 10px;display:flex;flex-direction:column;justify-content:center;align-self:stretch;overflow:hidden;border:1px solid #c6d9d1;border-left:4px solid #2d705a;border-radius:9px;background:#eaf4f0;color:#26473b;font:inherit;text-align:left;box-shadow:0 4px 12px rgba(32,74,59,.11);cursor:pointer;transition:transform .13s ease,box-shadow .13s ease}.control-day-event:hover{transform:translateY(-1px);box-shadow:0 7px 16px rgba(32,74,59,.16)}.control-day-event.barber-bruno{border-color:#bcdcec;border-left-color:#5ea9d1;background:#eaf6fc;color:#25566f}.control-day-event.barber-joao{border-color:#c5e1ca;border-left-color:#69ad76;background:#edf8ef;color:#315f38}.control-day-event.neutral{border-color:#ded4c3;border-left-color:#bb8a3c;background:#fbf6ed;color:#604b2d}.control-day-event.is-paid{box-shadow:inset 0 0 0 1px rgba(42,123,84,.16),0 4px 12px rgba(32,74,59,.11)}.control-day-event strong,.control-day-event small{display:block;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}.control-day-event strong{font-size:.73rem;line-height:1.25}.control-day-event small{margin-top:4px;font-size:.6rem;opacity:.8}.control-day-event-state{position:absolute;top:7px;right:7px;width:7px;height:7px;border-radius:50%;background:#c5984b}.control-day-event.is-paid .control-day-event-state{background:#4a9b69}
+.control-day-empty{padding:11px 15px;border-top:1px solid #e3e8e5;background:#fbfcfb;color:#76827c;font-size:.67rem}
+.calendar-page{will-change:transform,opacity}
+@media(max-width:760px){
+  .control-day-toolbar{top:68px!important;z-index:20!important;display:grid!important;grid-template-columns:auto minmax(0,1fr)!important;gap:8px!important;margin:0 -1px 12px!important;padding:9px!important;border-radius:12px!important}.control-day-nav{grid-column:1}.control-day-picker{grid-column:2;width:100%;font-size:0!important}.control-day-picker>span{margin:0}.control-day-picker input{width:100%;font-size:.68rem!important}.control-day-mode{display:none}.control-today-btn{min-width:52px;padding-inline:8px!important}
+  .control-day-summary{padding:10px 12px}.control-day-summary-metrics{gap:8px}.control-day-summary-metrics span:last-child{display:none}
+  .control-day-shell{margin:0 -13px;border-inline:0;border-radius:0}.control-day-scroll{max-height:calc(100svh - 300px);min-height:420px}.control-day-grid{--control-day-col-width:155px!important;min-width:var(--control-day-mobile-width,374px)}
+  .control-day-corner,.control-day-barber{min-height:62px}.control-day-barber{gap:7px;padding:8px}.control-day-barber-avatar{width:30px;height:30px;border-radius:9px}.control-day-barber strong{font-size:.72rem}.control-day-barber small{font-size:.54rem}
+  .control-day-time{font-size:.58rem}.control-day-cell{min-height:56px}.control-day-cell::after{opacity:.72;right:5px;top:5px;width:20px;height:20px}.control-day-event{margin:3px 4px;padding:7px 8px;border-radius:8px}.control-day-event strong{font-size:.68rem}.control-day-event small{font-size:.56rem}
+}
 </style>
 </head>
 <body>
@@ -1055,18 +1081,19 @@ body{background:var(--studio-bg)!important;color:var(--studio-ink)!important;fon
 
     <section id="tab-agenda" class="hidden">
       <div class="cc-page-head"><div><span class="cc-kicker">Operação</span><h2>Planeamento da equipa</h2><p>Agenda diária, disponibilidade e turnos dos barbeiros.</p></div><div class="cc-head-actions"><button class="btn btn-primary" onclick="toggleManualForm()">＋ Nova marcação</button></div></div>
-      <div class="cal-toolbar">
-        <label style="max-width:220px; margin-bottom:0;">Dia
-          <div style="display:flex; gap:8px; align-items:flex-end;">
-            <input type="date" id="agenda-date" style="flex:1;">
-            <button type="button" class="btn btn-ghost btn-sm" style="padding:11px 14px;" onclick="openScrollCalendar()" title="Calendário com scroll">📅</button>
-          </div>
-        </label>
-        <div class="zoom-controls">
-          <span class="eyebrow">Zoom</span>
-          <button class="btn btn-ghost btn-icon" onclick="changeZoom(-0.2)">−</button>
-          <button class="btn btn-ghost btn-icon" onclick="changeZoom(0.2)">+</button>
+      <div class="cal-toolbar control-day-toolbar" aria-label="Navegação da agenda diária">
+        <div class="control-day-nav">
+          <button type="button" class="btn btn-ghost btn-icon" onclick="changeAgendaDay(-1,-1)" aria-label="Dia anterior" title="Dia anterior">‹</button>
+          <button type="button" class="btn btn-ghost btn-sm control-today-btn" onclick="goToAgendaToday()">Hoje</button>
+          <button type="button" class="btn btn-ghost btn-icon" onclick="changeAgendaDay(1,1)" aria-label="Dia seguinte" title="Dia seguinte">›</button>
         </div>
+        <label class="control-day-picker">Dia
+          <span>
+            <input type="date" id="agenda-date">
+            <button type="button" class="btn btn-ghost btn-sm" onclick="openScrollCalendar()" title="Escolher outra data" aria-label="Escolher outra data">⌄</button>
+          </span>
+        </label>
+        <div class="control-day-mode" aria-label="Vista atual"><span></span> Vista diária</div>
       </div>
 
       <div style="display:flex; gap:8px; flex-wrap:wrap; margin-bottom:16px;">
@@ -2321,96 +2348,93 @@ function shiftForBarberOnDate(barberId, dateStr){
   return barberShifts.find(s => s.barber_id === barberId && s.day_of_week === dow) || null;
 }
 
-function buildCalendarSkeleton(dateStr){
-  const pxPerMin = calZoom;
-  const totalMinutes = (CAL_END_HOUR - CAL_START_HOUR) * 60;
-  const totalHeight = totalMinutes * pxPerMin;
-
-  let gutterHtml = `<div class="cal-gutter" style="height:${totalHeight}px;">`;
-  for (let h = CAL_START_HOUR; h <= CAL_END_HOUR; h++) {
-    const top = (h - CAL_START_HOUR) * 60 * pxPerMin;
-    gutterHtml += `<div class="cal-gutter-label" style="top:${top}px;">${String(h).padStart(2,'0')}:00</div>`;
-  }
-  gutterHtml += `</div>`;
-
-  const columnsHtml = barbers.map(b => {
-    let offShiftHtml = '';
-    const windowInfo = workingWindowForBarber(b.id, dateStr);
-    if (!windowInfo) {
-      offShiftHtml = `<div class="cal-offshift" style="top:0;height:${totalHeight}px;"></div>`;
-    } else {
-      const visibleStart = CAL_START_HOUR * 60;
-      const visibleEnd = CAL_END_HOUR * 60;
-      const start = Math.max(windowInfo.startMin, visibleStart);
-      const end = Math.min(windowInfo.endMin, visibleEnd);
-      if (start > visibleStart) {
-        offShiftHtml += `<div class="cal-offshift" style="top:0;height:${(start-visibleStart)*pxPerMin}px;"></div>`;
-      }
-      if (end < visibleEnd) {
-        offShiftHtml += `<div class="cal-offshift" style="top:${(end-visibleStart)*pxPerMin}px;height:${(visibleEnd-end)*pxPerMin}px;"></div>`;
-      }
-    }
-    return `<div class="cal-column ${barberColorClass(b.name)}" data-barber-id="${b.id}" style="height:${totalHeight}px;--cal-hour-height:${60*pxPerMin}px;--cal-slot-height:${30*pxPerMin}px;">${offShiftHtml}</div>`;
-  }).join('');
-
-  return `
-    <div class="calendar-page desktop-calendar">
-      <div class="cal-scroll">
-        <div class="cal-grid">
-          <div class="cal-header-row">
-            <div class="cal-corner"></div>
-            ${barbers.map(b => `<div class="cal-barber-header ${barberColorClass(b.name)}">${escapeHtml(b.name)}</div>`).join('')}
-          </div>
-          <div class="cal-body-row">
-            ${gutterHtml}
-            ${columnsHtml}
-          </div>
-        </div>
-      </div>
-    </div>`;
-}
-
 function isMobileStudio(){
   return window.matchMedia('(max-width:760px)').matches;
 }
 
-function buildMobileAgendaSkeleton(dateStr){
-  const label = new Date(dateStr + 'T00:00:00').toLocaleDateString('pt-PT',{weekday:'long',day:'numeric',month:'long'});
-  return `<div class="mobile-agenda-board"><div class="mobile-agenda-head"><div><span>Agenda do dia</span><strong>${escapeHtml(label)}</strong></div></div><div class="mobile-agenda-empty">A carregar marcações…</div></div>`;
-}
-
-function buildMobileAgenda(data, dateStr){
-  const label = new Date(dateStr + 'T00:00:00').toLocaleDateString('pt-PT',{weekday:'long',day:'numeric',month:'long'});
+function buildControlDayCalendar(data, dateStr, isLoading=false){
+  const team = barbers.length ? barbers : [{id:'',name:'Equipa'}];
+  const slotMinutes = 30;
+  const firstMinute = CAL_START_HOUR * 60;
+  const lastMinute = CAL_END_HOUR * 60;
+  const slotCount = Math.ceil((lastMinute - firstMinute) / slotMinutes);
+  const columnTemplate = `64px repeat(${team.length},minmax(var(--control-day-col-width),1fr))`;
+  const minWidth = 64 + team.length * 210;
+  const mobileMinWidth = 64 + team.length * 155;
+  const rowTemplate = `70px repeat(${slotCount},58px)`;
+  const selectedDate = new Date(dateStr + 'T00:00:00');
+  const dateLabel = selectedDate.toLocaleDateString('pt-PT',{weekday:'long',day:'numeric',month:'long',year:'numeric'});
   const ordered = [...(data || [])].sort((a,b)=>new Date(a.start_time)-new Date(b.start_time));
-  const chips = [`<button class="mobile-barber-chip active" type="button" data-barber-filter="all" onclick="filterMobileAgenda('all',this)">Todos · ${ordered.length}</button>`]
-    .concat(barbers.map(barber => {
-      const count = ordered.filter(appt => String(appt.barber_id) === String(barber.id)).length;
-      const isOff = !workingWindowForBarber(barber.id, dateStr);
-      return `<button class="mobile-barber-chip" type="button" data-barber-filter="${escapeHtml(barber.id)}" onclick="filterMobileAgenda('${escapeHtml(barber.id)}',this)">${escapeHtml(barber.name)} · ${isOff ? 'folga' : count}</button>`;
-    })).join('');
-  const rows = ordered.map(appt => {
+
+  const headers = team.map((barber,index) => {
+    const windowInfo = workingWindowForBarber(barber.id, dateStr);
+    const count = ordered.filter(appt => String(appt.barber_id) === String(barber.id)).length;
+    const shiftLabel = windowInfo ? `${minutesToTimeStr(windowInfo.startMin)}–${minutesToTimeStr(windowInfo.endMin)} · ${count} ${count === 1 ? 'marcação' : 'marcações'}` : 'Folga';
+    const initial = (barber.name || 'E').trim().charAt(0).toUpperCase();
+    return `<div class="control-day-barber ${barberColorClass(barber.name)}" style="grid-column:${index+2};grid-row:1">
+      <span class="control-day-barber-avatar">${escapeHtml(initial)}</span><div><strong>${escapeHtml(barber.name || 'Equipa')}</strong><small>${escapeHtml(shiftLabel)}</small></div>
+    </div>`;
+  }).join('');
+
+  let cells = '';
+  for (let slotIndex=0; slotIndex<slotCount; slotIndex++) {
+    const slotMin = firstMinute + slotIndex * slotMinutes;
+    const timeLabel = minutesToTimeStr(slotMin);
+    const row = slotIndex + 2;
+    cells += `<time class="control-day-time" datetime="${timeLabel}" style="grid-column:1;grid-row:${row}">${timeLabel}</time>`;
+    team.forEach((barber,index) => {
+      const windowInfo = workingWindowForBarber(barber.id, dateStr);
+      const isOff = !windowInfo || slotMin < windowInfo.startMin || slotMin >= windowInfo.endMin;
+      const slotDate = new Date(`${dateStr}T${timeLabel}:00`);
+      const isPast = slotDate < new Date();
+      const disabled = isLoading || isOff || isPast || !barber.id;
+      const stateClass = isOff ? ' is-off' : (isPast ? ' is-past' : '');
+      const title = isOff ? 'Fora do turno' : (isPast ? 'Horário já passou' : `Criar marcação às ${timeLabel}`);
+      cells += `<button type="button" class="control-day-cell${stateClass}" style="grid-column:${index+2};grid-row:${row}" data-barber-id="${escapeHtml(barber.id)}" data-slot-min="${slotMin}" title="${escapeHtml(title)}" aria-label="${escapeHtml(title)} — ${escapeHtml(barber.name || 'Equipa')}" ${disabled?'disabled':''}></button>`;
+    });
+  }
+
+  const events = ordered.map(appt => {
+    const barberIndex = team.findIndex(barber => String(barber.id) === String(appt.barber_id));
+    if (barberIndex < 0) return '';
     const start = new Date(appt.start_time);
     const end = new Date(appt.end_time);
-    const time = `${start.toLocaleTimeString('pt-PT',{hour:'2-digit',minute:'2-digit'})}–${end.toLocaleTimeString('pt-PT',{hour:'2-digit',minute:'2-digit'})}`;
-    const barberName = appt.barbers?.name || 'Equipa';
-    const serviceName = appt.services?.name?.split('|')[0].trim() || 'Serviço';
+    const startMin = start.getHours()*60 + start.getMinutes();
+    if (startMin >= lastMinute || end.getHours()*60 + end.getMinutes() <= firstMinute) return '';
+    const startOffset = Math.max(0, Math.floor((startMin-firstMinute)/slotMinutes));
+    const duration = Math.max(slotMinutes,(end-start)/60000);
+    const span = Math.max(1,Math.min(slotCount-startOffset,Math.ceil(duration/slotMinutes)));
+    const row = startOffset + 2;
     const isPaid = Array.isArray(appt.payments) && appt.payments.length > 0;
-    return `<button class="mobile-time-card ${barberColorClass(barberName)}" type="button" data-mobile-barber="${escapeHtml(appt.barber_id)}" data-appointment-id="${escapeHtml(appt.id)}">
-      <span class="mt-time">${escapeHtml(time)}</span><i class="mt-line"></i><span class="mt-info"><strong>${escapeHtml(appt.clients?.name || 'Cliente')}</strong><small>${escapeHtml(serviceName)} · ${escapeHtml(barberName)}</small></span><span class="mt-state">${isPaid ? 'Pago' : 'Por pagar'}</span>
+    const time = `${start.toLocaleTimeString('pt-PT',{hour:'2-digit',minute:'2-digit'})}–${end.toLocaleTimeString('pt-PT',{hour:'2-digit',minute:'2-digit'})}`;
+    const service = appt.services?.name?.split('|')[0].trim() || 'Serviço';
+    const plan = appt.subscription_id ? ' · Assinatura' : '';
+    return `<button type="button" class="control-day-event ${blockColorClass(appt)} ${isPaid?'is-paid':''}" data-appointment-id="${escapeHtml(appt.id)}" style="grid-column:${barberIndex+2};grid-row:${row}/span ${span}" aria-label="Abrir marcação de ${escapeHtml(appt.clients?.name || 'Cliente')} às ${escapeHtml(time)}">
+      <span class="control-day-event-state" aria-hidden="true"></span><strong>${escapeHtml(time)} · ${escapeHtml(appt.clients?.name || 'Cliente')}</strong><small>${escapeHtml(service + plan)} · ${isPaid?'Pago':'Por pagar'}</small>
     </button>`;
   }).join('');
-  return `<div class="mobile-agenda-board">
-    <div class="mobile-agenda-head"><div><span>Agenda do dia</span><strong>${escapeHtml(label)}</strong></div><button type="button" onclick="openNewAppointmentFromOverview()">＋ Marcação</button></div>
-    <div class="mobile-barber-strip">${chips}</div>
-    <div class="mobile-timeline">${rows || '<div class="mobile-agenda-empty"><b>Dia livre</b>Ainda não existem marcações para este dia.</div>'}</div>
-  </div>`;
-}
 
-function filterMobileAgenda(barberId, button){
-  document.querySelectorAll('.mobile-barber-chip').forEach(chip => chip.classList.toggle('active', chip === button));
-  document.querySelectorAll('.mobile-time-card').forEach(card => {
-    card.hidden = barberId !== 'all' && String(card.dataset.mobileBarber) !== String(barberId);
-  });
+  const onDuty = team.filter(barber => !!workingWindowForBarber(barber.id,dateStr)).length;
+  const freeSlots = team.reduce((total,barber) => {
+    const windowInfo = workingWindowForBarber(barber.id,dateStr);
+    if (!windowInfo) return total;
+    const capacity = Math.max(0,Math.floor((windowInfo.endMin-windowInfo.startMin)/slotMinutes));
+    const used = ordered.filter(appt => String(appt.barber_id)===String(barber.id)).reduce((sum,appt)=>sum+Math.max(1,Math.ceil((new Date(appt.end_time)-new Date(appt.start_time))/60000/slotMinutes)),0);
+    return total + Math.max(0,capacity-used);
+  },0);
+  const loadingText = isLoading ? 'A atualizar agenda…' : `${ordered.length} ${ordered.length === 1 ? 'marcação' : 'marcações'}`;
+
+  return `<div class="calendar-page">
+    <div class="control-day-shell">
+      <div class="control-day-summary"><div><span>Agenda diária</span><strong>${escapeHtml(dateLabel)}</strong></div><div class="control-day-summary-metrics"><span><b>${loadingText}</b></span><span>${onDuty}/${team.length} barbeiros</span><span>${freeSlots} blocos livres</span></div></div>
+      <div class="control-day-scroll">
+        <div class="control-day-grid" style="grid-template-columns:${columnTemplate};grid-template-rows:${rowTemplate};--control-day-col-width:210px;--control-day-min-width:${minWidth}px;--control-day-mobile-width:${mobileMinWidth}px">
+          <div class="control-day-corner" style="grid-column:1;grid-row:1">Hora</div>${headers}${cells}${events}
+        </div>
+      </div>
+      ${!isLoading && !ordered.length ? '<div class="control-day-empty">Sem marcações neste dia. Toque num horário livre para adicionar a primeira.</div>' : ''}
+    </div>
+  </div>`;
 }
 
 let studioMobileMode = isMobileStudio();
@@ -2469,7 +2493,9 @@ function adjacentDate(dateStr, delta){
 
 async function loadAgenda(dateStr, transitionDir = 0, force=false){
   const areaEl = document.getElementById('calendar-area');
-  const previousScroll = areaEl.querySelector('.cal-scroll')?.scrollTop || 0;
+  const previouslyRenderedDate = areaEl.dataset.renderedDate || '';
+  const previousScroll = areaEl.querySelector('.control-day-scroll')?.scrollTop || 0;
+  const previousHorizontalScroll = areaEl.querySelector('.control-day-scroll')?.scrollLeft || 0;
   currentAgendaDateStr = dateStr;
   areaEl.dataset.loadingDate = dateStr;
   areaEl.classList.add('is-loading');
@@ -2477,8 +2503,8 @@ async function loadAgenda(dateStr, transitionDir = 0, force=false){
   const cached = agendaCache.get(dateStr);
   const cacheIsFresh = !force && cached && (Date.now() - cached.fetchedAt < AGENDA_CACHE_TTL_MS);
   if (!cacheIsFresh && areaEl.dataset.renderedDate !== dateStr) {
-    areaEl.innerHTML = isMobileStudio() ? buildMobileAgendaSkeleton(dateStr) : buildCalendarSkeleton(dateStr);
-    const loadingScroll = areaEl.querySelector('.cal-scroll');
+    areaEl.innerHTML = buildControlDayCalendar([], dateStr, true);
+    const loadingScroll = areaEl.querySelector('.control-day-scroll');
     if (loadingScroll && previousScroll) loadingScroll.scrollTop = previousScroll;
   }
 
@@ -2496,31 +2522,19 @@ async function loadAgenda(dateStr, transitionDir = 0, force=false){
   if (areaEl.dataset.loadingDate !== dateStr) return;
 
   currentAppointments = data;
-  if (isMobileStudio()) {
-    areaEl.innerHTML = buildMobileAgenda(data, dateStr);
-    areaEl.dataset.renderedDate = dateStr;
-    areaEl.classList.remove('is-loading');
-    document.getElementById('appt-detail-area').innerHTML = '';
-    areaEl.querySelectorAll('[data-appointment-id]').forEach(card => {
-      card.addEventListener('click', () => {
-        const appt = currentAppointments.find(item => String(item.id) === String(card.dataset.appointmentId));
-        if (appt) showApptDetail(appt, dateStr);
-      });
-    });
-    scheduleIdleWork(() => {
-      prefetchAgendaDate(adjacentDate(dateStr, -1));
-      prefetchAgendaDate(adjacentDate(dateStr, 1));
-    }, 900);
-    return;
-  }
-
-  areaEl.innerHTML = buildCalendarSkeleton(dateStr);
+  areaEl.innerHTML = buildControlDayCalendar(data, dateStr);
   areaEl.dataset.renderedDate = dateStr;
   areaEl.classList.remove('is-loading');
   document.getElementById('appt-detail-area').innerHTML = '';
 
-  const newScroll = areaEl.querySelector('.cal-scroll');
+  const newScroll = areaEl.querySelector('.control-day-scroll');
   if (newScroll && previousScroll) newScroll.scrollTop = previousScroll;
+  if (newScroll && previousHorizontalScroll) newScroll.scrollLeft = previousHorizontalScroll;
+  if (newScroll && !previousScroll && previouslyRenderedDate !== dateStr && dateStr === toLocalDateStr(new Date())) {
+    const now = new Date();
+    const minutesSinceOpening = now.getHours()*60 + now.getMinutes() - CAL_START_HOUR*60;
+    newScroll.scrollTop = Math.max(0,Math.floor(minutesSinceOpening/30)*58 - 96);
+  }
 
   const page = areaEl.querySelector('.calendar-page');
   if (page && transitionDir) {
@@ -2533,18 +2547,12 @@ async function loadAgenda(dateStr, transitionDir = 0, force=false){
     }));
   }
 
-  const pxPerMin = calZoom;
-  areaEl.querySelectorAll('.cal-column').forEach(col => {
-    col.addEventListener('click', (e) => {
+  areaEl.querySelectorAll('.control-day-cell:not(:disabled)').forEach(cell => {
+    cell.addEventListener('click', () => {
       if (Date.now() < suppressCalendarClickUntil) return;
-      const barberId = col.dataset.barberId;
-      const rect = col.getBoundingClientRect();
-      const clickY = e.clientY - rect.top;
-      const minutesFromStart = clickY / pxPerMin;
-      let clickedMin = Math.round(minutesFromStart / 30) * 30 + CAL_START_HOUR*60;
-      clickedMin = Math.max(CAL_START_HOUR*60, Math.min(clickedMin, CAL_END_HOUR*60 - 30));
-
-      const start = new Date(dateStr + 'T' + minutesToTimeStr(clickedMin) + ':00');
+      const barberId = cell.dataset.barberId;
+      const clickedMin = Number(cell.dataset.slotMin);
+      const start = new Date(`${dateStr}T${minutesToTimeStr(clickedMin)}:00`);
       if (start < new Date()) {
         showToast('Não é possível criar uma marcação num horário que já passou.', 'err');
         return;
@@ -2558,36 +2566,13 @@ async function loadAgenda(dateStr, transitionDir = 0, force=false){
     });
   });
 
-  const columnsByBarber = new Map(
-    [...areaEl.querySelectorAll('.cal-column')].map(col => [String(col.dataset.barberId), col])
-  );
-  currentAppointments.forEach(appt => {
-    const col = columnsByBarber.get(String(appt.barber_id));
-    if (!col) return;
-    const start = new Date(appt.start_time);
-    const end = new Date(appt.end_time);
-    const startMin = start.getHours()*60 + start.getMinutes() - CAL_START_HOUR*60;
-    const durMin = (end - start) / 60000;
-    const isPaid = appt.payments && appt.payments.length > 0;
-    const block = document.createElement('div');
-    block.className = `cal-appt ${blockColorClass(appt)} ${isPaid ? 'is-paid' : ''}`;
-    block.style.top = (startMin * pxPerMin) + 'px';
-    block.style.height = Math.max(durMin * pxPerMin - 2, 16) + 'px';
-    block.style.zIndex = '10';
-    const timeLabel = start.toLocaleTimeString('pt-PT', { hour:'2-digit', minute:'2-digit' });
-    const subTag = appt.subscription_id ? `<span class="tag">Ass.</span> ` : '';
-    block.innerHTML = `<strong>${timeLabel} ${escapeHtml(appt.clients?.name || 'Cliente')}</strong>${subTag}${escapeHtml(appt.services?.name?.split('|')[0].trim() || '')}`;
-    block.addEventListener('click', (e) => { e.stopPropagation(); showApptDetail(appt, dateStr); });
-    col.appendChild(block);
+  areaEl.querySelectorAll('[data-appointment-id]').forEach(card => {
+    card.addEventListener('click', (event) => {
+      event.stopPropagation();
+      const appt = currentAppointments.find(item => String(item.id) === String(card.dataset.appointmentId));
+      if (appt) showApptDetail(appt, dateStr);
+    });
   });
-
-  if (currentAppointments.length === 0) {
-    const note = document.createElement('p');
-    note.style.color = 'var(--ink-muted)';
-    note.style.marginTop = '14px';
-    note.textContent = 'Sem marcações neste dia.';
-    areaEl.appendChild(note);
-  }
 
   scheduleIdleWork(() => {
     prefetchAgendaDate(adjacentDate(dateStr, -1));
@@ -2602,6 +2587,9 @@ function setupCalendarSwipe(){
 
   areaEl.addEventListener('touchstart', (e) => {
     if (agendaSwipeBusy || !e.touches.length) return;
+    // A grelha diária desloca-se horizontalmente no iPhone; a navegação de dias
+    // fica nos botões para não competir com esse gesto.
+    if (e.target.closest('.control-day-scroll')) return;
     const t = e.touches[0];
     const page = areaEl.querySelector('.calendar-page');
     swipeState = { startX:t.clientX, startY:t.clientY, horizontal:false, page };
@@ -2672,6 +2660,14 @@ async function changeAgendaDay(deltaDays, transitionDir = 0){
   current.setDate(current.getDate() + deltaDays);
   dateInput.value = toLocalDateStr(current);
   await loadAgenda(dateInput.value, transitionDir);
+}
+
+async function goToAgendaToday(){
+  const dateInput = document.getElementById('agenda-date');
+  const today = toLocalDateStr(new Date());
+  const direction = dateInput.value === today ? 0 : (dateInput.value && dateInput.value < today ? 1 : -1);
+  dateInput.value = today;
+  await loadAgenda(today, direction);
 }
 
 function showApptDetail(appt, dateStr){
