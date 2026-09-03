@@ -883,30 +883,30 @@ body{background:var(--studio-bg)!important;color:var(--studio-ink)!important;fon
   #appt-detail-area:not(:empty){position:fixed;left:8px;right:8px;bottom:calc(82px + env(safe-area-inset-bottom));z-index:65;max-height:72dvh;overflow:auto;border-radius:19px;background:#fff;box-shadow:0 24px 70px rgba(23,49,40,.25)}#appt-detail-area .appt-detail{margin:0!important;border-radius:19px!important}.appt-detail-close{display:block!important;position:sticky;top:0;margin-left:auto;z-index:2}
 }
 
-/* Agenda Control Grid — uma única vista diária para computador e telemóvel. */
-.control-day-toolbar{display:flex!important;align-items:center!important;gap:12px!important;margin-bottom:14px!important}
-.control-day-nav{display:flex;align-items:center;gap:6px}.control-day-nav .btn-icon{font-size:1.25rem!important;line-height:1}.control-today-btn{min-width:64px}
-.control-day-picker{width:min(260px,100%);margin:0!important;color:#7b8781!important;font-size:.62rem!important;letter-spacing:.08em;text-transform:uppercase}
-.control-day-picker>span{display:flex;align-items:center;gap:6px;margin-top:4px}.control-day-picker input{height:38px!important;min-width:0;padding:0 10px!important;border-color:#d7ded9!important;background:#f7f9f8!important;color:#26362f!important;font-size:.76rem!important}.control-day-picker button{height:38px!important;min-width:38px!important;padding:0!important}
-.control-day-mode{display:flex;align-items:center;gap:7px;margin-left:auto;padding:8px 11px;border:1px solid #dce3df;border-radius:999px;background:#f7faf8;color:#52625b;font-size:.65rem;font-weight:700}.control-day-mode>span{width:7px;height:7px;border-radius:50%;background:#51a876;box-shadow:0 0 0 3px #e2f2e8}
-.control-day-shell{overflow:hidden;border:1px solid #d5ddd8;border-radius:14px;background:#fff;box-shadow:0 8px 24px rgba(28,56,45,.055)}
-.control-day-summary{min-height:56px;padding:11px 15px;display:flex;align-items:center;justify-content:space-between;gap:16px;border-bottom:1px solid #e0e6e2;background:#fbfcfb}.control-day-summary>div:first-child span,.control-day-summary>div:first-child strong{display:block}.control-day-summary>div:first-child span{color:#a16d22;font-size:.58rem;font-weight:750;letter-spacing:.12em;text-transform:uppercase}.control-day-summary>div:first-child strong{margin-top:3px;color:#22322b;font-size:.86rem;text-transform:capitalize}.control-day-summary-metrics{display:flex;align-items:center;gap:15px;color:#74817b;font-size:.62rem}.control-day-summary-metrics b{color:#2a3a33;font-size:.72rem}
-.control-day-scroll{position:relative;max-height:calc(100vh - 345px);min-height:360px;overflow:auto;overscroll-behavior:contain;scrollbar-color:#bdc9c2 #f2f5f3;scrollbar-width:thin}
-.control-day-grid{display:grid;position:relative;isolation:isolate;min-width:100%;background:#fff}
-.control-day-corner,.control-day-barber{position:sticky;top:0;z-index:12;min-height:70px;border-bottom:1px solid #d5ddd8;background:#f2f5f3}
-.control-day-corner{left:0;z-index:15;display:grid;place-items:center;border-right:1px solid #d5ddd8;color:#84908a;font-size:.56rem;font-weight:750;letter-spacing:.1em;text-transform:uppercase}
-.control-day-barber{display:flex;align-items:center;justify-content:center;gap:10px;padding:10px 12px;border-right:1px solid #dce3df}.control-day-barber:last-of-type{border-right:0}.control-day-barber-avatar{width:34px;height:34px;display:grid;place-items:center;flex:0 0 auto;border-radius:10px;background:#e3efeb;color:#245445;font-weight:800}.control-day-barber.barber-bruno .control-day-barber-avatar{background:#e4f2fa;color:#2c627e}.control-day-barber.barber-joao .control-day-barber-avatar{background:#e6f4e8;color:#357041}.control-day-barber div{min-width:0}.control-day-barber strong,.control-day-barber small{display:block;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}.control-day-barber strong{color:#27372f;font-size:.78rem}.control-day-barber small{margin-top:3px;color:#7b8781;font-size:.58rem}
-.control-day-time{position:sticky;left:0;z-index:8;display:flex;align-items:flex-start;justify-content:center;padding-top:7px;border-right:1px solid #d8e0db;border-bottom:1px solid #e7ece9;background:#f7f9f8;color:#74817b;font-size:.62rem;font-variant-numeric:tabular-nums}
-.control-day-cell{position:relative;min-height:58px;padding:4px;border-right:1px solid #e2e8e4;border-bottom:1px solid #e7ece9;background:#fff;font:inherit;cursor:pointer}.control-day-cell:nth-last-child(-n+1){border-right:0}.control-day-cell:hover{background:#f2f8f5}.control-day-cell::after{content:'＋';position:absolute;right:7px;top:6px;width:22px;height:22px;display:grid;place-items:center;border-radius:7px;background:#e8f1ed;color:#326b59;font-size:.76rem;opacity:0;transform:translateY(2px);transition:.14s ease}.control-day-cell:hover::after,.control-day-cell:focus-visible::after{opacity:1;transform:none}.control-day-cell.is-past{cursor:not-allowed;background:#fafbfa}.control-day-cell.is-past::after,.control-day-cell.is-off::after{display:none}.control-day-cell.is-off{cursor:not-allowed;background:repeating-linear-gradient(135deg,#f5f7f6,#f5f7f6 7px,#edf1ef 7px,#edf1ef 14px)}
-.control-day-event{position:relative;z-index:6;min-width:0;margin:4px 5px;padding:8px 10px;display:flex;flex-direction:column;justify-content:center;align-self:stretch;overflow:hidden;border:1px solid #c6d9d1;border-left:4px solid #2d705a;border-radius:9px;background:#eaf4f0;color:#26473b;font:inherit;text-align:left;box-shadow:0 4px 12px rgba(32,74,59,.11);cursor:pointer;transition:transform .13s ease,box-shadow .13s ease}.control-day-event:hover{transform:translateY(-1px);box-shadow:0 7px 16px rgba(32,74,59,.16)}.control-day-event.barber-bruno{border-color:#bcdcec;border-left-color:#5ea9d1;background:#eaf6fc;color:#25566f}.control-day-event.barber-joao{border-color:#c5e1ca;border-left-color:#69ad76;background:#edf8ef;color:#315f38}.control-day-event.neutral{border-color:#ded4c3;border-left-color:#bb8a3c;background:#fbf6ed;color:#604b2d}.control-day-event.is-paid{box-shadow:inset 0 0 0 1px rgba(42,123,84,.16),0 4px 12px rgba(32,74,59,.11)}.control-day-event strong,.control-day-event small{display:block;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}.control-day-event strong{font-size:.73rem;line-height:1.25}.control-day-event small{margin-top:4px;font-size:.6rem;opacity:.8}.control-day-event-state{position:absolute;top:7px;right:7px;width:7px;height:7px;border-radius:50%;background:#c5984b}.control-day-event.is-paid .control-day-event-state{background:#4a9b69}
-.control-day-empty{padding:11px 15px;border-top:1px solid #e3e8e5;background:#fbfcfb;color:#76827c;font-size:.67rem}
-.calendar-page{will-change:transform,opacity}
+/* Agenda Control Grid — vista diária responsiva, compacta e ajustável. */
+#calendar-area{overflow:hidden}.agenda-secondary-actions{display:flex;align-items:center;gap:7px;flex-wrap:wrap;margin:0 0 12px}
+.control-day-toolbar{display:flex!important;align-items:center!important;gap:7px!important;margin:0 0 10px!important;padding:7px 9px!important}
+.control-day-nav{display:flex;align-items:center;gap:5px}.control-day-nav .btn-icon{font-size:1.12rem!important;line-height:1}.control-day-nav .btn,.control-day-picker{width:36px!important;height:36px!important;min-width:36px!important;min-height:36px!important;padding:0!important}.control-day-nav .control-today-btn{width:auto!important;min-width:58px!important;padding:0 10px!important;font-size:.7rem!important}
+.control-day-native-date{display:none!important}.control-day-picker{display:grid!important;place-items:center!important;font-size:.94rem!important;color:#386556!important}
+.control-day-zoom{display:flex;align-items:center;gap:3px;margin-left:auto;padding:3px;border:1px solid #dce3df;border-radius:9px;background:#f7f9f8}.control-day-zoom .btn{width:30px!important;height:30px!important;min-width:30px!important;min-height:30px!important;padding:0!important;border:0!important;background:transparent!important;font-size:1rem!important}.control-day-zoom output{width:40px;color:#63716a;font-size:.62rem;font-weight:750;text-align:center;font-variant-numeric:tabular-nums}
+.control-day-shell{width:100%;max-width:100%;overflow:hidden;border:1px solid #d5ddd8;border-radius:12px;background:#fff;box-shadow:0 6px 18px rgba(28,56,45,.045)}
+.control-day-summary{min-height:52px;padding:9px 13px;display:grid;grid-template-columns:minmax(0,1fr) auto;align-items:center;gap:12px;border-bottom:1px solid #e0e6e2;background:#fbfcfb}.control-day-summary>div:first-child{min-width:0}.control-day-summary>div:first-child span,.control-day-summary>div:first-child strong{display:block}.control-day-summary>div:first-child span{color:#a16d22;font-size:.54rem;font-weight:750;letter-spacing:.11em;text-transform:uppercase}.control-day-summary>div:first-child strong{margin-top:2px;overflow:hidden;color:#22322b;font-size:.8rem;line-height:1.25;text-overflow:ellipsis;text-transform:capitalize;white-space:nowrap}.control-day-summary-metrics{display:flex;align-items:center;gap:12px;color:#74817b;font-size:.59rem}.control-day-summary-metrics span{white-space:nowrap}.control-day-summary-metrics b{display:block;color:#2a3a33;font-size:.7rem}
+.control-day-scroll{position:relative;max-height:calc(100vh - 320px);min-height:330px;overflow:auto;overscroll-behavior:contain;scrollbar-color:#bdc9c2 #f2f5f3;scrollbar-width:thin}
+.control-day-grid{--control-day-col-width:190px;display:grid;position:relative;isolation:isolate;width:100%;min-width:100%;background:#fff}
+.control-day-corner,.control-day-barber{position:sticky;top:0;z-index:12;min-height:60px;border-bottom:1px solid #d5ddd8;background:#f2f5f3}
+.control-day-corner{left:0;z-index:15;display:grid;place-items:center;border-right:1px solid #d5ddd8;color:#84908a;font-size:.53rem;font-weight:750;letter-spacing:.09em;text-transform:uppercase}
+.control-day-barber{display:flex;align-items:center;justify-content:center;gap:8px;padding:8px 10px;border-right:1px solid #dce3df}.control-day-barber:last-of-type{border-right:0}.control-day-barber-avatar{width:30px;height:30px;display:grid;place-items:center;flex:0 0 auto;border-radius:9px;background:#e3efeb;color:#245445;font-size:.78rem;font-weight:800}.control-day-barber.barber-bruno .control-day-barber-avatar{background:#e4f2fa;color:#2c627e}.control-day-barber.barber-joao .control-day-barber-avatar{background:#e6f4e8;color:#357041}.control-day-barber div{min-width:0}.control-day-barber strong,.control-day-barber small{display:block;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}.control-day-barber strong{color:#27372f;font-size:.72rem}.control-day-barber small{margin-top:2px;color:#7b8781;font-size:.53rem}
+.control-day-time{position:sticky;left:0;z-index:8;display:flex;align-items:flex-start;justify-content:center;min-height:0;padding-top:6px;border-right:1px solid #d8e0db;border-bottom:1px solid #e7ece9;background:#f7f9f8;color:#74817b;font-size:.57rem;font-variant-numeric:tabular-nums}
+.control-day-cell{appearance:none;position:relative;min-height:0;padding:0;border:0!important;border-right:1px solid #e2e8e4!important;border-bottom:1px solid #e7ece9!important;border-radius:0!important;background:#fff;font:inherit;box-shadow:none!important;cursor:pointer}.control-day-cell:hover{background:#f2f8f5}.control-day-cell::after{content:'＋';position:absolute;right:5px;top:5px;width:20px;height:20px;display:grid;place-items:center;border-radius:7px;background:#e8f1ed;color:#326b59;font-size:.7rem;opacity:0;transform:translateY(2px);transition:.14s ease}.control-day-cell:hover::after,.control-day-cell:focus-visible::after{opacity:1;transform:none}.control-day-cell.is-past{cursor:not-allowed;background:#fafbfa}.control-day-cell.is-past::after,.control-day-cell.is-off::after{display:none}.control-day-cell.is-off{cursor:not-allowed;background:repeating-linear-gradient(135deg,#f7f9f8,#f7f9f8 7px,#eef2f0 7px,#eef2f0 14px)}
+.control-day-event{position:relative;z-index:6;min-width:0;margin:3px 4px;padding:6px 8px;display:flex;flex-direction:column;justify-content:center;align-self:stretch;overflow:hidden;border:1px solid #c6d9d1;border-left:4px solid #2d705a;border-radius:8px;background:#eaf4f0;color:#26473b;font:inherit;text-align:left;box-shadow:0 3px 9px rgba(32,74,59,.1);cursor:pointer;transition:transform .13s ease,box-shadow .13s ease}.control-day-event:hover{transform:translateY(-1px);box-shadow:0 6px 14px rgba(32,74,59,.15)}.control-day-event.barber-bruno{border-color:#bcdcec;border-left-color:#5ea9d1;background:#eaf6fc;color:#25566f}.control-day-event.barber-joao{border-color:#c5e1ca;border-left-color:#69ad76;background:#edf8ef;color:#315f38}.control-day-event.neutral{border-color:#ded4c3;border-left-color:#bb8a3c;background:#fbf6ed;color:#604b2d}.control-day-event.is-paid{box-shadow:inset 0 0 0 1px rgba(42,123,84,.16),0 3px 9px rgba(32,74,59,.1)}.control-day-event strong,.control-day-event small{display:block;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}.control-day-event strong{padding-right:8px;font-size:.68rem;line-height:1.2}.control-day-event small{margin-top:3px;font-size:.55rem;opacity:.8}.control-day-event-state{position:absolute;top:6px;right:6px;width:6px;height:6px;border-radius:50%;background:#c5984b}.control-day-event.is-paid .control-day-event-state{background:#4a9b69}
+.control-day-empty{padding:9px 13px;border-top:1px solid #e3e8e5;background:#fbfcfb;color:#76827c;font-size:.62rem}.calendar-page{touch-action:pan-y;will-change:transform,opacity}
 @media(max-width:760px){
-  .control-day-toolbar{top:68px!important;z-index:20!important;display:grid!important;grid-template-columns:auto minmax(0,1fr)!important;gap:8px!important;margin:0 -1px 12px!important;padding:9px!important;border-radius:12px!important}.control-day-nav{grid-column:1}.control-day-picker{grid-column:2;width:100%;font-size:0!important}.control-day-picker>span{margin:0}.control-day-picker input{width:100%;font-size:.68rem!important}.control-day-mode{display:none}.control-today-btn{min-width:52px;padding-inline:8px!important}
-  .control-day-summary{padding:10px 12px}.control-day-summary-metrics{gap:8px}.control-day-summary-metrics span:last-child{display:none}
-  .control-day-shell{margin:0 -13px;border-inline:0;border-radius:0}.control-day-scroll{max-height:calc(100svh - 300px);min-height:420px}.control-day-grid{--control-day-col-width:155px!important;min-width:var(--control-day-mobile-width,374px)}
-  .control-day-corner,.control-day-barber{min-height:62px}.control-day-barber{gap:7px;padding:8px}.control-day-barber-avatar{width:30px;height:30px;border-radius:9px}.control-day-barber strong{font-size:.72rem}.control-day-barber small{font-size:.54rem}
-  .control-day-time{font-size:.58rem}.control-day-cell{min-height:56px}.control-day-cell::after{opacity:.72;right:5px;top:5px;width:20px;height:20px}.control-day-event{margin:3px 4px;padding:7px 8px;border-radius:8px}.control-day-event strong{font-size:.68rem}.control-day-event small{font-size:.56rem}
+  #tab-agenda .cc-page-head{display:grid!important;grid-template-columns:minmax(0,1fr) auto;align-items:center!important;gap:8px!important;margin-bottom:11px!important}#tab-agenda .cc-page-head h2{font-size:1.2rem!important;line-height:1.12!important}#tab-agenda .cc-page-head p{max-width:230px;font-size:.64rem!important;line-height:1.42!important}#tab-agenda .cc-head-actions .btn{min-height:39px!important;padding:6px 10px!important;font-size:.65rem!important}
+  .control-day-toolbar{position:sticky!important;top:68px!important;z-index:20!important;gap:5px!important;margin:0 0 9px!important;padding:6px!important;border-radius:11px!important}.control-day-nav{gap:4px}.control-day-nav .btn,.control-day-picker{width:34px!important;height:34px!important;min-width:34px!important;min-height:34px!important}.control-day-nav .control-today-btn{min-width:47px!important;padding:0 7px!important;font-size:.62rem!important}.control-day-picker{font-size:.82rem!important}.control-day-zoom{gap:1px;padding:2px}.control-day-zoom .btn{width:27px!important;height:28px!important;min-width:27px!important;min-height:28px!important}.control-day-zoom output{width:33px;font-size:.55rem}
+  .agenda-secondary-actions{display:grid;grid-template-columns:1fr 1fr;gap:6px;margin-bottom:10px}.agenda-secondary-actions .btn{min-width:0;min-height:38px!important;padding:6px 8px!important;overflow:hidden;font-size:.6rem!important;text-overflow:ellipsis;white-space:nowrap}
+  .control-day-summary{min-height:49px;padding:8px 10px;gap:7px}.control-day-summary>div:first-child span{font-size:.49rem}.control-day-summary>div:first-child strong{font-size:.7rem}.control-day-summary-metrics{gap:7px;font-size:.5rem}.control-day-summary-metrics b{font-size:.64rem}.control-day-summary-metrics span:last-child{display:none}
+  .control-day-shell{margin:0;border-radius:11px}.control-day-scroll{min-height:360px;max-height:calc(100svh - 265px);overflow-x:hidden;scroll-padding-bottom:86px}.control-day-grid{--control-day-col-width:150px;min-width:100%}
+  .control-day-corner,.control-day-barber{min-height:54px}.control-day-barber{justify-content:flex-start;gap:6px;padding:6px}.control-day-barber-avatar{width:27px;height:27px;border-radius:8px;font-size:.7rem}.control-day-barber strong{font-size:.65rem}.control-day-barber small{font-size:.48rem}.control-day-time{padding-top:5px;font-size:.52rem}.control-day-cell::after{right:4px;top:4px;width:18px;height:18px;font-size:.63rem;opacity:.62}.control-day-event{margin:2px 3px;padding:5px 6px;border-left-width:3px;border-radius:7px}.control-day-event strong{font-size:.6rem}.control-day-event small{font-size:.49rem}
 }
 </style>
 </head>
@@ -1087,16 +1087,16 @@ body{background:var(--studio-bg)!important;color:var(--studio-ink)!important;fon
           <button type="button" class="btn btn-ghost btn-sm control-today-btn" onclick="goToAgendaToday()">Hoje</button>
           <button type="button" class="btn btn-ghost btn-icon" onclick="changeAgendaDay(1,1)" aria-label="Dia seguinte" title="Dia seguinte">›</button>
         </div>
-        <label class="control-day-picker">Dia
-          <span>
-            <input type="date" id="agenda-date">
-            <button type="button" class="btn btn-ghost btn-sm" onclick="openScrollCalendar()" title="Escolher outra data" aria-label="Escolher outra data">⌄</button>
-          </span>
-        </label>
-        <div class="control-day-mode" aria-label="Vista atual"><span></span> Vista diária</div>
+        <input type="date" id="agenda-date" class="control-day-native-date" tabindex="-1" aria-hidden="true">
+        <button type="button" class="btn btn-ghost btn-icon control-day-picker" onclick="openScrollCalendar()" title="Escolher outra data" aria-label="Abrir calendário para escolher outro dia">▦</button>
+        <div class="control-day-zoom" aria-label="Zoom do calendário">
+          <button type="button" class="btn btn-ghost btn-icon" onclick="changeZoom(-0.1)" aria-label="Diminuir calendário" title="Diminuir calendário">−</button>
+          <output id="calendar-zoom-label" aria-live="polite">100%</output>
+          <button type="button" class="btn btn-ghost btn-icon" onclick="changeZoom(0.1)" aria-label="Aumentar calendário" title="Aumentar calendário">＋</button>
+        </div>
       </div>
 
-      <div style="display:flex; gap:8px; flex-wrap:wrap; margin-bottom:16px;">
+      <div class="agenda-secondary-actions">
         <button class="btn btn-ghost btn-sm" id="toggle-manual-btn" onclick="toggleManualForm()">+ Nova marcação manual</button>
         <button class="btn btn-ghost btn-sm" id="toggle-shifts-btn" onclick="toggleShiftsPanel()">Turnos dos barbeiros</button>
       </div>
@@ -1497,7 +1497,13 @@ if(sb) {
 
 const CAL_START_HOUR = 8;
 const CAL_END_HOUR = 20;
-let calZoom = 1;
+let calZoom = (() => {
+  try {
+    const saved = Number(localStorage.getItem('tch-calendar-zoom'));
+    if (saved >= 0.7 && saved <= 1.5) return saved;
+  } catch (_) {}
+  return window.matchMedia('(max-width:760px)').matches ? 0.8 : 1;
+})();
 
 let services = [], barbers = [], currentAppointments = [], businessHours = [], barberShifts = [];
 let manualSelectedSlot = null; // { start: Date, end: Date }
@@ -1709,6 +1715,7 @@ async function showDashboard(){
 
     document.documentElement.style.setProperty('--n-barbers', Math.max(barbers.length, 1));
     renderLegend();
+    updateCalendarZoomLabel();
     setupCalendarSwipe();
 
     const dateInput = document.getElementById('agenda-date');
@@ -2339,8 +2346,15 @@ function blockColorClass(appt){
 }
 
 function changeZoom(delta){
-  calZoom = Math.max(0.5, Math.min(2, Math.round((calZoom + delta) * 10) / 10));
+  calZoom = Math.max(0.7, Math.min(1.5, Math.round((calZoom + delta) * 10) / 10));
+  try { localStorage.setItem('tch-calendar-zoom', String(calZoom)); } catch (_) {}
+  updateCalendarZoomLabel();
   loadAgenda(document.getElementById('agenda-date').value);
+}
+
+function updateCalendarZoomLabel(){
+  const label = document.getElementById('calendar-zoom-label');
+  if (label) label.textContent = `${Math.round(calZoom * 100)}%`;
 }
 
 function shiftForBarberOnDate(barberId, dateStr){
@@ -2354,16 +2368,25 @@ function isMobileStudio(){
 
 function buildControlDayCalendar(data, dateStr, isLoading=false){
   const team = barbers.length ? barbers : [{id:'',name:'Equipa'}];
+  const mobileLayout = isMobileStudio();
   const slotMinutes = 30;
   const firstMinute = CAL_START_HOUR * 60;
   const lastMinute = CAL_END_HOUR * 60;
   const slotCount = Math.ceil((lastMinute - firstMinute) / slotMinutes);
-  const columnTemplate = `64px repeat(${team.length},minmax(var(--control-day-col-width),1fr))`;
-  const minWidth = 64 + team.length * 210;
-  const mobileMinWidth = 64 + team.length * 155;
-  const rowTemplate = `70px repeat(${slotCount},58px)`;
+  const timeColumnWidth = mobileLayout ? 48 : 64;
+  const availableMobileWidth = Math.max(280, window.innerWidth - 28);
+  const barberColumnWidth = mobileLayout && team.length <= 2
+    ? Math.max(116,Math.floor((availableMobileWidth-timeColumnWidth)/team.length))
+    : (mobileLayout ? 140 : 190);
+  const headerHeight = mobileLayout ? 54 : 60;
+  const rowHeight = Math.round(52 * calZoom);
+  const columnTemplate = `${timeColumnWidth}px repeat(${team.length},minmax(${barberColumnWidth}px,1fr))`;
+  const minWidth = timeColumnWidth + team.length * barberColumnWidth;
+  const rowTemplate = `${headerHeight}px repeat(${slotCount},${rowHeight}px)`;
   const selectedDate = new Date(dateStr + 'T00:00:00');
-  const dateLabel = selectedDate.toLocaleDateString('pt-PT',{weekday:'long',day:'numeric',month:'long',year:'numeric'});
+  const dateLabel = selectedDate.toLocaleDateString('pt-PT',mobileLayout
+    ? {weekday:'long',day:'numeric',month:'short'}
+    : {weekday:'long',day:'numeric',month:'long',year:'numeric'});
   const ordered = [...(data || [])].sort((a,b)=>new Date(a.start_time)-new Date(b.start_time));
 
   const headers = team.map((barber,index) => {
@@ -2422,13 +2445,15 @@ function buildControlDayCalendar(data, dateStr, isLoading=false){
     const used = ordered.filter(appt => String(appt.barber_id)===String(barber.id)).reduce((sum,appt)=>sum+Math.max(1,Math.ceil((new Date(appt.end_time)-new Date(appt.start_time))/60000/slotMinutes)),0);
     return total + Math.max(0,capacity-used);
   },0);
-  const loadingText = isLoading ? 'A atualizar agenda…' : `${ordered.length} ${ordered.length === 1 ? 'marcação' : 'marcações'}`;
+  const appointmentMetric = isLoading
+    ? '<span><b>…</b>A atualizar</span>'
+    : `<span><b>${ordered.length}</b>${ordered.length === 1 ? 'marcação' : 'marcações'}</span>`;
 
   return `<div class="calendar-page">
     <div class="control-day-shell">
-      <div class="control-day-summary"><div><span>Agenda diária</span><strong>${escapeHtml(dateLabel)}</strong></div><div class="control-day-summary-metrics"><span><b>${loadingText}</b></span><span>${onDuty}/${team.length} barbeiros</span><span>${freeSlots} blocos livres</span></div></div>
+      <div class="control-day-summary"><div><span>Agenda diária</span><strong>${escapeHtml(dateLabel)}</strong></div><div class="control-day-summary-metrics">${appointmentMetric}<span><b>${onDuty}/${team.length}</b>equipa</span><span><b>${freeSlots}</b>livres</span></div></div>
       <div class="control-day-scroll">
-        <div class="control-day-grid" style="grid-template-columns:${columnTemplate};grid-template-rows:${rowTemplate};--control-day-col-width:210px;--control-day-min-width:${minWidth}px;--control-day-mobile-width:${mobileMinWidth}px">
+        <div class="control-day-grid" style="grid-template-columns:${columnTemplate};grid-template-rows:${rowTemplate};min-width:${minWidth}px">
           <div class="control-day-corner" style="grid-column:1;grid-row:1">Hora</div>${headers}${cells}${events}
         </div>
       </div>
@@ -2533,7 +2558,8 @@ async function loadAgenda(dateStr, transitionDir = 0, force=false){
   if (newScroll && !previousScroll && previouslyRenderedDate !== dateStr && dateStr === toLocalDateStr(new Date())) {
     const now = new Date();
     const minutesSinceOpening = now.getHours()*60 + now.getMinutes() - CAL_START_HOUR*60;
-    newScroll.scrollTop = Math.max(0,Math.floor(minutesSinceOpening/30)*58 - 96);
+    const rowHeight = Math.round(52 * calZoom);
+    newScroll.scrollTop = Math.max(0,Math.floor(minutesSinceOpening/30)*rowHeight - 82);
   }
 
   const page = areaEl.querySelector('.calendar-page');
@@ -2587,12 +2613,10 @@ function setupCalendarSwipe(){
 
   areaEl.addEventListener('touchstart', (e) => {
     if (agendaSwipeBusy || !e.touches.length) return;
-    // A grelha diária desloca-se horizontalmente no iPhone; a navegação de dias
-    // fica nos botões para não competir com esse gesto.
-    if (e.target.closest('.control-day-scroll')) return;
     const t = e.touches[0];
     const page = areaEl.querySelector('.calendar-page');
-    swipeState = { startX:t.clientX, startY:t.clientY, horizontal:false, page };
+    const scroller = e.target.closest('.control-day-scroll');
+    swipeState = { startX:t.clientX, startY:t.clientY, horizontal:false, page, scroller };
   }, { passive:true });
 
   areaEl.addEventListener('touchmove', (e) => {
@@ -2603,6 +2627,12 @@ function setupCalendarSwipe(){
     if (!swipeState.horizontal) {
       if (Math.abs(dx) < 8 && Math.abs(dy) < 8) return;
       if (Math.abs(dx) <= Math.abs(dy)) { swipeState = null; return; }
+      const scroller = swipeState.scroller;
+      if (!isMobileStudio() && scroller && scroller.scrollWidth > scroller.clientWidth + 2) {
+        const atStart = scroller.scrollLeft <= 1;
+        const atEnd = scroller.scrollLeft + scroller.clientWidth >= scroller.scrollWidth - 1;
+        if ((dx > 0 && !atStart) || (dx < 0 && !atEnd)) { swipeState = null; return; }
+      }
       swipeState.horizontal = true;
       if (swipeState.page) swipeState.page.classList.add('is-dragging');
     }
