@@ -1221,10 +1221,10 @@ body{background:var(--studio-bg)!important;color:var(--studio-ink)!important;fon
           <label>Serviços incluídos
             <input type="number" id="sub-total-services" value="4" min="1">
           </label>
-          <label>Início
+          <label>Dia de início
             <input type="date" id="sub-start-date">
           </label>
-          <label>Validade até
+          <label>Dia de vencimento
             <input type="date" id="sub-end-date">
           </label>
         </div>
@@ -2695,6 +2695,12 @@ async function goToAgendaToday(){
 function showApptDetail(appt, dateStr){
   const isPaid = appt.payments && appt.payments.length > 0;
   const time = new Date(appt.start_time).toLocaleTimeString('pt-PT', { hour:'2-digit', minute:'2-digit' });
+  const actualDuration = Math.max(5, Math.round((new Date(appt.end_time) - new Date(appt.start_time)) / 60000) || Number(appt.services?.duration_minutes) || 30);
+  const editableDuration = Math.max(30, Math.ceil(actualDuration / 30) * 30);
+  const durationOptions = Array.from(new Set([30, 60, 90, 120, 150, 180, editableDuration]))
+    .sort((a, b) => a - b)
+    .map(minutes => `<option value="${minutes}" ${minutes === editableDuration ? 'selected' : ''}>${formatDurationMinutes(minutes)}</option>`)
+    .join('');
   const detailEl = document.getElementById('appt-detail-area');
   const safePhone = normalizePhone(appt.clients?.phone || '');
   detailEl.innerHTML = `
@@ -2705,6 +2711,7 @@ function showApptDetail(appt, dateStr){
       <div class="row"><span>Barbeiro</span><span>${escapeHtml(appt.barbers?.name || '')}</span></div>
       <div class="row"><span>Preferência</span><span>${appt.barber_preference === 'specific' ? 'Pediu este barbeiro' : 'Qualquer barbeiro'}</span></div>
       <div class="row"><span>Hora</span><span>${time}</span></div>
+      <div class="row"><span>Duração</span><span>${formatDurationMinutes(actualDuration)}</span></div>
       <div class="row"><span>Preço</span><span>${appt.subscription_id ? 'Coberto pela assinatura' : euro(appt.services?.price_eur)}</span></div>
       <div class="actions">
         ${isPaid
@@ -2718,6 +2725,7 @@ function showApptDetail(appt, dateStr){
         <div class="form-grid">
           <label>Barbeiro<select id="edit-barber"></select></label>
           <label>Preferência<select id="edit-preference"><option value="specific">Cliente pediu este barbeiro</option><option value="any">Sem preferência (qualquer barbeiro)</option></select></label>
+          <label>Duração desta marcação<select id="edit-duration">${durationOptions}</select></label>
           <label>Novo dia<input type="date" id="edit-date"></label>
         </div>
         <div id="edit-slots-area"></div><div id="edit-msg"></div>
@@ -2730,11 +2738,16 @@ function showApptDetail(appt, dateStr){
   barberSelect.value = appt.barber_id;
   document.getElementById('edit-preference').value = appt.barber_preference || 'any';
   const editDate = document.getElementById('edit-date');
+  const editDuration = document.getElementById('edit-duration');
   editDate.min = toLocalDateStr(new Date());
   editDate.value = toLocalDateStr(new Date(appt.start_time)) < editDate.min ? editDate.min : toLocalDateStr(new Date(appt.start_time));
   if (isMobileStudio()) requestAnimationFrame(() => detailEl.scrollIntoView({behavior:'smooth',block:'end'}));
   barberSelect.addEventListener('change', () => renderEditSlots());
   editDate.addEventListener('change', () => renderEditSlots());
+  editDuration.addEventListener('change', () => {
+    const selectedStart = editSelectedSlot?.start || new Date(editingAppointment.start_time);
+    renderEditSlots(selectedStart.getHours() * 60 + selectedStart.getMinutes());
+  });
 }
 
 function closeAppointmentDetail(){
@@ -2754,6 +2767,14 @@ function toggleEditAppt(){
   }
 }
 
+function getEditAppointmentDuration(){
+  const selected = Number(document.getElementById('edit-duration')?.value);
+  if (Number.isFinite(selected) && selected >= 30 && selected % 30 === 0) return selected;
+  if (!editingAppointment) return 30;
+  const current = Math.round((new Date(editingAppointment.end_time) - new Date(editingAppointment.start_time)) / 60000) || Number(editingAppointment.services?.duration_minutes) || 30;
+  return Math.max(30, Math.ceil(current / 30) * 30);
+}
+
 async function renderEditSlots(preferredMinutes){
   const requestId = ++editSlotsRequestId;
   const appt = editingAppointment;
@@ -2766,7 +2787,7 @@ async function renderEditSlots(preferredMinutes){
   if (!barberId || !dateStr) { areaEl.innerHTML = ''; return; }
   if (dateStr < toLocalDateStr(new Date())) { areaEl.innerHTML = '<div class="msg err">Não é possível mover para uma data passada.</div>'; return; }
 
-  const duration = Number(appt.services?.duration_minutes) || 30;
+  const duration = getEditAppointmentDuration();
   const windowInfo = workingWindowForBarber(barberId, dateStr);
   if (!windowInfo) {
     areaEl.innerHTML = '<div class="msg err">O barbeiro não está disponível neste dia.</div>';
@@ -2813,7 +2834,7 @@ async function renderEditSlots(preferredMinutes){
   }
 
   if (!slots.length) {
-    areaEl.innerHTML = '<div class="msg err">Sem horários livres para este barbeiro neste dia.</div>';
+    areaEl.innerHTML = `<div class="msg err">Sem horários livres de ${formatDurationMinutes(duration)} para este barbeiro neste dia.</div>`;
     return;
   }
 
@@ -2865,6 +2886,29 @@ async function saveApptEdit(){
   const endMin = editSelectedSlot.end.getHours()*60 + editSelectedSlot.end.getMinutes();
   if (!windowInfo || startMin < windowInfo.startMin || endMin > windowInfo.endMin) {
     msgEl.innerHTML = '<div class="msg err">O barbeiro está de folga ou este horário fica fora do turno.</div>';
+    return;
+  }
+
+  const dayStart = new Date(dateStr + 'T00:00:00');
+  const dayEnd = new Date(dateStr + 'T23:59:59.999');
+  const { data: conflicts, error: conflictError } = await sb.from('appointments')
+    .select('id')
+    .eq('barber_id', barberId)
+    .neq('status', 'cancelled')
+    .neq('id', appt.id)
+    .gte('start_time', dayStart.toISOString())
+    .lte('start_time', dayEnd.toISOString())
+    .lt('start_time', editSelectedSlot.end.toISOString())
+    .gt('end_time', editSelectedSlot.start.toISOString())
+    .limit(1);
+  if (conflictError) {
+    console.error(conflictError);
+    msgEl.innerHTML = '<div class="msg err">Não foi possível confirmar a disponibilidade. Tenta novamente.</div>';
+    return;
+  }
+  if (conflicts?.length) {
+    msgEl.innerHTML = '<div class="msg err">Este horário acabou de ficar ocupado. Escolhe outro.</div>';
+    renderEditSlots(startMin);
     return;
   }
   const { error } = await sb.from('appointments').update({
@@ -3333,7 +3377,7 @@ async function loadSubscriptions(force=false){
   subscriptionsLoadPromise = (async () => {
     const [{ data, error }, { data: usageRows, error: usageError }] = await Promise.all([
       sb.from('subscriptions')
-        .select('id,client_id,service_id,plan_name,start_date,end_date,total_services,cycle_total_services,usage_offset,clients(name,phone),services(name)')
+        .select('id,client_id,service_id,plan_name,start_date,end_date,total_services,cycle_total_services,usage_offset,access_code,clients(name,phone),services(name)')
         .order('end_date', { ascending: true }),
       sb.from('appointments').select('subscription_id').neq('status','cancelled').not('subscription_id','is',null)
     ]);
@@ -3402,7 +3446,8 @@ function showSubscriptionDetail(subscriptionId){
     <div class="row"><span>Plano:</span><span>${escapeHtml(sub.plan_name || sub.services?.name || '—')}</span></div>
     <div class="row"><span>Serviço:</span><span>${escapeHtml(sub.services?.name?.split('|')[0].trim() || '—')}</span></div>
     <div class="row"><span>Utilização:</span><span>${used} usados · ${remaining} restantes · ${total} total</span></div>
-    <div class="row"><span>Validade:</span><span>${new Date(sub.end_date+'T00:00:00').toLocaleDateString('pt-PT')}</span></div>
+    <div class="row"><span>Início:</span><span>${new Date(sub.start_date+'T00:00:00').toLocaleDateString('pt-PT')}</span></div>
+    <div class="row"><span>Vencimento:</span><span>${new Date(sub.end_date+'T00:00:00').toLocaleDateString('pt-PT')}</span></div>
     <div class="row"><span>Código:</span><span style="font-weight:600;font-family:'IBM Plex Mono',monospace;">${escapeHtml(sub.access_code || '—')}</span></div>
     <div class="row"><span>Status:</span><span style="color:${isActive?'var(--ok)':'var(--err)'};font-weight:600;">${status}</span></div></div>
     <div style="display:flex;gap:8px;margin-top:20px;flex-wrap:wrap;"><button class="btn btn-primary btn-sm" onclick="editClientData('${sub.id}')">Editar cliente</button><button class="btn btn-ghost btn-sm" onclick="renewSubscription('${sub.id}')">Renovar</button><button class="btn btn-ghost btn-sm" onclick="closeSubscriptionDetail();startEditSubscriptionService('${sub.id}')">Editar serviço</button><button class="btn btn-danger btn-sm" onclick="closeSubscriptionDetail();deleteSubscription('${sub.id}')">Apagar</button></div></div>`;
@@ -3451,11 +3496,21 @@ function renewSubscription(subscriptionId){
   const sub = subscriptionsData.find(s => s.id === subscriptionId);
   if(!sub) return;
   const { total } = getSubscriptionCycleUsage(sub);
+  const todayStr = toLocalDateStr(new Date());
+  const suggestedStart = new Date((sub.end_date >= todayStr ? sub.end_date : todayStr) + 'T00:00:00');
+  if (sub.end_date >= todayStr) suggestedStart.setDate(suggestedStart.getDate() + 1);
+  const suggestedEnd = new Date(suggestedStart);
+  suggestedEnd.setDate(suggestedEnd.getDate() + 30);
+  const suggestedStartStr = toLocalDateStr(suggestedStart);
+  const suggestedEndStr = toLocalDateStr(suggestedEnd);
   document.getElementById('subscription-detail-content').innerHTML = `
     <div style="padding:20px;">
       <div class="booking-section-header" style="margin-top:0;">Renovar assinatura</div>
       <div class="client-meta" style="margin-bottom:16px;">A renovação inicia um novo ciclo. Os serviços do ciclo anterior continuam no histórico, mas a contagem volta a zero.</div>
-      <label>Dias de renovação<input type="number" min="1" id="sub-renew-days" value="30"></label>
+      <div class="form-grid">
+        <label>Dia de início<input type="date" min="${todayStr}" id="sub-renew-start" value="${suggestedStartStr}" onchange="syncRenewalDateRange()"></label>
+        <label>Dia de vencimento<input type="date" min="${suggestedStartStr}" id="sub-renew-end" value="${suggestedEndStr}"></label>
+      </div>
       <label>Serviços do novo ciclo<input type="number" min="1" id="sub-renew-services" value="${total || 1}"></label>
       <div id="sub-renew-msg"></div>
       <div style="display:flex;gap:8px;margin-top:14px;">
@@ -3465,24 +3520,31 @@ function renewSubscription(subscriptionId){
     </div>`;
 }
 
+function syncRenewalDateRange(){
+  const startInput = document.getElementById('sub-renew-start');
+  const endInput = document.getElementById('sub-renew-end');
+  if (!startInput || !endInput) return;
+  endInput.min = startInput.value;
+  if (startInput.value && (!endInput.value || endInput.value < startInput.value)) endInput.value = startInput.value;
+}
 
 async function confirmRenewSubscription(subscriptionId){
   const sub = subscriptionsData.find(s => s.id === subscriptionId);
   if (!sub) return;
-  const days = parseInt(document.getElementById('sub-renew-days').value, 10);
+  const startDate = document.getElementById('sub-renew-start').value;
+  const endDate = document.getElementById('sub-renew-end').value;
   const included = parseInt(document.getElementById('sub-renew-services').value, 10);
   const msgEl = document.getElementById('sub-renew-msg');
-  if (!Number.isFinite(days) || days <= 0 || !Number.isFinite(included) || included <= 0) {
-    msgEl.innerHTML = '<div class="msg err">Indica dias e serviços válidos.</div>'; return;
+  if (!startDate || !endDate || !Number.isFinite(included) || included <= 0) {
+    msgEl.innerHTML = '<div class="msg err">Indica as datas e a quantidade de serviços.</div>'; return;
   }
-  const today = new Date(toLocalDateStr(new Date()) + 'T00:00:00');
-  const currentEnd = new Date(sub.end_date + 'T00:00:00');
-  const base = currentEnd > today ? currentEnd : today;
-  const newEnd = new Date(base); newEnd.setDate(newEnd.getDate() + days);
+  if (endDate < startDate) {
+    msgEl.innerHTML = '<div class="msg err">O vencimento não pode ser anterior ao início.</div>'; return;
+  }
   const rawUsed = Math.max(0, Number(subscriptionUsageCounts[subscriptionId]) || 0);
   const { error } = await sb.from('subscriptions').update({
-    start_date: toLocalDateStr(today),
-    end_date: toLocalDateStr(newEnd),
+    start_date: startDate,
+    end_date: endDate,
     total_services: rawUsed + included,
     usage_offset: rawUsed,
     cycle_total_services: included
@@ -3495,7 +3557,9 @@ async function confirmRenewSubscription(subscriptionId){
   subscriptionsLoadedAt = 0;
   await loadSubscriptions(true);
   showSubscriptionDetail(subscriptionId);
-  showToast(`Novo ciclo iniciado: 0/${included} · válido até ${newEnd.toLocaleDateString('pt-PT')}.`);
+  const startLabel = new Date(startDate + 'T00:00:00').toLocaleDateString('pt-PT');
+  const endLabel = new Date(endDate + 'T00:00:00').toLocaleDateString('pt-PT');
+  showToast(`Novo ciclo definido: ${startLabel} a ${endLabel} · 0/${included}.`);
 }
 
 function startEditSubscriptionService(subscriptionId){
