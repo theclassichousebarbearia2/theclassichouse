@@ -464,8 +464,8 @@ img,video{max-width:100%}
       <div class="eyebrow">Marcação confirmada</div>
       <h2>Até já! 🪒</h2>
       <div id="success-summary" style="text-align:left;margin:20px 0"></div>
+      <div class="msg ok" id="success-message" style="text-align:left;margin:0 0 14px"></div>
       <a class="btn calendar" id="google-calendar-link" target="_blank" rel="noopener">Adicionar ao Google Calendar</a>
-      <a class="btn whats" id="whats-confirm-link" target="_blank" rel="noopener">Avisar a barbearia no WhatsApp</a>
       <div style="margin-top:14px"><a class="btn ghost" href="index.html">Voltar ao início</a></div>
     </div>
   </section>
@@ -477,10 +477,9 @@ img,video{max-width:100%}
 const SUPABASE_URL="https://kjhaphbaoxwxyankdkmk.supabase.co";
 const SUPABASE_ANON_KEY="eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImtqaGFwaGJhb3h3eHlhbmtka21rIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODQxOTI2ODIsImV4cCI6MjA5OTc2ODY4Mn0.IIHToQLp68HRHf7uOUblWd0YtiLRnLmsE35RVU-Cq14";
 const sb=window.supabase?window.supabase.createClient(SUPABASE_URL,SUPABASE_ANON_KEY):null;
-const WHATSAPP_NUMBER="351926323222";
 const NTFY_TOPIC="theclassichouse-marcacoes-2026";
 
-const state={services:[],barbers:[],hours:[],barberShifts:[],selectedService:null,selectedBarber:null,selectedDate:null,selectedSlot:null};
+const state={services:[],categories:[],barbers:[],hours:[],barberShifts:[],selectedService:null,selectedBarber:null,selectedDate:null,selectedSlot:null};
 
 function euro(v){return v==null?"a confirmar":`€ ${Number(v).toFixed(0)}`}
 function fmtDuration(v){v=Number(v)||0;return v>=60?`${(v/60).toFixed(v%60===0?0:1)} h`:`${v} min`}
@@ -582,7 +581,8 @@ function goToStep(n){
 function renderServices(){
   const el=document.getElementById("services-list");el.innerHTML="";
   const groups={};state.services.forEach(s=>(groups[s.category]??=[]).push(s));
-  Object.keys(groups).forEach(cat=>{
+  const orderedCategories=state.categories.map(category=>category.name).filter(name=>groups[name]?.length);
+  orderedCategories.forEach(cat=>{
     const label=document.createElement("div");label.className="category-label";label.textContent=cat;el.appendChild(label);
     groups[cat].forEach(s=>{
       const card=document.createElement("div");card.className="card";
@@ -695,7 +695,7 @@ async function submitBooking(){
       });
     }
     await sendNtfyNotification({clientName:name,clientPhone:phone,serviceName:state.selectedService.name.split("|")[0].trim(),barberName:state.barbers.find(b=>b.id===state.selectedSlot.barberId)?.name||"",startTime:state.selectedSlot.start.toISOString()});
-    showSuccess(name)
+    showSuccess(name,email)
   }catch(e){console.error(e);msg.innerHTML=`<div class="msg err">Não foi possível confirmar a marcação. Tenta novamente.<br><small>${escapeHtml(e.message||"")}</small></div>`;btn.disabled=false;btn.textContent="Confirmar marcação"}
 }
 
@@ -708,12 +708,14 @@ function googleCalendarUrl({serviceName,barberName,start,end,clientName,phone}){
   return `https://calendar.google.com/calendar/render?${params.toString()}`;
 }
 
-function showSuccess(name){
+function showSuccess(name,email){
   for(let i=1;i<=4;i++)document.getElementById("step-"+i).classList.add("hidden");
   document.getElementById("step-success").classList.remove("hidden");
   const s=state.selectedService,slot=state.selectedSlot,barber=state.barbers.find(b=>b.id===slot.barberId)?.name||"Qualquer barbeiro",date=new Date(state.selectedDate+"T00:00:00").toLocaleDateString("pt-PT",{weekday:"long",day:"numeric",month:"long"});
   document.getElementById("success-summary").innerHTML=`<div class="summary-row"><span>Serviço</span><span>${escapeHtml(s.name.split("|")[0].trim())}</span></div><div class="summary-row"><span>Barbeiro</span><span>${escapeHtml(barber)}</span></div><div class="summary-row"><span>Quando</span><span>${date}, ${slot.time}</span></div>`;
-  document.getElementById("whats-confirm-link").href=`https://wa.me/${WHATSAPP_NUMBER}?text=${encodeURIComponent(`Nova marcação: ${name} — ${s.name.split("|")[0].trim()} — ${date} às ${slot.time} — ${barber}`)}`;
+  document.getElementById("success-message").textContent=email
+    ? `A sua marcação já está confirmada. Enviámos uma confirmação para ${email}.`
+    : "A sua marcação já está confirmada. Como não foi indicado um email, não foi enviada uma confirmação por email.";
   document.getElementById("google-calendar-link").href=googleCalendarUrl({
     serviceName:s.name.split("|")[0].trim(),
     barberName:barber,
@@ -744,14 +746,18 @@ async function init(){
   try{
     /* Serviços, barbeiros, horários e turnos são essenciais para calcular
        a disponibilidade. Se os turnos falharem, o booking fecha com segurança. */
-    const [svc,bar,hrs,shifts]=await Promise.all([
-      sb.from("services").select("*").eq("active",true).order("category").order("sort_order"),
+    const [cat,svc,bar,hrs,shifts]=await Promise.all([
+      sb.from("categories").select("name,sort_order,active").eq("active",true).order("sort_order").order("name"),
+      sb.from("services").select("*").eq("active",true).order("sort_order").order("name"),
       sb.from("barbers").select("*").eq("active",true),
       sb.from("business_hours").select("*"),
       sb.from("barber_shifts").select("*")
     ]);
-    if(svc.error)throw svc.error;if(bar.error)throw bar.error;if(hrs.error)throw hrs.error;if(shifts.error)throw shifts.error;
-    state.services=svc.data||[];state.barbers=bar.data||[];state.hours=hrs.data||[];state.barberShifts=shifts.data||[];
+    if(cat.error)throw cat.error;if(svc.error)throw svc.error;if(bar.error)throw bar.error;if(hrs.error)throw hrs.error;if(shifts.error)throw shifts.error;
+    state.categories=cat.data||[];
+    const visibleCategories=new Set(state.categories.map(category=>category.name));
+    state.services=(svc.data||[]).filter(service=>visibleCategories.has(service.category));
+    state.barbers=bar.data||[];state.hours=hrs.data||[];state.barberShifts=shifts.data||[];
     if(!state.services.length){el.innerHTML='<div class="msg err">Não existem serviços ativos disponíveis neste momento.</div>';return}
     renderServices();renderBarbers();buildDayStrip()
   }catch(e){console.error("init:",e);el.innerHTML=`<div class="msg err">Não consegui ligar à base de dados.<br><small>${escapeHtml(e.message||"Verifica a ligação ao Supabase.")}</small></div>`}

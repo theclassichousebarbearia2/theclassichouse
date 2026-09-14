@@ -3595,9 +3595,10 @@ async function deleteSubscription(subscriptionId){
 
 let categories = [];
 let editingCategoryName = null;
+let categoryOrderBusy = false;
 
 async function loadCategories(){
-  const { data, error } = await sb.from('categories').select('id,name,sort_order,active').order('sort_order');
+  const { data, error } = await sb.from('categories').select('name,sort_order,active').order('sort_order').order('name');
   if (error) { console.error(error); return; }
   categories = data || [];
 }
@@ -3682,16 +3683,32 @@ async function toggleCategoryActive(encodedName, currentlyActive){
 }
 
 async function moveCategory(encodedName, direction){
+  if (categoryOrderBusy) return;
   const name = decodeURIComponent(encodedName);
   const idx = categories.findIndex(c => c.name === name);
   const swapIdx = direction === 'up' ? idx - 1 : idx + 1;
   if (idx < 0 || swapIdx < 0 || swapIdx >= categories.length) return;
+  const previousOrder = categories.map(category => ({ ...category }));
+  categoryOrderBusy = true;
   [categories[idx], categories[swapIdx]] = [categories[swapIdx], categories[idx]];
-  const results = await Promise.all(categories.map((category, i) => sb.from('categories').update({ sort_order: i }).eq('name', category.name)));
-  const failed = results.find(r => r.error);
-  if (failed) { console.error(failed.error); showToast('Erro ao reordenar.', 'err'); return; }
-  catalogLoadedAt = 0;
-  await loadCatalog(true);
+  categories.forEach((category, i) => { category.sort_order = i; });
+  renderCategoriesList();
+  try {
+    for (let i = 0; i < categories.length; i++) {
+      const { error } = await sb.from('categories').update({ sort_order: i }).eq('name', categories[i].name);
+      if (error) throw error;
+    }
+    catalogLoadedAt = 0;
+    await loadCatalog(true);
+    showToast('Ordem das categorias atualizada.');
+  } catch (error) {
+    console.error(error);
+    categories = previousOrder;
+    renderCategoriesList();
+    showToast('Erro ao reordenar as categorias.', 'err');
+  } finally {
+    categoryOrderBusy = false;
+  }
 }
 
 async function updateServiceCategory(serviceId, newCategory){
@@ -3732,7 +3749,7 @@ async function loadCatalog(force=false){
   if (!services.length) listEl.innerHTML = 'A carregar…';
   catalogLoadPromise = (async () => {
     const [catRes, svcRes] = await Promise.all([
-      sb.from('categories').select('id,name,sort_order,active').order('sort_order'),
+      sb.from('categories').select('name,sort_order,active').order('sort_order').order('name'),
       sb.from('services').select('id,name,category,duration_minutes,price_eur,active,sort_order').order('category').order('sort_order')
     ]);
     if (catRes.error) console.error(catRes.error); else categories = catRes.data || [];
