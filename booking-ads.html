@@ -89,6 +89,8 @@ h2.section-title{font-size:36px;line-height:1;margin:8px 0 20px}
 .card-name{font-size:14px;font-weight:600}
 .card-meta{font-size:11px;color:var(--muted);margin-top:4px}
 .card-price{font-size:20px;font-weight:600;color:var(--brown);white-space:nowrap}
+.service-copy{min-width:0}
+.service-badge{display:inline-flex;margin-bottom:7px;padding:4px 7px;border-radius:999px;background:#efe0c3;color:#65471f;font-size:8px;font-weight:700;letter-spacing:.08em;text-transform:uppercase}
 
 /* Fotos dos barbeiros — mantém o design original do booking */
 .barber-card-row{
@@ -335,6 +337,8 @@ img,video{max-width:100%}
   font-size:9.5px;
   line-height:1.4;
 }
+.booking-reassurance{margin:12px 0 0;color:var(--muted);font-size:10px;text-align:center}
+.success-icon{width:58px;height:58px;margin:0 auto 14px;border-radius:50%;display:grid;place-items:center;background:#e8f3e9;color:var(--green);font-size:26px;font-weight:700}
 #step-1{
   scroll-margin-top:90px;
 }
@@ -387,6 +391,10 @@ img,video{max-width:100%}
     text-align:center;
     margin-top:8px;
   }
+  .booking-hero{padding-bottom:10px}
+  .booking-trust-item:nth-child(2),.booking-trust-item:nth-child(3){display:none}
+  .booking-offer span{flex:1;justify-content:center}
+  .booking-offer span:nth-child(3){display:none}
 }
 
 /* ===== Consentimento discreto ===== */
@@ -526,8 +534,8 @@ img,video{max-width:100%}
 
   <header class="head booking-hero">
     <div class="eyebrow">Barbearia em Telheiras · Lisboa</div>
-    <h1>O teu próximo<br><span>momento Classic.</span></h1>
-    <p class="subtitle">Escolhe o serviço, o barbeiro e o horário. Vês a disponibilidade online e a marcação fica confirmada em poucos passos.</p>
+    <h1>Marca em Telheiras<br><span>em menos de 1 minuto.</span></h1>
+    <p class="subtitle">Escolhe o serviço, o barbeiro e o horário. Vê a disponibilidade em tempo real e confirma sem esperar por mensagens.</p>
 
     <div class="booking-offer" aria-label="Preços principais">
       <span>Corte desde 13€</span>
@@ -622,11 +630,12 @@ img,video{max-width:100%}
 
   <section id="step-success" class="hidden">
     <div class="center">
+      <div class="success-icon" aria-hidden="true">✓</div>
       <div class="eyebrow">Marcação confirmada</div>
       <h2>Até já! 🪒</h2>
+      <p id="success-message" class="subtitle" style="margin:0 auto 12px"></p>
       <div id="success-summary" style="text-align:left;margin:20px 0"></div>
       <a class="btn calendar" id="google-calendar-link" target="_blank" rel="noopener">Adicionar ao Google Calendar</a>
-      <a class="btn whats" id="whats-confirm-link" target="_blank" rel="noopener">Avisar a barbearia no WhatsApp</a>
       <div style="margin-top:14px"><a class="btn ghost" href="index.html">Voltar ao início</a></div>
     </div>
   </section>
@@ -638,7 +647,6 @@ img,video{max-width:100%}
 const SUPABASE_URL="https://kjhaphbaoxwxyankdkmk.supabase.co";
 const SUPABASE_ANON_KEY="eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImtqaGFwaGJhb3h3eHlhbmtka21rIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODQxOTI2ODIsImV4cCI6MjA5OTc2ODY4Mn0.IIHToQLp68HRHf7uOUblWd0YtiLRnLmsE35RVU-Cq14";
 const sb=window.supabase?window.supabase.createClient(SUPABASE_URL,SUPABASE_ANON_KEY):null;
-const WHATSAPP_NUMBER="351926323222";
 const NTFY_TOPIC="theclassichouse-marcacoes-2026";
 
 const state={services:[],barbers:[],hours:[],barberShifts:[],selectedService:null,selectedBarber:null,selectedDate:null,selectedSlot:null};
@@ -732,11 +740,16 @@ async function lookupMyBookings(){
   }catch(e){console.error(e);el.innerHTML=`<div class="msg err">Ocorreu um erro ao consultar as marcações.<br><small>${escapeHtml(e.message||"")}</small></div>`}
 }
 
+function trackBookingEvent(name,params={}){
+  if(typeof gtag==="function")gtag("event",name,{...params,send_to:"AW-18304988964"});
+}
+
 function goToStep(n){
   for(let i=1;i<=4;i++){const el=document.getElementById("step-"+i);el.classList.toggle("hidden",i!==n)}
   document.querySelectorAll(".step-dot").forEach(d=>d.classList.toggle("done",Number(d.dataset.step)<=n));
   if(n===3)renderSlots();
   if(n===4)renderSummary();
+  trackBookingEvent("booking_step_view",{booking_step:n});
   window.scrollTo({top:0,behavior:"smooth"});
 }
 
@@ -747,8 +760,10 @@ function renderServices(){
     const label=document.createElement("div");label.className="category-label";label.textContent=cat;el.appendChild(label);
     groups[cat].forEach(s=>{
       const card=document.createElement("div");card.className="card";
-      card.innerHTML=`<div class="card-row"><div><div class="card-name">${escapeHtml(s.name.split("|")[0].trim())}</div><div class="card-meta">${fmtDuration(s.duration_minutes)}</div></div><div class="card-price">${euro(s.price_eur)}</div></div>`;
-      card.onclick=()=>{state.selectedService=s;state.selectedBarber=null;state.selectedSlot=null;document.querySelectorAll("#services-list .card").forEach(x=>x.classList.remove("selected"));card.classList.add("selected");goToStep(2)};
+      const cleanName=s.name.split("|")[0].trim();
+      const popular=/corte de cabelo|corte normal|corte.*barba|cabelo.*barba/i.test(cleanName);
+      card.innerHTML=`<div class="card-row"><div class="service-copy">${popular?'<span class="service-badge">Mais escolhido</span>':''}<div class="card-name">${escapeHtml(cleanName)}</div><div class="card-meta">${fmtDuration(s.duration_minutes)}</div></div><div class="card-price">${euro(s.price_eur)}</div></div>`;
+      card.onclick=()=>{state.selectedService=s;state.selectedBarber=null;state.selectedSlot=null;document.querySelectorAll("#services-list .card").forEach(x=>x.classList.remove("selected"));card.classList.add("selected");trackBookingEvent("select_service",{service_name:cleanName,value:Number(s.price_eur)||0,currency:"EUR"});goToStep(2)};
       el.appendChild(card);
     });
   });
@@ -841,7 +856,9 @@ async function sendNtfyNotification({clientName,clientPhone,serviceName,barberNa
 async function submitBooking(){
   const name=document.getElementById("name-input").value.trim(),phone=document.getElementById("phone-input").value.trim(),email=document.getElementById("email-input").value.trim(),msg=document.getElementById("form-msg"),btn=document.getElementById("confirm-btn");
   msg.innerHTML="";
-  if(!name||!phone){msg.innerHTML='<div class="msg err">Preenche pelo menos o nome e o telemóvel.</div>';return}
+  const normalizedPhone=normalizePhone(phone);
+  if(!name||normalizedPhone.length!==9){msg.innerHTML='<div class="msg err">Indica o teu nome e um telemóvel válido com 9 dígitos.</div>';return}
+  if(email&&!document.getElementById("email-input").checkValidity()){msg.innerHTML='<div class="msg err">Confirma se o endereço de email está correto.</div>';return}
   if(!state.selectedSlot||!state.selectedService){msg.innerHTML='<div class="msg err">Seleciona primeiro o serviço e o horário.</div>';return}
   btn.disabled=true;btn.textContent="A confirmar…";
   try{
@@ -856,7 +873,7 @@ async function submitBooking(){
       });
     }
     await sendNtfyNotification({clientName:name,clientPhone:phone,serviceName:state.selectedService.name.split("|")[0].trim(),barberName:state.barbers.find(b=>b.id===state.selectedSlot.barberId)?.name||"",startTime:state.selectedSlot.start.toISOString()});
-    showSuccess(name)
+    showSuccess(name,email)
   }catch(e){console.error(e);msg.innerHTML=`<div class="msg err">Não foi possível confirmar a marcação. Tenta novamente.<br><small>${escapeHtml(e.message||"")}</small></div>`;btn.disabled=false;btn.textContent="Confirmar marcação"}
 }
 
@@ -869,12 +886,14 @@ function googleCalendarUrl({serviceName,barberName,start,end,clientName,phone}){
   return `https://calendar.google.com/calendar/render?${params.toString()}`;
 }
 
-function showSuccess(name){
+function showSuccess(name,email){
   for(let i=1;i<=4;i++)document.getElementById("step-"+i).classList.add("hidden");
   document.getElementById("step-success").classList.remove("hidden");
   const s=state.selectedService,slot=state.selectedSlot,barber=state.barbers.find(b=>b.id===slot.barberId)?.name||"Qualquer barbeiro",date=new Date(state.selectedDate+"T00:00:00").toLocaleDateString("pt-PT",{weekday:"long",day:"numeric",month:"long"});
   document.getElementById("success-summary").innerHTML=`<div class="summary-row"><span>Serviço</span><span>${escapeHtml(s.name.split("|")[0].trim())}</span></div><div class="summary-row"><span>Barbeiro</span><span>${escapeHtml(barber)}</span></div><div class="summary-row"><span>Quando</span><span>${date}, ${slot.time}</span></div>`;
-  document.getElementById("whats-confirm-link").href=`https://wa.me/${WHATSAPP_NUMBER}?text=${encodeURIComponent(`Nova marcação: ${name} — ${s.name.split("|")[0].trim()} — ${date} às ${slot.time} — ${barber}`)}`;
+  document.getElementById("success-message").textContent=email
+    ? "A marcação está feita. Enviámos também a confirmação para o email indicado."
+    : "A marcação está feita e a barbearia já recebeu a notificação.";
   document.getElementById("google-calendar-link").href=googleCalendarUrl({
     serviceName:s.name.split("|")[0].trim(),
     barberName:barber,
