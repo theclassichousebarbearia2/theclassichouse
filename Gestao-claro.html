@@ -778,7 +778,8 @@ section:not(.hidden){animation:ccEnter .14s ease both}
   .command-overlay{display:none!important}
 
   .mobile-app-header{
-    position:sticky;top:0;z-index:42;height:70px;padding:10px 15px;
+    position:sticky;top:0;z-index:42;height:calc(70px + env(safe-area-inset-top));
+    padding:calc(10px + env(safe-area-inset-top)) 15px 10px;
     display:flex;align-items:center;justify-content:space-between;gap:10px;
     background:rgba(255,255,255,.96);border-bottom:1px solid var(--n-150);
     backdrop-filter:blur(16px);-webkit-backdrop-filter:blur(16px);
@@ -913,7 +914,7 @@ section:not(.hidden){animation:ccEnter .14s ease both}
   .studio-payment-panel>header{min-height:64px;padding:13px}
 
   /* Agenda mobile */
-  .cal-toolbar{position:sticky;top:70px;z-index:18;padding:11px;border-radius:var(--r-md)}
+  .cal-toolbar{position:sticky;top:calc(70px + env(safe-area-inset-top));z-index:18;padding:11px;border-radius:var(--r-md)}
   .cal-toolbar .zoom-controls,.legend{display:none!important}
   .desktop-calendar{display:block}
   #tab-agenda .cc-page-head{margin-bottom:10px}
@@ -1442,14 +1443,6 @@ section:not(.hidden){animation:ccEnter .14s ease both}
             <button class="keypad-btn" onclick="appendToQuickPayment('0')">0</button>
             <button class="keypad-btn keypad-delete" onclick="deleteQuickPayment()">⌫</button>
           </div>
-        </div>
-        <div class="form-grid quick-payment-options">
-          <label>Forma de pagamento
-            <select id="quick-payment-method"><option value="mbway">MB Way</option><option value="multibanco">Multibanco</option><option value="dinheiro">Dinheiro</option></select>
-          </label>
-          <label>Barbeiro (opcional)
-            <select id="quick-payment-barber"><option value="">Sem barbeiro associado</option></select>
-          </label>
         </div>
         <div id="quick-payment-msg"></div>
         <button class="btn btn-primary" id="quick-payment-submit-btn" style="width:100%; margin-top:20px;" onclick="submitQuickPayment()">Registar pagamento</button>
@@ -4023,14 +4016,6 @@ function openQuickPayment(){
   document.getElementById('quick-payment-modal').classList.remove('hidden');
   document.getElementById('quick-payment-amount').textContent = '0 €';
   document.getElementById('quick-payment-msg').innerHTML = '';
-  const methodSelect = document.getElementById('quick-payment-method');
-  if (methodSelect) methodSelect.value = 'mbway';
-  const barberSelect = document.getElementById('quick-payment-barber');
-  if (barberSelect) {
-    barberSelect.innerHTML = '<option value="">Sem barbeiro associado</option>' + barbers.map(barber =>
-      `<option value="${escapeHtml(barber.id)}">${escapeHtml(barber.name || 'Barbeiro')}</option>`
-    ).join('');
-  }
   document.getElementById('fab-menu')?.classList.add('hidden');
 }
 
@@ -4064,8 +4049,8 @@ async function submitQuickPayment(){
   const amount = Number.parseFloat(currentQuickPaymentValue);
   const msgEl = document.getElementById('quick-payment-msg');
   const btn = document.getElementById('quick-payment-submit-btn');
-  const method = document.getElementById('quick-payment-method')?.value || 'dinheiro';
-  const barberId = document.getElementById('quick-payment-barber')?.value || null;
+  const method = 'dinheiro';
+  const barberId = null;
   if (!Number.isFinite(amount) || amount <= 0) { msgEl.innerHTML = '<div class="msg err">Escreve um valor válido.</div>'; return; }
   quickPaymentBusy = true; setButtonBusy(btn, true, 'A registar…'); msgEl.innerHTML = '';
   try {
