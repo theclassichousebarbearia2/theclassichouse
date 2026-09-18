@@ -915,7 +915,17 @@ section:not(.hidden){animation:ccEnter .14s ease both}
   /* Agenda mobile */
   .cal-toolbar{position:sticky;top:70px;z-index:18;padding:11px;border-radius:var(--r-md)}
   .cal-toolbar .zoom-controls,.legend{display:none!important}
-  .desktop-calendar{display:none!important}
+  .desktop-calendar{display:block}
+  #tab-agenda .cc-page-head{margin-bottom:10px}
+  #tab-agenda .cc-page-head h2{font-size:1.18rem}
+  #tab-agenda .cc-page-head p,#tab-agenda .cc-kicker{display:none}
+  .cal-scroll{max-height:calc(100dvh - 250px);min-height:400px}
+  .cal-header-row,.cal-body-row{grid-template-columns:42px repeat(var(--n-barbers,2),minmax(0,1fr))}
+  .cal-barber-header{padding:11px 4px;font-size:.68rem}
+  .cal-gutter-label{right:4px;font-size:.6rem}
+  .cal-appt{left:2px;right:2px;padding:4px 6px;border-radius:7px;border-left-width:3px;font-size:.63rem}
+  .cal-appt strong{font-size:.66rem}
+  .cal-appt .tag{font-size:.57rem}
   .mobile-agenda-board{display:block}
   .mobile-agenda-head{display:flex;align-items:center;justify-content:space-between;gap:10px;margin-bottom:12px}
   .mobile-agenda-head div span{display:block;color:var(--n-400);font-size:.58rem;font-weight:700;letter-spacing:.11em;text-transform:uppercase}
@@ -2461,6 +2471,10 @@ function isMobileStudio(){
   return window.matchMedia('(max-width:760px)').matches;
 }
 
+/* Agenda no telemóvel: false = grelha do calendário (igual ao desktop);
+   true = lista de marcações. */
+const AGENDA_LIST_ON_MOBILE = false;
+
 function buildMobileAgendaSkeleton(dateStr){
   const label = new Date(dateStr + 'T00:00:00').toLocaleDateString('pt-PT',{weekday:'long',day:'numeric',month:'long'});
   return `<div class="mobile-agenda-board"><div class="mobile-agenda-head"><div><span>Agenda do dia</span><strong>${escapeHtml(label)}</strong></div></div><div class="mobile-agenda-empty">A carregar marcações…</div></div>`;
@@ -2564,7 +2578,7 @@ async function loadAgenda(dateStr, transitionDir = 0, force=false){
   const cached = agendaCache.get(dateStr);
   const cacheIsFresh = !force && cached && (Date.now() - cached.fetchedAt < AGENDA_CACHE_TTL_MS);
   if (!cacheIsFresh && areaEl.dataset.renderedDate !== dateStr) {
-    areaEl.innerHTML = isMobileStudio() ? buildMobileAgendaSkeleton(dateStr) : buildCalendarSkeleton(dateStr);
+    areaEl.innerHTML = (AGENDA_LIST_ON_MOBILE && isMobileStudio()) ? buildMobileAgendaSkeleton(dateStr) : buildCalendarSkeleton(dateStr);
     const loadingScroll = areaEl.querySelector('.cal-scroll');
     if (loadingScroll && previousScroll) loadingScroll.scrollTop = previousScroll;
   }
@@ -2583,7 +2597,7 @@ async function loadAgenda(dateStr, transitionDir = 0, force=false){
   if (areaEl.dataset.loadingDate !== dateStr) return;
 
   currentAppointments = data;
-  if (isMobileStudio()) {
+  if (AGENDA_LIST_ON_MOBILE && isMobileStudio()) {
     areaEl.innerHTML = buildMobileAgenda(data, dateStr);
     areaEl.dataset.renderedDate = dateStr;
     areaEl.classList.remove('is-loading');
