@@ -2823,6 +2823,7 @@ function showApptDetail(appt, dateStr){
           <label>Barbeiro<select id="edit-barber"></select></label>
           <label>Preferência<select id="edit-preference"><option value="specific">Cliente pediu este barbeiro</option><option value="any">Sem preferência (qualquer barbeiro)</option></select></label>
           <label>Novo dia<input type="date" id="edit-date"></label>
+          <label>Duração<select id="edit-duration"></select></label>
         </div>
         <div class="booking-section-header">Hora (intervalos de 30 min)</div>
         <div id="edit-slots-area"></div><div id="edit-msg"></div>
@@ -2837,9 +2838,17 @@ function showApptDetail(appt, dateStr){
   const editDate = document.getElementById('edit-date');
   editDate.min = toLocalDateStr(new Date());
   editDate.value = toLocalDateStr(new Date(appt.start_time)) < editDate.min ? editDate.min : toLocalDateStr(new Date(appt.start_time));
+  const originalDuration = Number(appt.services?.duration_minutes) || 30;
+  const durationSelect = document.getElementById('edit-duration');
+  const durationOptions = [30,60,90,120,150,180];
+  if (!durationOptions.includes(originalDuration)) durationOptions.push(originalDuration);
+  durationOptions.sort((a,b) => a-b);
+  durationSelect.innerHTML = durationOptions.map(m => `<option value="${m}">${m} min${m===originalDuration ? ' (original)' : ''}</option>`).join('');
+  durationSelect.value = originalDuration;
   if (isMobileStudio()) requestAnimationFrame(() => detailEl.scrollIntoView({behavior:'smooth',block:'end'}));
   barberSelect.addEventListener('change', () => renderEditSlots());
   editDate.addEventListener('change', () => renderEditSlots());
+  durationSelect.addEventListener('change', () => renderEditSlots());
   const start = new Date(appt.start_time);
   renderEditSlots(start.getHours()*60 + start.getMinutes());
 }
@@ -2873,7 +2882,8 @@ async function renderEditSlots(preferredMinutes){
   if (!barberId || !dateStr) { areaEl.innerHTML = ''; return; }
   if (dateStr < toLocalDateStr(new Date())) { areaEl.innerHTML = '<div class="msg err">Não é possível mover para uma data passada.</div>'; return; }
 
-  const duration = Number(appt.services?.duration_minutes) || 30;
+  const durationSelectEl = document.getElementById('edit-duration');
+  const duration = Number(durationSelectEl?.value) || Number(appt.services?.duration_minutes) || 30;
   const windowInfo = workingWindowForBarber(barberId, dateStr);
   if (!windowInfo) {
     areaEl.innerHTML = '<div class="msg err">O barbeiro não está disponível neste dia.</div>';
@@ -2982,6 +2992,17 @@ async function saveApptEdit(){
   }).eq('id', appt.id);
 
   if (error) { msgEl.innerHTML = '<div class="msg err">Erro ao guardar as alterações.</div>'; console.error(error); return; }
+  const newBarber = barbers.find(b => b.id === barberId);
+  void sendNtfyNotification({
+    clientName: appt.clients?.name || 'Cliente',
+    clientPhone: appt.clients?.phone || '',
+    serviceName: appt.services?.name?.split('|')[0].trim() || 'Serviço',
+    barberName: newBarber?.name || appt.barbers?.name || '',
+    startTime: editSelectedSlot.start.toISOString(),
+    title: '✏️ MARCAÇÃO ALTERADA — The Classic House',
+    tags: 'pencil2,scissors',
+    priority: 'default'
+  });
   document.getElementById('appt-detail-area').innerHTML = '';
   invalidateAgendaCache(currentAgendaDateStr);
   await loadAgenda(currentAgendaDateStr, 0, true);
@@ -3024,8 +3045,23 @@ function sendReviewLink(phone){
 
 async function cancelAppointment(appointmentId, dateStr){
   if (!(await showConfirm('Cancelar esta marcação?'))) return;
+  const { data: cancelledAppt } = await sb.from('appointments')
+    .select('start_time, clients(name,phone), services(name), barbers(name)')
+    .eq('id', appointmentId).maybeSingle();
   const { error } = await sb.from('appointments').update({ status: 'cancelled' }).eq('id', appointmentId);
   if (error) { console.error(error); showToast('Erro ao cancelar a marcação.', 'err'); return; }
+  if (cancelledAppt) {
+    void sendNtfyNotification({
+      clientName: cancelledAppt.clients?.name || 'Cliente',
+      clientPhone: cancelledAppt.clients?.phone || '',
+      serviceName: cancelledAppt.services?.name?.split('|')[0].trim() || 'Serviço',
+      barberName: cancelledAppt.barbers?.name || '',
+      startTime: cancelledAppt.start_time,
+      title: '❌ MARCAÇÃO CANCELADA — The Classic House',
+      tags: 'x,scissors',
+      priority: 'default'
+    });
+  }
   document.getElementById('appt-detail-area').innerHTML = '';
   invalidateAgendaCache(dateStr);
   clientVisitCountsFetchedAt = 0;
@@ -3033,7 +3069,7 @@ async function cancelAppointment(appointmentId, dateStr){
   showToast('Marcação cancelada.');
 }
 
-async function sendNtfyNotification({clientName, clientPhone, serviceName, barberName, startTime}) {
+async function sendNtfyNotification({clientName, clientPhone, serviceName, barberName, startTime, title, tags, priority}) {
   const date = new Date(startTime);
   const dateFmt = date.toLocaleDateString('pt-PT', { weekday:'long', day:'numeric', month:'long' });
   const time = date.toLocaleTimeString('pt-PT', { hour:'2-digit', minute:'2-digit' });
@@ -3044,9 +3080,9 @@ async function sendNtfyNotification({clientName, clientPhone, serviceName, barbe
     // O ntfy documenta este endpoint como webhook de publicação via GET.
     const url = new URL(`https://ntfy.sh/${encodeURIComponent(NTFY_TOPIC)}/publish`);
     url.searchParams.set('message', message);
-    url.searchParams.set('title', '🔔 NOVA MARCAÇÃO — The Classic House');
-    url.searchParams.set('priority', 'high');
-    url.searchParams.set('tags', 'bell,scissors');
+    url.searchParams.set('title', title || '🔔 NOVA MARCAÇÃO — The Classic House');
+    url.searchParams.set('priority', priority || 'high');
+    url.searchParams.set('tags', tags || 'bell,scissors');
 
     const response = await fetch(url.toString(), { method: 'GET', cache: 'no-store' });
     if (!response.ok) throw new Error(`ntfy respondeu com HTTP ${response.status}`);
@@ -3630,7 +3666,23 @@ async function saveSubscriptionService(subscriptionId){
 async function deleteSubscription(subscriptionId){
   if (!(await showConfirm('Apagar esta assinatura? Esta ação não pode ser desfeita.'))) return;
   const { error } = await sb.from('subscriptions').delete().eq('id', subscriptionId);
-  if (error) { console.error(error); showToast('Erro ao apagar a assinatura.', 'err'); return; }
+  if (error) {
+    console.error(error);
+    const isForeignKeyBlock = error.code === '23503' || /foreign key|violat/i.test(error.message || '');
+    if (isForeignKeyBlock) {
+      const yesterday = new Date(); yesterday.setDate(yesterday.getDate() - 1);
+      const { error: closeError } = await sb.from('subscriptions')
+        .update({ end_date: toLocalDateStr(yesterday) })
+        .eq('id', subscriptionId);
+      if (closeError) { console.error(closeError); showToast('Erro ao apagar a assinatura.', 'err'); return; }
+      subscriptionsLoadedAt = 0;
+      await loadSubscriptions(true);
+      showToast('Esta assinatura tem marcações associadas e não pode ser apagada — foi encerrada e passa a aparecer como inativa.');
+      return;
+    }
+    showToast('Erro ao apagar a assinatura.', 'err');
+    return;
+  }
   subscriptionsLoadedAt = 0;
   await loadSubscriptions(true);
   showToast('Assinatura apagada.');
